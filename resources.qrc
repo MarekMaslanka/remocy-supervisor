@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/icons">
+	    <file alias="tray-icon-macos-white">resources/icons/tray_icon_macos_white.png</file>
+		<file alias="tray-icon-macos-black">resources/icons/tray_icon_macos_black.png</file>
+    </qresource>
+    <qresource prefix="/fonts/ubuntu">
+        <file alias="bold">resources/fonts/Ubuntu/Ubuntu-Bold.ttf</file>
+        <file alias="bold-italic">resources/fonts/Ubuntu/Ubuntu-BoldItalic.ttf</file>
+        <file alias="italic">resources/fonts/Ubuntu/Ubuntu-Italic.ttf</file>
+        <file alias="light">resources/fonts/Ubuntu/Ubuntu-Light.ttf</file>
+        <file alias="light-italic">resources/fonts/Ubuntu/Ubuntu-LightItalic.ttf</file>
+        <file alias="medium">resources/fonts/Ubuntu/Ubuntu-Medium.ttf</file>
+        <file alias="medium-italic">resources/fonts/Ubuntu/Ubuntu-MediumItalic.ttf</file>
+        <file alias="regular">resources/fonts/Ubuntu/Ubuntu-Regular.ttf</file>
+    </qresource>
+</RCC>
