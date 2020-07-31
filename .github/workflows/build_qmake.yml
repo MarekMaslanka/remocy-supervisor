@@ -3,7 +3,7 @@ name: QMake Build Matrix
 on: [push]
 
 env:
-  QT_VERSION: 5.14.0
+  QT_VERSION: 5.15.1
   QT_CREATOR_VERSION: 4.12.3
   PLUGIN_PRO: remocy-supervisor.pro
   PLUGIN_NAME: Remocy-Supervisor
