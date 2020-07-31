@@ -39,6 +39,9 @@ jobs:
           execute_process(
             COMMAND sudo apt install libgl1-mesa-dev icu-devtools
           )
+          execute_process(
+            COMMAND ln -s /usr/lib/x86_64-linux-gnu/libicui18n.so /usr/lib/x86_64-linux-gnu/libicui18n.so.56
+          )
         endif()
     - name: Download Qt
       id: qt
