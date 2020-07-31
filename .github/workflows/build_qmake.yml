@@ -43,7 +43,10 @@ jobs:
             COMMAND sudo ln -s /usr/lib/x86_64-linux-gnu/libicui18n.so /usr/lib/x86_64-linux-gnu/libicui18n.so.56
           )
           execute_process(
-            COMMAND find /usr -name "libicui18n*"
+            COMMAND sudo ln -s /usr/lib/x86_64-linux-gnu/libicuuc.so /usr/lib/x86_64-linux-gnu/libicuuc.so.56
+          )
+          execute_process(
+            COMMAND find /usr/lib/x86_64-linux-gnu/ -name "libicuuc.so*"
           )
         endif()
     - name: Download Qt
