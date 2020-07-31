@@ -5,8 +5,8 @@ on: [push]
 env:
   QT_VERSION: 5.15.1
   QT_CREATOR_VERSION: 4.12.3
-  PLUGIN_PRO: remocy-client.pro
-  PLUGIN_NAME: Remocy-Client
+  PLUGIN_PRO: remocy-supervisor.pro
+  PLUGIN_NAME: Remocy-Supervisor
 
 jobs:
   build:
