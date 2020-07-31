@@ -49,7 +49,7 @@ jobs:
             COMMAND 7z x 5.15.1-0-202007300958icu-linux-Rhel7.2-x64.7z
           )
           execute_process(
-            sudo mv 5.15.1/gcc_64/lib/* /usr/lib/x86_64-linux-gnu/
+            COMMAND sudo mv 5.15.1/gcc_64/lib/* /usr/lib/x86_64-linux-gnu/
           )
 
         endif()
