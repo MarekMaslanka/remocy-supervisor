@@ -1,6 +1,6 @@
 name: QMake Build Matrix
 
-on: [push]
+#on: [push]
 
 env:
   QT_VERSION: 5.15.1
