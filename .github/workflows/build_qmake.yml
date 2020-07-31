@@ -48,6 +48,9 @@ jobs:
           execute_process(
             COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
           )
+          execute_process(
+            export  LD_LIBRARY_PATH=/home/runner/work/remocy-supervisor/remocy-supervisor/qt5/5.15.1/gcc_64/lib:$LD_LIBRARY_PATH
+          )
 
         endif()
     - name: Download Qt
