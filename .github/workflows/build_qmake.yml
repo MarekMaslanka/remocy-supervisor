@@ -211,7 +211,10 @@ jobs:
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{PLUGIN_NAME}-$ENV{QT_CREATOR_VERSION}-${{ matrix.config.artifact }}" artifact)
 
         if ("${{ runner.os }}" STREQUAL "Windows")
-          ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release"
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release"
+            WORKING_DIRECTORY "${{ steps.qt_creator.outputs.qtc_output_directory }}"
+          )
         else()
           ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "${{ steps.qt_creator.outputs.qtc_binary_name }}"
         endif()
