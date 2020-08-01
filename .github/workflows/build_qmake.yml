@@ -73,7 +73,7 @@ jobs:
         endif()
 
         set(qt_base_url "https://download.qt.io/online/qtsdkrepository/${url_os}/desktop/qt5_${qt_version_dotless}")
-        file(DOWNLOAD "${qt_base_url}/Updates.xml" ./Updates.xml SHOW_PROGRESS)
+        file(DOWNLOAD "${qt_base_url}/Updates.xml" ./Updates.xml)
 
         file(READ ./Updates.xml updates_xml)
         string(REGEX MATCH "<Name>${qt_package_name}.*<Version>([0-9+-.]+)</Version>.*<DownloadableArchives>qtbase([a-zA-Z0-9_-]+).7z"
@@ -211,7 +211,7 @@ jobs:
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{PLUGIN_NAME}-$ENV{QT_CREATOR_VERSION}-${{ matrix.config.artifact }}" artifact)
 
         if ("${{ runner.os }}" STREQUAL "Windows")
-          ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release/${{ steps.qt_creator.outputs.qtc_binary_name }}"
+          ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release\${{ steps.qt_creator.outputs.qtc_binary_name }}"
         else()
           ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "${{ steps.qt_creator.outputs.qtc_binary_name }}"
         endif()
