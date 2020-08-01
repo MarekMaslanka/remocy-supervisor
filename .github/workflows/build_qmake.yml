@@ -5,8 +5,8 @@ on: [push]
 env:
   QT_VERSION: 5.14.2
   QT_CREATOR_VERSION: 4.12.3
-  PLUGIN_PRO: remocy-client.pro
-  PLUGIN_NAME: Remocy-Client
+  PLUGIN_PRO: remocy-supervisor.pro
+  PLUGIN_NAME: Remocy-Supervisor
 
 jobs:
   build:
@@ -37,7 +37,7 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(
-            COMMAND sudo apt install p7zip-full libgl1-mesa-dev
+            COMMAND sudo apt install p7zip-full libgl1-mesa-dev tree
           )
           execute_process(
             COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
@@ -214,7 +214,9 @@ jobs:
           ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "${{ steps.qt_creator.outputs.qtc_binary_name }}"
           WORKING_DIRECTORY "${{ steps.qt_creator.outputs.qtc_output_directory }}"
         )
-
+        execute_process(
+          COMMAND tree .
+        )
     - uses: actions/upload-artifact@v1
       id: upload_artifact
       with:
