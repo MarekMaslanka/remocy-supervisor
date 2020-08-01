@@ -40,16 +40,10 @@ jobs:
             COMMAND sudo apt install p7zip-full
           )
           execute_process(
-            COMMAND wget https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt5_5151/qt.qt5.5151.gcc_64/5.15.1-0-202007300958icu-linux-Rhel7.2-x64.7z
+            COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
           )
           execute_process(
-            COMMAND 7z x 5.15.1-0-202007300958icu-linux-Rhel7.2-x64.7z
-          )
-          execute_process(
-            COMMAND ls -l 5.15.1/gcc_64/lib/*
-          )
-          execute_process(
-            COMMAND sudo mv 5.15.1/gcc_64/lib/lib* /usr/lib/x86_64-linux-gnu/
+            COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
           )
 
         endif()
