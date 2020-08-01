@@ -46,10 +46,10 @@ jobs:
             COMMAND 7z x 5.15.1-0-202007300958icu-linux-Rhel7.2-x64.7z
           )
           execute_process(
-            COMMAND ls -l 5.15.1 5.15.1/gcc_64 5.15.1/gcc_64/lib
+            COMMAND ls -l 5.15.1/gcc_64/lib/*
           )
           execute_process(
-            COMMAND sudo mv 5.15.1/gcc_64/lib/* /usr/lib/x86_64-linux-gnu/
+            COMMAND sudo mv 5.15.1/gcc_64/lib/lib* /usr/lib/x86_64-linux-gnu/
           )
 
         endif()
