@@ -215,8 +215,6 @@ jobs:
         else()
           ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "${{ steps.qt_creator.outputs.qtc_binary_name }}"
         endif()
-        execute_process(COMMAND
-        )
     - uses: actions/upload-artifact@v1
       id: upload_artifact
       with:
