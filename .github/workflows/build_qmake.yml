@@ -217,12 +217,8 @@ jobs:
           execute_process(
             COMMAND dir "release"
           )
-          execute_process(
-            COMMAND dir "release"
-            WORKING_DIRECTORY "${{ steps.qt_creator.outputs.qtc_output_directory }}"
-          )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -E tar cvf ${artifact} --format=zip "release"
+            ${CMAKE_COMMAND} "-E tar cvf ${artifact} --format=zip release"
           )
         else()
           execute_process(COMMAND
