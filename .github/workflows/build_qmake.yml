@@ -218,17 +218,11 @@ jobs:
             COMMAND dir "release"
           )
           execute_process(
-            COMMAND dir "${{ steps.qt_creator.outputs.qtc_output_directory }}"
-          )
-          execute_process(
-            COMMAND dir "release\${{ steps.qt_creator.outputs.qtc_output_directory }}"
-          )
-          execute_process(
-            COMMAND dir "release/${{ steps.qt_creator.outputs.qtc_output_directory }}"
+            COMMAND dir "release"
+            WORKING_DIRECTORY "${{ steps.qt_creator.outputs.qtc_output_directory }}"
           )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -E tar cvf ${artifact} --format=zip "release"
-            WORKING_DIRECTORY "${{ steps.qt_creator.outputs.qtc_output_directory }}"
           )
         else()
           execute_process(COMMAND
