@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
 	pingTimer->setInterval(500);
 
 	connect(socket, &QUdpSocket::readyRead, this, &MainWindow::readFortune);
-	connect(socket, &QUdpSocket::errorOccurred, this, &MainWindow::displayError);
+//	connect(socket, &QUdpSocket::errorOccurred, this, &MainWindow::displayError);
 
 	connect(&process, &QProcess::errorOccurred, this, &MainWindow::processErrorOccurred);
 	connect(&process, &QProcess::started, this, &MainWindow::processStarted);
