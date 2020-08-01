@@ -6,7 +6,7 @@ env:
   QT_VERSION: 5.14.2
   QT_CREATOR_VERSION: 4.12.3
   PLUGIN_PRO: remocy-supervisor.pro
-  PLUGIN_NAME: Remocy-Supervisor
+  PLUGIN_NAME: remocy-supervisor
 
 jobs:
   build:
@@ -113,15 +113,15 @@ jobs:
 
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
-          set(qtc_binary_name "$ENV{PLUGIN_NAME}4.dll")
+          set(qtc_binary_name "$ENV{PLUGIN_NAME}.exe")
             set(qtc_platform "windows_msvc2017_x64")
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
-          set(qtc_binary_name "lib$ENV{PLUGIN_NAME}.so")
+          set(qtc_binary_name "$ENV{PLUGIN_NAME}")
           set(qtc_platform "linux_gcc_64_rhel72")
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           set(qtc_output_directory "qtcreator/bin/Qt Creator.app/Contents/PlugIns")
-          set(qtc_binary_name "lib$ENV{PLUGIN_NAME}.dylib")
+          set(qtc_binary_name "$ENV{PLUGIN_NAME}")
           set(qtc_platform "mac_x64")
         endif()
 
