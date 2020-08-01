@@ -24,7 +24,7 @@ using namespace std;
 ClientMsg makeMsg(MsgType type)
 {
 	static uint32_t seq = 1;
-	ClientMsg msg = {};
+// 	ClientMsg msg = {};
 	msg.type = type;
 	msg.seq = seq++;
 	return msg;
