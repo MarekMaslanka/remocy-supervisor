@@ -3,7 +3,7 @@ name: QMake Build Matrix
 on: [push]
 
 env:
-  QT_VERSION: 5.14.2
+  QT_VERSION: 5.15.0
   QT_CREATOR_VERSION: 4.12.3
   PLUGIN_PRO: remocy-supervisor.pro
   PLUGIN_NAME: remocy-supervisor
@@ -15,15 +15,15 @@ jobs:
     strategy:
       matrix:
         config:
-        - {
-            name: "Windows Latest x64", artifact: "Windows-x64.zip",
-            os: windows-latest,
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-          }
 #         - {
-#             name: "Linux Latest x64", artifact: "Linux-x64.zip",
-#             os: ubuntu-latest
+#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
+#             os: windows-latest,
+#             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
 #           }
+        - {
+            name: "Linux Latest x64", artifact: "Linux-x64.zip",
+            os: ubuntu-latest
+          }
 #         - {
 #             name: "macOS Latest x64", artifact: "macOS-x64.zip",
 #             os: macos-latest
@@ -272,14 +272,14 @@ jobs:
     strategy:
       matrix:
         config:
-        - {
-            name: "Windows Latest x64", artifact: "Windows-x64.zip",
-            os: windows-latest
-          }
 #         - {
-#             name: "Linux Latest x64", artifact: "Linux-x64.zip",
-#             os: ubuntu-latest
+#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
+#             os: windows-latest
 #           }
+        - {
+            name: "Linux Latest x64", artifact: "Linux-x64.zip",
+            os: ubuntu-latest
+          }
 #         - {
 #             name: "macOS Latest x64", artifact: "macOS-x64.zip",
 #             os: macos-latest
