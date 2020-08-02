@@ -47,7 +47,7 @@ jobs:
           )
         endif()
 
-#    steps:
+    steps:
     - name: Cache node modules
     - uses: actions/cache@v2
       env:
