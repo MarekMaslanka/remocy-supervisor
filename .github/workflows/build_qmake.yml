@@ -47,8 +47,6 @@ jobs:
           )
         endif()
 
-    - name: Download Qt
-      id: qt
     - name: Cache qt modules
       uses: actions/cache@v2
       env:
@@ -56,6 +54,9 @@ jobs:
       with:
         path: qt5
         key: qt
+
+    - name: Download Qt
+      id: qt
       shell: cmake -P {0}
       run: |
         set(qt_version $ENV{QT_VERSION})
