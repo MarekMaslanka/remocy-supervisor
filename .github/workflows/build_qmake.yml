@@ -48,14 +48,14 @@ jobs:
         endif()
 
     steps:
-    - name: Cache node modules
-      uses: actions/cache@v2
-      env:
-        cache-name: cache-node-modules
-      with:
-        path: qt5
-        key: qt
-
+#    - name: Cache node modules
+#      uses: actions/cache@v2
+#      env:
+#        cache-name: cache-node-modules
+#      with:
+#        path: qt5
+#        key: qt
+#
     - name: ZDownload Qt
       id: download_qt
       shell: cmake -P {0}
