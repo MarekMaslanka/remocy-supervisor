@@ -210,9 +210,23 @@ jobs:
           )
           execute_process(
             COMMAND dir
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
+          execute_process(
+            COMMAND dir
+            WORKING_DIRECTORY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC"
+          )
+          execute_process(
+            COMMAND dir
+          )
+          execute_process(
+            COMMAND dir "release"
+          )
+#          execute_process(COMMAND
+#            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release/${{ steps.qt_creator.outputs.qtc_binary_name }}"
+#          )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release/${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release/"
           )
         else()
           execute_process(COMMAND
