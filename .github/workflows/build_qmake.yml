@@ -49,6 +49,13 @@ jobs:
 
     - name: Download Qt
       id: qt
+    - name: Cache qt modules
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: qt5
+        key: qt
       shell: cmake -P {0}
       run: |
         set(qt_version $ENV{QT_VERSION})
@@ -91,7 +98,6 @@ jobs:
         foreach(package qtbase qtdeclarative qttools qtsvg ${qt_extras})
           file(DOWNLOAD
             "${qt_base_url}/${qt_package_name}/${package_version}${package}${package_suffix}.7z" ./${package}.7z
-            SHOW_PROGRESS
           )
           execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ../${package}.7z WORKING_DIRECTORY qt5)
         endforeach()
