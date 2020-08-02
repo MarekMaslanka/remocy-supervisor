@@ -56,7 +56,7 @@ jobs:
         path: qt5
         key: qt
 
-    - name: Download Qt
+    - name: ZDownload Qt
       id: download_qt
       shell: cmake -P {0}
       run: |
@@ -107,7 +107,7 @@ jobs:
         string(REPLACE "licheck_mac" "" qtconfig "${qtconfig}")
         file(WRITE "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" "${qtconfig}")
 
-    - name: Download Qt Creator
+    - name: ZDownload Qt Creator
       id: download_qt_creator
       shell: cmake -P {0}
       run: |
