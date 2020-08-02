@@ -202,7 +202,7 @@ jobs:
           )
           execute_process(
             COMMAND dir
-            WORKING_DIRECTORY "qt5"
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/"
           )
           execute_process(
             COMMAND dir
