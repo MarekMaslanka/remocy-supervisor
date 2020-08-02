@@ -268,8 +268,9 @@ jobs:
         name: upload_url
         path: ./
     - id: set_upload_url
+      
       run: |
-        upload_url=`type ./upload_url`
+        file(READ ./upload_url upload_url)
         echo ::set-output name=upload_url::$upload_url
     - name: Upload to Release
       id: upload_to_release
