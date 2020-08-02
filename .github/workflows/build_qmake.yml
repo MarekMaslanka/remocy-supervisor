@@ -179,11 +179,10 @@ jobs:
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status")
         endif()
-        file(MAKE_DIRECTORY "deploy")
-        file(MAKE_DIRECTORY "deploy/$ENV{PLUGIN_NAME}")
+        file(MAKE_DIRECTORY "$ENV{PLUGIN_NAME}")
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{PLUGIN_NAME}-$ENV{QT_CREATOR_VERSION}-${{ matrix.config.artifact }}" artifact)
         if ("${{ runner.os }}" STREQUAL "Windows")
-          file(COPY "release/${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "deploy/$ENV{PLUGIN_NAME}")
+          file(COPY "release/${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "$ENV{PLUGIN_NAME}")
           execute_process(
             COMMAND dir
           )
@@ -192,13 +191,13 @@ jobs:
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
         else()
-          file(COPY "${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "deploy/$ENV{PLUGIN_NAME}")
+          file(COPY "${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "$ENV{PLUGIN_NAME}")
           execute_process(
             COMMAND ls
           )
         endif()
         execute_process(COMMAND
-          ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "deploy/$ENV{PLUGIN_NAME}"
+          ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "$ENV{PLUGIN_NAME}"
         )
     - uses: actions/upload-artifact@v1
       id: upload_artifact
@@ -206,7 +205,7 @@ jobs:
         path: ./${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
         name: ${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
 
-  release:
+  deploy:
 #    if: contains(github.ref, 'tags/v')
     runs-on: ubuntu-latest
     strategy:
@@ -233,7 +232,7 @@ jobs:
         name: ${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
         path: ./
 
-    - name: Store Release url2
+    - name: Dir list
       shell: cmake -P {0}
       run: |
           execute_process(
@@ -269,7 +268,7 @@ jobs:
 #         path: ./upload_url
 #         name: upload_url
 
-    - name: Upload to Release
+    - name: Deploy
       id: upload_to_release
       uses: actions/upload-release-asset@v1.0.1
       env:
@@ -277,55 +276,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
-        asset_name: ${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
-        asset_content_type: application/zip
-
-  publish:
-#    if: contains(github.ref, 'tags/v')
-
-    name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
-    strategy:
-      matrix:
-        config:
-#         - {
-#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
-#             os: windows-latest
-#           }
-        - {
-            name: "Linux Latest x64", artifact: "Linux-x64.zip",
-            os: ubuntu-latest
-          }
-#         - {
-#             name: "macOS Latest x64", artifact: "macOS-x64.zip",
-#             os: macos-latest
-#           }
-    needs: release
-
-    steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v1
-      with:
-        name: ${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
-        path: ./
-
-    - name: Download URL
-      uses: actions/download-artifact@v1
-      with:
-        name: upload_url
-        path: ./
-    - id: set_upload_url
-      
-      run: |
-        upload_url=`cat ./upload_url`
-        echo ::set-output name=upload_url::$upload_url
-    - name: Upload to Release
-      id: upload_to_release
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
-        asset_path: /home/runner/work/remocy-supervisor/remocy-supervisor/${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
         asset_name: ${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
         asset_content_type: application/zip
