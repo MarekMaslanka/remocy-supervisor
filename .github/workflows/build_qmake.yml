@@ -48,9 +48,8 @@ jobs:
         endif()
 
     steps:
+    - name: Cache node modules
       uses: actions/cache@v2
-
-    - name: Downloads
       env:
         cache-name: cache-node-modules
       with:
