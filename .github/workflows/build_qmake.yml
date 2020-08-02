@@ -37,7 +37,7 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "Linux")
           file(DOWNLOAD "https://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt5_5142/qt.qt5.5142.gcc_64/5.14.2-0-202003291222icu-linux-Rhel7.2-x64.7z" icu.7z)
-          execute_process(COMMAND sudo ${CMAKE_COMMAND} -E tar xvf icu.7z C /usr/lib/x86_64-linux-gnu/)
+          execute_process(COMMAND sudo ${CMAKE_COMMAND} -E tar xvf icu.7z)
           execute_process(
             COMMAND sudo apt install p7zip-full libgl1-mesa-dev tree
           )
