@@ -230,6 +230,12 @@ jobs:
         name: ${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
         path: ./
 
+    - name: Store Release url2
+      run: |
+          execute_process(
+            COMMAND ls
+          )
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1.0.0
@@ -240,6 +246,12 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
+
+    - name: Store Release url
+      run: |
+          execute_process(
+            COMMAND ls
+          )
 
 #     - name: Store Release url
 #       run: |
