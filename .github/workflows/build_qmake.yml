@@ -3,7 +3,7 @@ name: QMake Build Matrix
 on: [push]
 
 env:
-  QT_VERSION: 5.15.0
+  QT_VERSION: 5.14.2
   QT_CREATOR_VERSION: 4.12.3
   PLUGIN_PRO: remocy-supervisor.pro
   PLUGIN_NAME: remocy-supervisor
@@ -15,15 +15,15 @@ jobs:
     strategy:
       matrix:
         config:
-#         - {
-#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
-#             os: windows-latest,
-#             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-#           }
         - {
-            name: "Linux Latest x64", artifact: "Linux-x64.zip",
-            os: ubuntu-latest
+            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            os: windows-latest,
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           }
+#         - {
+#             name: "Linux Latest x64", artifact: "Linux-x64.zip",
+#             os: ubuntu-latest
+#           }
 #         - {
 #             name: "macOS Latest x64", artifact: "macOS-x64.zip",
 #             os: macos-latest
@@ -192,41 +192,19 @@ jobs:
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status")
         endif()
+        file(MAKE_DIRECTORY deploy)
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{PLUGIN_NAME}-$ENV{QT_CREATOR_VERSION}-${{ matrix.config.artifact }}" artifact)
         if ("${{ runner.os }}" STREQUAL "Windows")
+          file(COPY "release/${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "deploy/")
           execute_process(
             COMMAND dir
           )
           execute_process(
-            COMMAND dir "release"
-          )
-          execute_process(
-            COMMAND dir
+            COMMAND windeployqt "deploy/${{ steps.qt_creator.outputs.qtc_binary_name }}"
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
-          )
-          execute_process(
-            COMMAND windeployqt "release/${{ steps.qt_creator.outputs.qtc_binary_name }}"
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
-          )
-          execute_process(
-            COMMAND dir
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
-          )
-          execute_process(
-            COMMAND dir
-            WORKING_DIRECTORY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC"
-          )
-          execute_process(
-            COMMAND dir
-          )
-          execute_process(
-            COMMAND dir "release"
           )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${artifact}2 --format=zip "release/${{ steps.qt_creator.outputs.qtc_binary_name }}"
-          )
-          execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release/"
+            ${CMAKE_COMMAND} -E tar cvf ${artifact}2 --format=zip "deploy/${{ steps.qt_creator.outputs.qtc_binary_name }}"
           )
         else()
           execute_process(COMMAND
@@ -272,14 +250,14 @@ jobs:
     strategy:
       matrix:
         config:
-#         - {
-#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
-#             os: windows-latest
-#           }
         - {
-            name: "Linux Latest x64", artifact: "Linux-x64.zip",
-            os: ubuntu-latest
+            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            os: windows-latest
           }
+#         - {
+#             name: "Linux Latest x64", artifact: "Linux-x64.zip",
+#             os: ubuntu-latest
+#           }
 #         - {
 #             name: "macOS Latest x64", artifact: "macOS-x64.zip",
 #             os: macos-latest
