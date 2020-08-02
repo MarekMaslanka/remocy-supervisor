@@ -24,7 +24,8 @@ using namespace std;
 ClientMsg makeMsg(MsgType type)
 {
 	static uint32_t seq = 1;
-// 	ClientMsg msg = {};
+	ClientMsg msg;
+	memset(&msg, 0, sizeof(msg));
 	msg.type = type;
 	msg.seq = seq++;
 	return msg;
@@ -47,9 +48,9 @@ MainWindow::MainWindow(QWidget *parent)
 	pingTimer->setInterval(500);
 
 	connect(socket, &QUdpSocket::readyRead, this, &MainWindow::readFortune);
-// 	connect(socket, &QUdpSocket::errorOccurred, this, &MainWindow::displayError);
+//	connect(socket, &QUdpSocket::errorOccurred, this, &MainWindow::displayError);
 
-// 	connect(&process, &QProcess::errorOccurred, this, &MainWindow::processErrorOccurred);
+	connect(&process, &QProcess::errorOccurred, this, &MainWindow::processErrorOccurred);
 	connect(&process, &QProcess::started, this, &MainWindow::processStarted);
 	connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &MainWindow::processStarted);
 
@@ -88,7 +89,7 @@ void MainWindow::createTrayIcon()
 	QString suffix = Macos::isDarkMode() ? "white" : "black";
 	QIcon icon = QIcon(":/icons/tray-icon-macos-" + suffix);
 #else
-	QIcon icon = QIcon(":/icons/remocy-icon");
+	QIcon icon = QIcon(":/icons/trayicon");
 #endif
 	trayIcon = new QSystemTrayIcon(this);
 	trayIcon->setContextMenu(trayIconMenu);
