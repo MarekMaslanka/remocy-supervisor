@@ -234,7 +234,10 @@ jobs:
       shell: cmake -P {0}
       run: |
           execute_process(
-            COMMAND ls
+            COMMAND ls -l
+          )
+          execute_process(
+            COMMAND pwd
           )
 
     - name: Create Release
@@ -252,7 +255,7 @@ jobs:
       shell: cmake -P {0}
       run: |
           execute_process(
-            COMMAND ls
+            COMMAND ls -l
           )
 
 #     - name: Store Release url
