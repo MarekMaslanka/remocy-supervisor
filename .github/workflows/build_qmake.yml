@@ -46,9 +46,10 @@ jobs:
             COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
           )
         endif()
-        steps:
-	- name: Downloads
+
+    steps:
       uses: actions/cache@v2
+    - name: Downloads
       env:
         cache-name: cache-node-modules
       with:
