@@ -222,9 +222,9 @@ jobs:
           execute_process(
             COMMAND dir "release"
           )
-#          execute_process(COMMAND
-#            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release/${{ steps.qt_creator.outputs.qtc_binary_name }}"
-#          )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${artifact}2 --format=zip "release/${{ steps.qt_creator.outputs.qtc_binary_name }}"
+          )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release/"
           )
