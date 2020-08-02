@@ -198,8 +198,9 @@ jobs:
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
         else()
-          execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "${{ steps.qt_creator.outputs.qtc_binary_name }}"
+          file(COPY "${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "deploy/$ENV{PLUGIN_NAME}")
+          execute_process(
+            COMMAND ls
           )
         endif()
     - uses: actions/upload-artifact@v1
