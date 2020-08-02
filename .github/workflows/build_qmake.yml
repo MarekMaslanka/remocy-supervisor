@@ -49,6 +49,7 @@ jobs:
 
     steps:
       uses: actions/cache@v2
+
     - name: Downloads
       env:
         cache-name: cache-node-modules
@@ -135,12 +136,6 @@ jobs:
     steps:
     - name: Download Qt
       id: qt
-      uses: actions/cache@v2
-      env:
-        cache-name: cache-node-modules
-      with:
-        path: qt5
-        key: qt
       shell: cmake -P {0}
       run: |
         set(qt_version $ENV{QT_VERSION})
