@@ -47,16 +47,14 @@ jobs:
           )
         endif()
 
-    - name: Cache qt modules
+    - name: Download Qt
+      id: qt
       uses: actions/cache@v2
       env:
         cache-name: cache-node-modules
       with:
         path: qt5
         key: qt
-
-    - name: Download Qt
-      id: qt
       shell: cmake -P {0}
       run: |
         set(qt_version $ENV{QT_VERSION})
@@ -226,7 +224,11 @@ jobs:
           )
           execute_process(
             COMMAND dir
-            WORKING_DIRECTORY "${{ steps.qt_creator.outputs.qtc_output_directory }}"
+            WORKING_DIRECTORY "qt5"
+          )
+          execute_process(
+            COMMAND dir
+            WORKING_DIRECTORY "qt5/bin"
           )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "release/${{ steps.qt_creator.outputs.qtc_binary_name }}"
