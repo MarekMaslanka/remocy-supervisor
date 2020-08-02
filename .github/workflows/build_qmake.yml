@@ -9,7 +9,7 @@ env:
   PLUGIN_NAME: remocy-supervisor
 
 jobs:
-  build:
+  download:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
@@ -28,34 +28,15 @@ jobs:
 #             name: "macOS Latest x64", artifact: "macOS-x64.zip",
 #             os: macos-latest
 #           }
+   steps:
+   - name: Cache node modules
+     uses: actions/cache@v2
+     env:
+       cache-name: cache-node-modules
+     with:
+       path: qt5
+       key: qt
 
-    steps:
-    - uses: actions/checkout@v1
-
-    - name: Installing system libs
-      shell: cmake -P {0}
-      run: |
-        if ("${{ runner.os }}" STREQUAL "Linux")
-          execute_process(
-            COMMAND sudo apt install p7zip-full libgl1-mesa-dev tree
-          )
-          execute_process(
-            COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
-          )
-          execute_process(
-            COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
-          )
-        endif()
-
-#    steps:
-#    - name: Cache node modules
-#      uses: actions/cache@v2
-#      env:
-#        cache-name: cache-node-modules
-#      with:
-#        path: qt5
-#        key: qt
-#
     - name: ZDownload Qt
       id: download_qt
       shell: cmake -P {0}
@@ -132,6 +113,45 @@ jobs:
             ${CMAKE_COMMAND} -E tar xvf ../${package}.7z WORKING_DIRECTORY qtcreator)
         endforeach()
         
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+        - {
+            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            os: windows-latest,
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          }
+#         - {
+#             name: "Linux Latest x64", artifact: "Linux-x64.zip",
+#             os: ubuntu-latest
+#           }
+#         - {
+#             name: "macOS Latest x64", artifact: "macOS-x64.zip",
+#             os: macos-latest
+#           }
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Installing system libs
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "Linux")
+          execute_process(
+            COMMAND sudo apt install p7zip-full libgl1-mesa-dev tree
+          )
+          execute_process(
+            COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
+          )
+          execute_process(
+            COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
+          )
+        endif()
+
+
     steps:
     - name: Download Qt X
       id: qt
