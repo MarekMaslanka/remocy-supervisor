@@ -46,13 +46,6 @@ jobs:
             COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
           )
         endif()
-    - name: Cache qt modules
-      uses: actions/cache@v2
-      env:
-        cache-name: cache-node-modules
-      with:
-        path: qt5
-        key: qt
 
     - name: Download Qt
       id: qt
@@ -192,15 +185,16 @@ jobs:
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status")
         endif()
-        file(MAKE_DIRECTORY "$ENV{PLUGIN_NAME}")
+        file(MAKE_DIRECTORY "deploy")
+        file(MAKE_DIRECTORY "deploy/$ENV{PLUGIN_NAME}")
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{PLUGIN_NAME}-$ENV{QT_CREATOR_VERSION}-${{ matrix.config.artifact }}" artifact)
         if ("${{ runner.os }}" STREQUAL "Windows")
-          file(COPY "release/${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "$ENV{PLUGIN_NAME}")
+          file(COPY "release/${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "deploy/$ENV{PLUGIN_NAME}")
           execute_process(
             COMMAND dir
           )
           execute_process(
-            COMMAND windeployqt "$ENV{PLUGIN_NAME}/${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            COMMAND windeployqt "deploy/$ENV{PLUGIN_NAME}/${{ steps.qt_creator.outputs.qtc_binary_name }}"
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
         else()
@@ -208,14 +202,10 @@ jobs:
             ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "${{ steps.qt_creator.outputs.qtc_binary_name }}"
           )
         endif()
-        execute_process(COMMAND
-          ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "$ENV{PLUGIN_NAME}"
-        )
     - uses: actions/upload-artifact@v1
       id: upload_artifact
       with:
-        path: ./${{ env.PLUGIN_NAME }}
-#         path: ./${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
+        path: ./deploy
         name: ${{ env.PLUGIN_NAME }}-${{ env.QT_CREATOR_VERSION }}-${{ matrix.config.artifact }}
 
   release:
@@ -279,7 +269,7 @@ jobs:
         path: ./
     - id: set_upload_url
       run: |
-        upload_url=`cat ./upload_url`
+        upload_url=`type ./upload_url`
         echo ::set-output name=upload_url::$upload_url
     - name: Upload to Release
       id: upload_to_release
