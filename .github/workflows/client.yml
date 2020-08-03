@@ -5,8 +5,10 @@ on: [push]
 env:
   QT_VERSION: 5.14.2
   QT_CREATOR_VERSION: 4.12.3
-  APPLICATION_NAME: remocy-supervisor
-  APPLICATION_PRO: remocy-supervisor.pro
+  SUPERVISOR_APPLICATION_NAME: lunremote-tray
+  SUPERVISOR_APPLICATION_PRO: remocy-supervisor.pro
+  CLIENT_APPLICATION_NAME: lunremote-client
+  CLIENT_APPLICATION_PRO: remocy-client.pro
   APPLICATION_VERSION: 0.9.0
 
 jobs:
@@ -162,6 +164,7 @@ jobs:
             CONFIG+=release
             QTC_SOURCE="${qtcreator_dir}"
             QTC_BUILD="${qtcreator_dir}"
+          WORKING_DIRECTORY "tray"
           RESULT_VARIABLE result
         )
         if (NOT result EQUAL 0)
@@ -186,6 +189,7 @@ jobs:
         execute_process(
           COMMAND ${make_program}
           RESULT_VARIABLE result
+          WORKING_DIRECTORY "tray"
         )
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status")
