@@ -198,11 +198,12 @@ jobs:
           )
           file(COPY "${{ steps.qt_creator.outputs.qtc_binary_name }}.app" DESTINATION "deploy/$ENV{APPLICATION_NAME}")
           execute_process(
-            COMMAND ls -l
+            COMMAND macdeployqt "deploy/$ENV{APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_name }}.app"
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
           execute_process(
-            COMMAND macdeployqt "deploy/$ENV{APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_name }}"
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
+            COMMAND ls -l
+            WORKING_DIRECTORY "deploy/"
           )
         else()
           file(COPY "${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "deploy/$ENV{APPLICATION_NAME}")
