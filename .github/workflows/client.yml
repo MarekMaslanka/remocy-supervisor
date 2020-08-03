@@ -239,8 +239,11 @@ jobs:
           execute_process(
             COMMAND ls -l tray
           )
+          execute_process(
+            COMMAND ls -l tray/deploy
+          )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}"
+            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "$ENV{SUPERVISOR_APPLICATION_NAME}"
             WORKING_DIRECTORY "tray/deploy/"
           )
         endif()
