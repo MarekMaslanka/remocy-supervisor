@@ -219,7 +219,7 @@ jobs:
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{CLIENT_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" client_artifact)
         if ("${{ runner.os }}" STREQUAL "Windows")
           file(COPY "tray/release/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
-          file(COPY "client/release/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "tray/deploy/$ENV{CLIENT_APPLICATION_NAME}")
+          file(COPY "client/release/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}")
           execute_process(
             COMMAND dir
           )
