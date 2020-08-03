@@ -33,12 +33,12 @@ jobs:
           }
 
     steps:
-    - name: Checkout
+    - name: Checkout supervisor
       uses: actions/checkout@v2
       with:
         path: tray
 
-    - name: Checkout private tools
+    - name: Checkout client
       uses: actions/checkout@v2
       with:
         path: client
