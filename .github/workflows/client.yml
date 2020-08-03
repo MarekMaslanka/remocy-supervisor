@@ -187,9 +187,8 @@ jobs:
           set(make_program "qtcreator/bin/jom")
         endif()
         execute_process(
-          COMMAND ${make_program}
+          COMMAND ${make_program} -C tray
           RESULT_VARIABLE result
-          WORKING_DIRECTORY "tray"
         )
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status")
