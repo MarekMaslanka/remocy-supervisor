@@ -321,14 +321,14 @@ jobs:
             name: "Windows Latest x64", artifact: "Windows-x64.zip",
             os: windows-latest
           }
-#         - {
-#             name: "Linux Latest x64", artifact: "Linux-x64.zip",
-#             os: ubuntu-latest
-#           }
-#         - {
-#             name: "macOS Latest x64", artifact: "macOS-x64.zip",
-#             os: macos-latest
-#           }
+        - {
+            name: "Linux Latest x64", artifact: "Linux-x64.zip",
+            os: ubuntu-latest
+          }
+        - {
+            name: "macOS Latest x64", artifact: "macOS-x64.zip",
+            os: macos-latest
+          }
     needs: build
 
     steps:
