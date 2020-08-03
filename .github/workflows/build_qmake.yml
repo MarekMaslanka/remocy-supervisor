@@ -106,7 +106,7 @@ jobs:
           set(qtc_platform "linux_gcc_64_rhel72")
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           set(qtc_output_directory "qtcreator/bin/Qt Creator.app/Contents/PlugIns")
-          set(qtc_binary_name "$ENV{APPLICATION_NAME}")
+          set(qtc_binary_name "$ENV{APPLICATION_NAME}.app")
           set(qtc_platform "mac_x64")
         endif()
         # Save the path for other steps
@@ -192,29 +192,31 @@ jobs:
             COMMAND windeployqt "deploy/$ENV{APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_name }}"
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "$ENV{APPLICATION_NAME}"
+            WORKING_DIRECTORY "deploy/"
+          )
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
             COMMAND ls -l
           )
-          file(COPY "${{ steps.qt_creator.outputs.qtc_binary_name }}.app" DESTINATION "deploy/$ENV{APPLICATION_NAME}")
           execute_process(
-            COMMAND macdeployqt "deploy/$ENV{APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_name }}.app"
+            COMMAND macdeployqt "${{ steps.qt_creator.outputs.qtc_binary_name }}"
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
-          execute_process(
-            COMMAND ls -l
-            WORKING_DIRECTORY "deploy/"
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "${{ steps.qt_creator.outputs.qtc_binary_name }}"
           )
         else()
           file(COPY "${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "deploy/$ENV{APPLICATION_NAME}")
           execute_process(
             COMMAND ls -l
           )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "$ENV{APPLICATION_NAME}"
+            WORKING_DIRECTORY "deploy/"
+          )
         endif()
-        execute_process(COMMAND
-          ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "$ENV{APPLICATION_NAME}"
-          WORKING_DIRECTORY "deploy/"
-        )
           execute_process(
             COMMAND ls -l
           )
