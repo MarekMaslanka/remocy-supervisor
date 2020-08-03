@@ -372,7 +372,7 @@ jobs:
             COMMAND ls -l
           )
 
-    - name: Deploy tray
+    - name: Deploy server
       id: server_upload_to_release
       uses: actions/upload-release-asset@v1.0.1
       env:
