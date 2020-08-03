@@ -273,11 +273,17 @@ jobs:
           
           file(COPY "client/lib/libopenh264.so" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
           file(COPY "client/lib/libopenh264.so.5" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
+          
+          file(COPY "client/lib/libopenh264.so" DESTINATION ".")
+          file(COPY "client/lib/libopenh264.so.5" DESTINATION ".")
         
           file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "tray/deploy/linuxdeployqt")
           file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "client/deploy/linuxdeployqt")
           file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "linuxdeployqt")
           
+          execute_process(
+            COMMAND ls -l
+          )
           execute_process(
             COMMAND ls -l client
           )
@@ -305,17 +311,17 @@ jobs:
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
           execute_process(
-            COMMAND ../../../../linuxdeployqt ../../../../client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=3
+            COMMAND ../../../../linuxdeployqt ../../../../client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }}
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
-          execute_process(
-            COMMAND ../../../../tray/deploy/linuxdeployqt ../../../../tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
-          )
-          execute_process(
-            COMMAND ../../../../client/deploy/linuxdeployqt ../../../../client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=3
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
-          )
+#          execute_process(
+#            COMMAND ../../../../tray/deploy/linuxdeployqt ../../../../tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}
+#            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
+#          )
+#          execute_process(
+#            COMMAND ../../../../client/deploy/linuxdeployqt ../../../../client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=3
+#            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
+#          )
 
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "$ENV{SUPERVISOR_APPLICATION_NAME}"
