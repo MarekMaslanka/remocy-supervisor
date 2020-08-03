@@ -241,7 +241,7 @@ jobs:
             ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}"
           )
         else()
-          file(COPY "${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
+          file(COPY "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
           execute_process(
             COMMAND ls -l
           )
