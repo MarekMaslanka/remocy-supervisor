@@ -220,6 +220,8 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Windows")
           file(COPY "tray/release/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
           file(COPY "client/release/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}")
+          
+          file(COPY "client/lib/openh264.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
           execute_process(
             COMMAND dir
           )
@@ -271,6 +273,9 @@ jobs:
           )
           file(COPY "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
           file(COPY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}")
+          
+          file(COPY "client/lib/libopenh264.so" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
+          file(COPY "client/lib/libopenh264.so.5" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
           execute_process(
             COMMAND ls -l
           )
