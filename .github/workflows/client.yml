@@ -300,7 +300,7 @@ jobs:
         endif()
 
     - uses: actions/upload-artifact@v1
-      id: upload_tray_artifact
+      id: upload_server_artifact
       with:
         path: ./${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
         name: ${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
