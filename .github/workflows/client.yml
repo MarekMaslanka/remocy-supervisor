@@ -312,7 +312,7 @@ jobs:
         name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
 
   deploy:
-#    if: contains(github.ref, 'tags/v')
+   if: contains(github.ref, 'tags/v')
     runs-on: ubuntu-latest
     strategy:
       matrix:
