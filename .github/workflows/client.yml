@@ -202,7 +202,7 @@ jobs:
         endif()
         file(MAKE_DIRECTORY "tray/deploy")
         file(MAKE_DIRECTORY "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
-        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{SUPERVISOR_APPLICATION_NAME}-$ENV{SUPERVISOR_APPLICATION_VERSION}-${{ matrix.config.artifact }}" artifact)
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{SUPERVISOR_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" artifact)
                     execute_process(
             COMMAND dir
           )
