@@ -192,9 +192,13 @@ jobs:
           execute_process(
             COMMAND dir tray
           )
+          execute_process(
+            COMMAND dir client
+          )
         execute_process(
-          COMMAND ${make_program} -C tray
+          COMMAND ${make_program}
           RESULT_VARIABLE result
+          WORKING_DIRECTORY "tray"
         )
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status")
