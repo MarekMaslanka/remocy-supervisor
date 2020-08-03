@@ -1,6 +1,8 @@
 name: All QMake Build Matrix
 
-on: [push]
+on:
+  push:
+  workflow_dispatch:
 
 env:
   QT_VERSION: 5.14.2
