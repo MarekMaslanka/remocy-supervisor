@@ -1,4 +1,4 @@
-name: All QMake Build Matrix
+name: Build remocy matrix
 
 on: [push]
 
