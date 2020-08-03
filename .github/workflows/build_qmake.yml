@@ -201,7 +201,7 @@ jobs:
             COMMAND ls -l
           )
           execute_process(
-            COMMAND macdeployqt -verbose=3 "${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            COMMAND macdeployqt -verbose=3 "${{ steps.qt_creator.outputs.qtc_binary_name }}1"
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
           execute_process(
