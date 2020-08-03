@@ -41,7 +41,7 @@ jobs:
       with:
         path: client
         repository: MarekMaslanka/remocy-client
-        token: ${{ secrets.ACCESS_TOKEN }} # `GitHub_PAT` is a secret that contains your PAT
+        token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Installing system libs
       shell: cmake -P {0}
