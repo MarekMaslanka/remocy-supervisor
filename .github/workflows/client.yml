@@ -250,7 +250,7 @@ jobs:
             #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
           execute_process(
-            COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
+            COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" -verbose=2
             #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
           execute_process(
@@ -271,53 +271,23 @@ jobs:
           file(COPY "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/")
           file(COPY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
           
-          file(COPY "client/lib/libopenh264.so" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
-          file(COPY "client/lib/libopenh264.so.5" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
-          
-          file(COPY "client/lib/libopenh264.so" DESTINATION ".")
-          file(COPY "client/lib/libopenh264.so.5" DESTINATION ".")
-          
           file(COPY "client/lib/libopenh264.so" DESTINATION "qt5/$ENV{QT_VERSION}/gcc_64/lib/")
           file(COPY "client/lib/libopenh264.so.5" DESTINATION "qt5/$ENV{QT_VERSION}/gcc_64/lib/")
-        
-          file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "tray/deploy/linuxdeployqt")
-          file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "client/deploy/linuxdeployqt")
+          
           file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "linuxdeployqt")
           
           execute_process(
-            COMMAND ls -l
-          )
-          execute_process(
-            COMMAND ls -l client/deploy
-          )
-          execute_process(
-            COMMAND ls -l client/deploy/lunremote
-          )
-          
-          execute_process(
-            COMMAND chmod a+x linuxdeployqt
-            WORKING_DIRECTORY "tray/deploy/"
-          )
-          execute_process(
-            COMMAND chmod a+x linuxdeployqt
-            WORKING_DIRECTORY "client/deploy/"
-          )
-          execute_process(
             COMMAND chmod a+x linuxdeployqt
           )
           
           execute_process(
-            COMMAND ../../../../linuxdeployqt ../../../../client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=2
+            COMMAND ../../../../linuxdeployqt ../../../../client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }}
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
           execute_process(	
-            COMMAND ../../../../tray/deploy/linuxdeployqt ../../../../tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_tray_name }} -verbose=2
+            COMMAND ../../../..//linuxdeployqt ../../../../tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
-          #execute_process(
-          #  COMMAND ../../../../client/deploy/linuxdeployqt ../../../../client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=3
-          #  WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
-          #)
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "$ENV{SUPERVISOR_APPLICATION_NAME}"
             WORKING_DIRECTORY "tray/deploy/"
@@ -327,9 +297,7 @@ jobs:
             WORKING_DIRECTORY "client/deploy/"
           )
         endif()
-          execute_process(
-            COMMAND ls -l
-          )
+
     - uses: actions/upload-artifact@v1
       id: upload_tray_artifact
       with:
