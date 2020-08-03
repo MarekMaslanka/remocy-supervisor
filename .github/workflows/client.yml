@@ -23,14 +23,14 @@ jobs:
             os: windows-latest,
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           }
-#         - {
-#             name: "Linux Latest x64", artifact: "Linux-x64.zip",
-#             os: ubuntu-latest
-#           }
-#         - {
-#             name: "macOS Latest x64", artifact: "macOS-x64.zip",
-#             os: macos-latest
-#           }
+        - {
+            name: "Linux Latest x64", artifact: "Linux-x64.zip",
+            os: ubuntu-latest
+          }
+        - {
+            name: "macOS Latest x64", artifact: "macOS-x64.zip",
+            os: macos-latest
+          }
 
     steps:
     - name: Checkout
@@ -110,19 +110,19 @@ jobs:
         set(qtc_base_url "https://download.qt.io/official_releases/qtcreator/${CMAKE_MATCH_1}/$ENV{QT_CREATOR_VERSION}")
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
-          set(qtc_binary_name "$ENV{APPLICATION_NAME}.exe")
-            set(qtc_platform "windows_msvc2017_x64")
+          set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}.exe")
+          set(qtc_platform "windows_msvc2017_x64")
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
-          set(qtc_binary_name "$ENV{APPLICATION_NAME}")
+          set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}")
           set(qtc_platform "linux_gcc_64_rhel72")
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           set(qtc_output_directory "qtcreator/bin/Qt Creator.app/Contents/PlugIns")
-          set(qtc_binary_name "$ENV{APPLICATION_NAME}.app")
+          set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}.app")
           set(qtc_platform "mac_x64")
         endif()
         # Save the path for other steps
-        message("::set-output name=qtc_binary_name::${qtc_binary_name}")
+        message("::set-output name=qtc_binary_tray_name::${qtc_binary_tray_name}")
         message("::set-output name=qtc_output_directory::${qtc_output_directory}")
         file(MAKE_DIRECTORY qtcreator)
         foreach(package qtcreator qtcreator_dev)
@@ -187,15 +187,6 @@ jobs:
           set(make_program "../qtcreator/bin/jom")
         endif()
         execute_process(
-            COMMAND dir
-          )
-          execute_process(
-            COMMAND dir tray
-          )
-          execute_process(
-            COMMAND dir client
-          )
-        execute_process(
           COMMAND ${make_program}
           RESULT_VARIABLE result
           WORKING_DIRECTORY "tray"
@@ -215,16 +206,13 @@ jobs:
                     execute_process(
             COMMAND dir tray/release/
           )
-                    execute_process(
-            COMMAND dir release
-          )
         if ("${{ runner.os }}" STREQUAL "Windows")
-          file(COPY "tray/release/${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
+          file(COPY "tray/release/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
           execute_process(
             COMMAND dir
           )
           execute_process(
-            COMMAND windeployqt "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            COMMAND windeployqt "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}"
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
           execute_process(COMMAND
@@ -236,18 +224,18 @@ jobs:
             COMMAND ls -l
           )
           execute_process(
-            COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "tray/${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}"
             #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
           execute_process(
             COMMAND ls -l
-            WORKING_DIRECTORY "tray/${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            WORKING_DIRECTORY "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}"
           )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "tray/${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}"
           )
         else()
-          file(COPY "${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
+          file(COPY "${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
           execute_process(
             COMMAND ls -l
           )
@@ -262,8 +250,8 @@ jobs:
     - uses: actions/upload-artifact@v1
       id: upload_artifact
       with:
-        path: ./${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-        name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        path: ./${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        name: ${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
 
   deploy:
 #    if: contains(github.ref, 'tags/v')
