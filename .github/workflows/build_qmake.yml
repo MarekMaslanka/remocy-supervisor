@@ -201,15 +201,7 @@ jobs:
             COMMAND ls -l
           )
           execute_process(
-            COMMAND macdeployqt1 -verbose=3 "${{ steps.qt_creator.outputs.qtc_binary_name }}1"
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
-          )
-          execute_process(
-            COMMAND ls -l
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
-          )
-          execute_process(
-            COMMAND macdeployqt -verbose=3 "${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            COMMAND macdeployqt "${{ steps.qt_creator.outputs.qtc_binary_name }}"
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
           execute_process(
@@ -231,10 +223,6 @@ jobs:
         endif()
           execute_process(
             COMMAND ls -l
-          )
-          execute_process(
-            COMMAND ls -l
-            WORKING_DIRECTORY "deploy/"
           )
     - uses: actions/upload-artifact@v1
       id: upload_artifact
