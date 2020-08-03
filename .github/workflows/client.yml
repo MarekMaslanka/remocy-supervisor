@@ -43,6 +43,7 @@ jobs:
       with:
         path: client
         repository: MarekMaslanka/remocy-client
+        ref: build
         token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Installing system libs
