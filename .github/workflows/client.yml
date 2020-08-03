@@ -373,7 +373,7 @@ jobs:
           )
 
     - name: Deploy tray
-      id: upload_to_tray_release
+      id: server_upload_to_release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
