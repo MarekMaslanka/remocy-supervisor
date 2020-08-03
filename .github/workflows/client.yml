@@ -7,7 +7,7 @@ env:
   QT_CREATOR_VERSION: 4.12.3
   SUPERVISOR_APPLICATION_NAME: remocy-supervisor
   SUPERVISOR_APPLICATION_PRO: remocy-supervisor.pro
-  CLIENT_APPLICATION_NAME: remocy-client
+  CLIENT_APPLICATION_NAME: lunremote
   CLIENT_APPLICATION_PRO: remocy-client.pro
   APPLICATION_VERSION: 0.9.0
 
@@ -266,6 +266,9 @@ jobs:
             ${CMAKE_COMMAND} -E tar cvf ${client_artifact} --format=zip "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
           )
         else()
+          execute_process(
+            COMMAND ls -l client
+          )
           file(COPY "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
           file(COPY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}")
           execute_process(
