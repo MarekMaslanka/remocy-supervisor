@@ -278,7 +278,6 @@ jobs:
           execute_process(
             COMMAND chmod a+x linuxdeployqt
           )
-          
           execute_process(
             COMMAND ../../../../linuxdeployqt ../../../../client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=2
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
