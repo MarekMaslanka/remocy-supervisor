@@ -1,4 +1,4 @@
-name: QMake Build Matrix
+name: All QMake Build Matrix
 
 on: [push]
 
@@ -40,7 +40,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: client
-        repository: my-org/my-private-tools
+        repository: MarekMaslanka/remocy-client
         token: ${{ secrets.GitHub_PAT }} # `GitHub_PAT` is a secret that contains your PAT
 
     - name: Installing system libs
