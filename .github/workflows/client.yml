@@ -332,7 +332,7 @@ jobs:
     needs: build
 
     steps:
-    - name: Download tray artifact
+    - name: Download server artifact
       uses: actions/download-artifact@v1
       with:
         name: ${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
