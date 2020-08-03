@@ -16,15 +16,15 @@ jobs:
     strategy:
       matrix:
         config:
-#         - {
-#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
-#             os: windows-latest,
-#             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-#           }
         - {
-            name: "Linux Latest x64", artifact: "Linux-x64.zip",
-            os: ubuntu-latest
+            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            os: windows-latest,
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           }
+#         - {
+#             name: "Linux Latest x64", artifact: "Linux-x64.zip",
+#             os: ubuntu-latest
+#           }
 #         - {
 #             name: "macOS Latest x64", artifact: "macOS-x64.zip",
 #             os: macos-latest
@@ -230,14 +230,14 @@ jobs:
     strategy:
       matrix:
         config:
-#         - {
-#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
-#             os: windows-latest
-#           }
         - {
-            name: "Linux Latest x64", artifact: "Linux-x64.zip",
-            os: ubuntu-latest
+            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            os: windows-latest
           }
+#         - {
+#             name: "Linux Latest x64", artifact: "Linux-x64.zip",
+#             os: ubuntu-latest
+#           }
 #         - {
 #             name: "macOS Latest x64", artifact: "macOS-x64.zip",
 #             os: macos-latest
@@ -278,14 +278,6 @@ jobs:
           execute_process(
             COMMAND ls -l
           )
-
-#     - name: Store Release url
-#       run: |
-#         echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
-#     - uses: actions/upload-artifact@v1
-#       with:
-#         path: ./upload_url
-#         name: upload_url
 
     - name: Deploy
       id: upload_to_release
