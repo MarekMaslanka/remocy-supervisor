@@ -281,11 +281,20 @@ jobs:
           file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "client/deploy/linuxdeployqt")
           
           execute_process(
-            COMMAND ./linuxdeployqt ${{ steps.qt_creator.outputs.qtc_binary_tray_name }} --verbose=3
+            COMMAND chmod a+x linuxdeployqt
             WORKING_DIRECTORY "tray/deploy/"
           )
           execute_process(
-            COMMAND ./linuxdeployqt ${{ steps.qt_creator.outputs.qtc_binary_client_name }} --verbose=3
+            COMMAND chmod a+x linuxdeployqt
+            WORKING_DIRECTORY "client/deploy/"
+          )
+          
+          execute_process(
+            COMMAND ./linuxdeployqt ${{ steps.qt_creator.outputs.qtc_binary_tray_name }} -verbose=3
+            WORKING_DIRECTORY "tray/deploy/"
+          )
+          execute_process(
+            COMMAND ./linuxdeployqt ${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=3
             WORKING_DIRECTORY "client/deploy/"
           )
             
