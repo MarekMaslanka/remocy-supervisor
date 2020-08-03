@@ -365,13 +365,6 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Store Release url
-      shell: cmake -P {0}
-      run: |
-          execute_process(
-            COMMAND ls -l
-          )
-
     - name: Deploy server
       id: server_upload_to_release
       uses: actions/upload-release-asset@v1.0.1
