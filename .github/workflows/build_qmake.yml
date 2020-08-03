@@ -205,11 +205,12 @@ jobs:
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
           execute_process(
-            COMMAND ls -l qt5
+            COMMAND ls -l
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
           execute_process(
             COMMAND macdeployqt -verbose=3 "${{ steps.qt_creator.outputs.qtc_binary_name }}"
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt"
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
           execute_process(
             COMMAND ls -l
