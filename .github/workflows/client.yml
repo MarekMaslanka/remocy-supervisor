@@ -203,15 +203,6 @@ jobs:
         file(MAKE_DIRECTORY "tray/deploy")
         file(MAKE_DIRECTORY "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{SUPERVISOR_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" artifact)
-                    execute_process(
-            COMMAND dir
-          )
-                    execute_process(
-            COMMAND dir tray
-          )
-                    execute_process(
-            COMMAND dir tray/release/
-          )
         if ("${{ runner.os }}" STREQUAL "Windows")
           file(COPY "tray/release/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
           execute_process(
@@ -245,8 +236,11 @@ jobs:
           execute_process(
             COMMAND ls -l
           )
+          execute_process(
+            COMMAND ls -l tray
+          )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "tray/$ENV{SUPERVISOR_APPLICATION_NAME}"
+            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}"
             WORKING_DIRECTORY "tray/deploy/"
           )
         endif()
