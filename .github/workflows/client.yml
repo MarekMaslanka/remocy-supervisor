@@ -194,45 +194,45 @@ jobs:
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status")
         endif()
-        file(MAKE_DIRECTORY "deploy")
-        file(MAKE_DIRECTORY "deploy/$ENV{APPLICATION_NAME}")
+        file(MAKE_DIRECTORY "tray/deploy")
+        file(MAKE_DIRECTORY "tray/deploy/$ENV{APPLICATION_NAME}")
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" artifact)
         if ("${{ runner.os }}" STREQUAL "Windows")
-          file(COPY "release/${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "deploy/$ENV{APPLICATION_NAME}")
+          file(COPY "tray/release/${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "tray/deploy/$ENV{APPLICATION_NAME}")
           execute_process(
             COMMAND dir
           )
           execute_process(
-            COMMAND windeployqt "deploy/$ENV{APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            COMMAND windeployqt "tray/deploy/$ENV{APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_name }}"
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "$ENV{APPLICATION_NAME}"
-            WORKING_DIRECTORY "deploy/"
+            WORKING_DIRECTORY "tray/deploy/"
           )
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
             COMMAND ls -l
           )
           execute_process(
-            COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "tray/${{ steps.qt_creator.outputs.qtc_binary_name }}"
             #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
           execute_process(
             COMMAND ls -l
-            WORKING_DIRECTORY "${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            WORKING_DIRECTORY "tray/${{ steps.qt_creator.outputs.qtc_binary_name }}"
           )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "${{ steps.qt_creator.outputs.qtc_binary_name }}"
+            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "tray/${{ steps.qt_creator.outputs.qtc_binary_name }}"
           )
         else()
-          file(COPY "${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "deploy/$ENV{APPLICATION_NAME}")
+          file(COPY "${{ steps.qt_creator.outputs.qtc_binary_name }}" DESTINATION "tray/deploy/$ENV{APPLICATION_NAME}")
           execute_process(
             COMMAND ls -l
           )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "$ENV{APPLICATION_NAME}"
-            WORKING_DIRECTORY "deploy/"
+            ${CMAKE_COMMAND} -E tar cvf ${artifact} --format=zip "tray/$ENV{APPLICATION_NAME}"
+            WORKING_DIRECTORY "tray/deploy/"
           )
         endif()
           execute_process(
