@@ -384,7 +384,7 @@ jobs:
         asset_content_type: application/zip
 
     - name: Deploy client
-      id: upload_to_client_release
+      id: client_upload_to_release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
