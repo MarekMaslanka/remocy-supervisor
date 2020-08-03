@@ -276,6 +276,9 @@ jobs:
           
           file(COPY "client/lib/libopenh264.so" DESTINATION ".")
           file(COPY "client/lib/libopenh264.so.5" DESTINATION ".")
+          
+          file(COPY "client/lib/libopenh264.so" DESTINATION "qt5/$ENV{QT_VERSION}/gcc_64/lib/")
+          file(COPY "client/lib/libopenh264.so.5" DESTINATION "qt5/$ENV{QT_VERSION}/gcc_64/lib/")
         
           file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "tray/deploy/linuxdeployqt")
           file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "client/deploy/linuxdeployqt")
@@ -285,13 +288,10 @@ jobs:
             COMMAND ls -l
           )
           execute_process(
-            COMMAND ls -l client
-          )
-          execute_process(
-            COMMAND ls -l client/lib
-          )
-          execute_process(
             COMMAND ls -l client/deploy
+          )
+          execute_process(
+            COMMAND ls -l client/deploy/lunremote
           )
           
           execute_process(
@@ -306,10 +306,6 @@ jobs:
             COMMAND chmod a+x linuxdeployqt
           )
           
-          execute_process(
-            COMMAND ls -l ../../../../client/deploy/
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
-          )
           execute_process(
             COMMAND ../../../../linuxdeployqt ../../../../client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }}
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
