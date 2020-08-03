@@ -344,16 +344,6 @@ jobs:
         name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
         path: ./
 
-    - name: Dir list
-      shell: cmake -P {0}
-      run: |
-          execute_process(
-            COMMAND ls -l
-          )
-          execute_process(
-            COMMAND pwd
-          )
-
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1.0.0
