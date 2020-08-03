@@ -66,7 +66,6 @@ jobs:
       shell: cmake -P {0}
       run: |
         set(qt_version $ENV{QT_VERSION})
-        set(CMAKE_VERBOSE_MAKEFILE ON)
         string(REPLACE "." "" qt_version_dotless "${qt_version}")
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(url_os "windows_x86")
