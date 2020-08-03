@@ -290,29 +290,18 @@ jobs:
           )
           
           execute_process(
-            COMMAND ./linuxdeployqt ${{ steps.qt_creator.outputs.qtc_binary_tray_name }} -verbose=3
-            WORKING_DIRECTORY "tray/deploy/"
+            COMMAND ls -l ../../../../
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
           execute_process(
-            COMMAND ./linuxdeployqt ${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=3
-            WORKING_DIRECTORY "client/deploy/"
-          )
-            
-          execute_process(
-            COMMAND ls -l
+            COMMAND ../../../../tray/deploy/linuxdeployqt ../../../../tray/deploy/${{ steps.qt_creator.outputs.qtc_binary_tray_name }} -verbose=3
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
           execute_process(
-            COMMAND ls -l tray
+            COMMAND ../../../../client/deploy/linuxdeployqt ../../../../tray/deploy/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=3
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
-          execute_process(
-            COMMAND ls -l tray/deploy
-          )
-          execute_process(
-            COMMAND ls -l client
-          )
-          execute_process(
-            COMMAND ls -l client/deploy
-          )
+
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "$ENV{SUPERVISOR_APPLICATION_NAME}"
             WORKING_DIRECTORY "tray/deploy/"
