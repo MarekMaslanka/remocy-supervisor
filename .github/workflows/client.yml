@@ -117,18 +117,26 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
           set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}.exe")
+          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.exe")
+          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}.exe")
           set(qtc_platform "windows_msvc2017_x64")
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
           set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}")
+          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}")
+          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}")
           set(qtc_platform "linux_gcc_64_rhel72")
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           set(qtc_output_directory "qtcreator/bin/Qt Creator.app/Contents/PlugIns")
           set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}.app")
+          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.app")
+          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}.app")
           set(qtc_platform "mac_x64")
         endif()
         # Save the path for other steps
         message("::set-output name=qtc_binary_tray_name::${qtc_binary_tray_name}")
+        message("::set-output name=qtc_binary_client_name::${qtc_binary_client_name}")
+        message("::set-output name=qtc_binary_server_name::${qtc_binary_server_name}")
         message("::set-output name=qtc_output_directory::${qtc_output_directory}")
         file(MAKE_DIRECTORY qtcreator)
         foreach(package qtcreator qtcreator_dev)
@@ -194,19 +202,24 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(make_program "../qtcreator/bin/jom")
         endif()
-        execute_process(
-          COMMAND ${make_program}
-          RESULT_VARIABLE result
-          WORKING_DIRECTORY "tray"
-        )
-        if (NOT result EQUAL 0)
-          message(FATAL_ERROR "Bad exit status")
-        endif()
-        file(MAKE_DIRECTORY "tray/deploy")
+        foreach(app tray client)
+          execute_process(
+            COMMAND ${make_program}
+           RESULT_VARIABLE result
+           WORKING_DIRECTORY "${app}"
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status")
+          endif()
+          file(MAKE_DIRECTORY "${app}/deploy")
+        endforeach()
         file(MAKE_DIRECTORY "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
+        file(MAKE_DIRECTORY "client/deploy/$ENV{CLIENT_APPLICATION_NAME}")
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{SUPERVISOR_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" supervisor_artifact)
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{CLIENT_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" client_artifact)
         if ("${{ runner.os }}" STREQUAL "Windows")
           file(COPY "tray/release/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
+          file(COPY "client/release/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "tray/deploy/$ENV{CLIENT_APPLICATION_NAME}")
           execute_process(
             COMMAND dir
           )
@@ -214,9 +227,17 @@ jobs:
             COMMAND windeployqt "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}"
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
+          execute_process(
+            COMMAND windeployqt "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
+          )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "$ENV{SUPERVISOR_APPLICATION_NAME}"
             WORKING_DIRECTORY "tray/deploy/"
+          )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${client_artifact} --format=zip "$ENV{CLIENT_APPLICATION_NAME}"
+            WORKING_DIRECTORY "client/deploy/"
           )
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
@@ -227,14 +248,26 @@ jobs:
             #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
           execute_process(
+            COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
+            #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
+          )
+          execute_process(
             COMMAND ls -l
             WORKING_DIRECTORY "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}"
+          )
+          execute_process(
+            COMMAND ls -l
+            WORKING_DIRECTORY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
           )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}"
           )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${client_artifact} --format=zip "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
+          )
         else()
           file(COPY "tray/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
+          file(COPY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}")
           execute_process(
             COMMAND ls -l
           )
@@ -244,19 +277,35 @@ jobs:
           execute_process(
             COMMAND ls -l tray/deploy
           )
+          execute_process(
+            COMMAND ls -l client
+          )
+          execute_process(
+            COMMAND ls -l client/deploy
+          )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "$ENV{SUPERVISOR_APPLICATION_NAME}"
             WORKING_DIRECTORY "tray/deploy/"
+          )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${client_artifact} --format=zip "$ENV{CLIENT_APPLICATION_NAME}"
+            WORKING_DIRECTORY "client/deploy/"
           )
         endif()
           execute_process(
             COMMAND ls -l
           )
     - uses: actions/upload-artifact@v1
-      id: upload_artifact
+      id: upload_tray_artifact
       with:
         path: ./${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
         name: ${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+    
+    - uses: actions/upload-artifact@v1
+      id: upload_client_artifact
+      with:
+        path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
 
   deploy:
 #    if: contains(github.ref, 'tags/v')
@@ -279,10 +328,16 @@ jobs:
     needs: build
 
     steps:
-    - name: Download artifact
+    - name: Download tray artifact
       uses: actions/download-artifact@v1
       with:
-        name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        name: ${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        path: ./
+
+    - name: Download client artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
         path: ./
 
     - name: Dir list
@@ -313,13 +368,24 @@ jobs:
             COMMAND ls -l
           )
 
-    - name: Deploy
-      id: upload_to_release
+    - name: Deploy tray
+      id: upload_to_tray_release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-        asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        asset_path: ./${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        asset_name: ${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        asset_content_type: application/zip
+
+    - name: Deploy client
+      id: upload_to_client_release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        asset_name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
         asset_content_type: application/zip
