@@ -33,33 +33,13 @@ jobs:
 #           }
 
     steps:
-    - name: Checkout supervisor
-      uses: actions/checkout@v2
+    - name: Cache qt modules
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
       with:
-        path: tray
-
-    - name: Checkout client
-      uses: actions/checkout@v2
-      with:
-        path: client
-        repository: MarekMaslanka/remocy-client
-#         ref: build
-        token: ${{ secrets.ACCESS_TOKEN }}
-
-    - name: Installing system libs
-      shell: cmake -P {0}
-      run: |
-        if ("${{ runner.os }}" STREQUAL "Linux")
-          execute_process(
-            COMMAND sudo apt install p7zip-full libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0
-          )
-          execute_process(
-            COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
-          )
-          execute_process(
-            COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
-          )
-        endif()
+        path: qt5
+        key: qt5
 
     - name: Download Qt
       id: qt
@@ -107,6 +87,36 @@ jobs:
         string(REPLACE "licheck64" "" qtconfig "${qtconfig}")
         string(REPLACE "licheck_mac" "" qtconfig "${qtconfig}")
         file(WRITE "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" "${qtconfig}")
+
+    steps:
+    - name: Checkout supervisor
+      uses: actions/checkout@v2
+      with:
+        path: tray
+
+    - name: Checkout client
+      uses: actions/checkout@v2
+      with:
+        path: client
+        repository: MarekMaslanka/remocy-client
+#         ref: build
+        token: ${{ secrets.ACCESS_TOKEN }}
+
+    - name: Installing system libs
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "Linux")
+          execute_process(
+            COMMAND sudo apt install p7zip-full libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0
+          )
+          execute_process(
+            COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
+          )
+          execute_process(
+            COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
+          )
+        endif()
+
     - name: Download Qt Creator
       id: qt_creator
       shell: cmake -P {0}
