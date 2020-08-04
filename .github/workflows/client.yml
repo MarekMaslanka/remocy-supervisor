@@ -61,26 +61,31 @@ jobs:
           )
         endif()
 
+    - name: Download Qt from cache
+      uses: actions/cache@v2
+      id: cache-qt5
+      with:
+        path: qt5
+        key: qt5
+
     - name: Download Qt
-      id: qt
+      id: download_qt
       shell: cmake -P {0}
+      if: steps.cache-qt5.outputs.cache-hit != 'true'
       run: |
         set(qt_version $ENV{QT_VERSION})
         string(REPLACE "." "" qt_version_dotless "${qt_version}")
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(url_os "windows_x86")
           set(qt_package_name "qt.qt5.${qt_version_dotless}.win64_msvc2019_64")
-          set(qt_dir_prefix "${qt_version}/msvc2019_64")
           set(qt_extras "qtwinextras")
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           set(url_os "linux_x64")
           set(qt_package_name "qt.qt5.${qt_version_dotless}.gcc_64")
-          set(qt_dir_prefix "${qt_version}/gcc_64")
           set(qt_extras "qtx11extras")
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           set(url_os "mac_x64")
           set(qt_package_name "qt.qt5.${qt_version_dotless}.clang_64")
-          set(qt_dir_prefix "${qt_version}/clang_64")
           set(qt_extras "qtmacextras")
         endif()
         set(qt_base_url "https://download.qt.io/online/qtsdkrepository/${url_os}/desktop/qt5_${qt_version_dotless}")
@@ -92,15 +97,31 @@ jobs:
         set(package_suffix ${CMAKE_MATCH_2})
         string(REPLACE "-debug-symbols" "" package_suffix "${package_suffix}")
         file(MAKE_DIRECTORY qt5)
-        # Save the path for other steps
-        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qt5/${qt_dir_prefix}" qt_dir)
-        message("::set-output name=qt_dir::${qt_dir}")
+
         foreach(package qtbase qtdeclarative qttools qtsvg ${qt_extras})
           file(DOWNLOAD
             "${qt_base_url}/${qt_package_name}/${package_version}${package}${package_suffix}.7z" ./${package}.7z
           )
           execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ../${package}.7z WORKING_DIRECTORY qt5)
         endforeach()
+
+    - name: Configure Qt
+      id: qt
+      shell: cmake -P {0}
+      run: |
+        set(qt_version $ENV{QT_VERSION})
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(qt_dir_prefix "${qt_version}/msvc2019_64")
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          set(qt_dir_prefix "${qt_version}/gcc_64")
+        elseif ("${{ runner.os }}" STREQUAL "macOS")
+          set(qt_dir_prefix "${qt_version}/clang_64")
+        endif()
+
+        # Save the path for other steps
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qt5/${qt_dir_prefix}" qt_dir)
+        message("::set-output name=qt_dir::${qt_dir}")
+
         file(READ "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" qtconfig)
         string(REPLACE "Enterprise" "OpenSource" qtconfig "${qtconfig}")
         string(REPLACE "licheck.exe" "" qtconfig "${qtconfig}")
@@ -108,36 +129,27 @@ jobs:
         string(REPLACE "licheck_mac" "" qtconfig "${qtconfig}")
         file(WRITE "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" "${qtconfig}")
 
+    - name: Download Qt Creator from cache
+      uses: actions/cache@v2
+      id: cache-qtcreator
+      with:
+        path: qtcreator
+        key: qtcreator
+
     - name: Download Qt Creator
-      id: qt_creator
+      id: download_qt_creator
       shell: cmake -P {0}
+      if: steps.cache-qtcreator.outputs.cache-hit != 'true'
       run: |
         string(REGEX MATCH "([0-9]+.[0-9]+).[0-9]+" outvar "$ENV{QT_CREATOR_VERSION}")
         set(qtc_base_url "https://download.qt.io/official_releases/qtcreator/${CMAKE_MATCH_1}/$ENV{QT_CREATOR_VERSION}")
         if ("${{ runner.os }}" STREQUAL "Windows")
-          set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
-          set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}.exe")
-          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.exe")
-          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}.exe")
           set(qtc_platform "windows_msvc2017_x64")
         elseif ("${{ runner.os }}" STREQUAL "Linux")
-          set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
-          set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}")
-          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}")
-          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}")
           set(qtc_platform "linux_gcc_64_rhel72")
         elseif ("${{ runner.os }}" STREQUAL "macOS")
-          set(qtc_output_directory "qtcreator/bin/Qt Creator.app/Contents/PlugIns")
-          set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}.app")
-          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.app")
-          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}.app")
           set(qtc_platform "mac_x64")
         endif()
-        # Save the path for other steps
-        message("::set-output name=qtc_binary_tray_name::${qtc_binary_tray_name}")
-        message("::set-output name=qtc_binary_client_name::${qtc_binary_client_name}")
-        message("::set-output name=qtc_binary_server_name::${qtc_binary_server_name}")
-        message("::set-output name=qtc_output_directory::${qtc_output_directory}")
         file(MAKE_DIRECTORY qtcreator)
         foreach(package qtcreator qtcreator_dev)
           file(DOWNLOAD
@@ -145,6 +157,29 @@ jobs:
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar xvf ../${package}.7z WORKING_DIRECTORY qtcreator)
         endforeach()
+
+    - name: Configure Qt Creator
+      id: qt_creator
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}.exe")
+          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.exe")
+          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}.exe")
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}")
+          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}")
+          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}")
+        elseif ("${{ runner.os }}" STREQUAL "macOS")
+          set(qtc_binary_tray_name "$ENV{SUPERVISOR_APPLICATION_NAME}.app")
+          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.app")
+          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}.app")
+        endif()
+        # Save the path for other steps
+        message("::set-output name=qtc_binary_tray_name::${qtc_binary_tray_name}")
+        message("::set-output name=qtc_binary_client_name::${qtc_binary_client_name}")
+        message("::set-output name=qtc_binary_server_name::${qtc_binary_server_name}")
+
         if ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
             COMMAND ${CMAKE_COMMAND} -E make_directory qtcreator/bin
@@ -153,6 +188,7 @@ jobs:
               "$ENV{GITHUB_WORKSPACE}/qtcreator/bin/Qt Creator.app"
           )
         endif()
+
     - name: Configure
       shell: cmake -P {0}
       run: |
