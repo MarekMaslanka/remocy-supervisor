@@ -313,10 +313,10 @@ jobs:
             ls -l
           )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cf qt5_ --format=zip "qt5"
+            ${CMAKE_COMMAND} -E tar cf qt5_.zip --format=zip "qt5"
           )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cf qtcreator_ --format=zip "qtcreator"
+            ${CMAKE_COMMAND} -E tar cf qtcreator_.zip --format=zip "qtcreator"
           )
           execute_process(COMMAND
             ls -l
