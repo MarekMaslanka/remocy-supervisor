@@ -114,7 +114,7 @@ jobs:
         string(REPLACE "licheck64" "" qtconfig "${qtconfig}")
         string(REPLACE "licheck_mac" "" qtconfig "${qtconfig}")
         file(WRITE "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" "${qtconfig}")
-		if: steps.cache-packages.outputs.cache-hit != 'true'
+        if: steps.cache-packages.outputs.cache-hit != 'true'
     - name: Download Qt Creator
       id: qt_creator
       shell: cmake -P {0}
