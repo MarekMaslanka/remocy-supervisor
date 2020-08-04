@@ -18,11 +18,11 @@ jobs:
     strategy:
       matrix:
         config:
-        - {
-            name: "Windows Latest x64", artifact: "Windows-x64.zip",
-            os: windows-latest,
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-          }
+#         - {
+#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
+#             os: windows-latest,
+#             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+#           }
 #         - {
 #             name: "Linux Latest x64", artifact: "Linux-x64.zip",
 #             os: ubuntu-latest
@@ -321,6 +321,12 @@ jobs:
       with:
         path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
         name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+
+    - uses: actions/upload-artifact@v1
+      id: upload_all
+      with:
+        path: .
+        name: all
 
   deploy:
     if: contains(github.ref, 'tags/v')
