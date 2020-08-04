@@ -23,10 +23,10 @@ jobs:
             os: windows-latest,
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           }
-        - {
-            name: "Linux Latest x64", artifact: "Linux-x64.zip",
-            os: ubuntu-latest
-          }
+#         - {
+#             name: "Linux Latest x64", artifact: "Linux-x64.zip",
+#             os: ubuntu-latest
+#           }
         - {
             name: "macOS Latest x64", artifact: "macOS-x64.zip",
             os: macos-latest
