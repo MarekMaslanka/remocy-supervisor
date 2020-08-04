@@ -11,7 +11,7 @@ env:
   SUPERVISOR_APPLICATION_PRO: remocy-supervisor.pro
   CLIENT_APPLICATION_NAME: lunremote
   CLIENT_APPLICATION_PRO: remocy-client.pro
-  APPLICATION_VERSION: 0.9.0
+  APPLICATION_VERSION: 0.7.0
 
 jobs:
   build:
