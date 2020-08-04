@@ -181,9 +181,6 @@ jobs:
             WORKING_DIRECTORY "${app}"
             RESULT_VARIABLE result
           )
-#          if (NOT result EQUAL 0)
-#            message(FATAL_ERROR "Bad exit status")
-#          endif()
         endforeach()
     - name: Build
       shell: cmake -P {0}
