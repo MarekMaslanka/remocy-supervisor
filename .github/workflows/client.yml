@@ -66,7 +66,7 @@ jobs:
       id: cache-qt5
       with:
         path: qt5
-        key: qt5-"$ENV{QT_VERSION}"
+        key: qt5-${{ runner.os }}-${{ env.QT_VERSION }}
 
     - name: Download Qt
       id: download_qt
@@ -149,7 +149,7 @@ jobs:
       id: cache-qtcreator
       with:
         path: qtcreator
-        key: qtcreator-"$ENV{QT_VERSION}"
+        key: qtcreator-${{ runner.os }}-${{ env.QT_VERSION }}
 
     - name: Download Qt Creator
       id: download_qt_creator
