@@ -3,7 +3,7 @@ name: Build remocy matrix
 on: [push]
 
 env:
-  QT_VERSION: 5.14.2
+  QT_VERSION: 5.15.0
   QT_CREATOR_VERSION: 4.12.3
   SUPERVISOR_APPLICATION_NAME: remocy-supervisor
   SUPERVISOR_APPLICATION_PRO: remocy-supervisor.pro
@@ -18,11 +18,11 @@ jobs:
     strategy:
       matrix:
         config:
-#         - {
-#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
-#             os: windows-latest,
-#             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-#           }
+        - {
+            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            os: windows-latest,
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          }
 #         - {
 #             name: "Linux Latest x64", artifact: "Linux-x64.zip",
 #             os: ubuntu-latest
@@ -333,18 +333,6 @@ jobs:
       with:
         path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
         name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-
-    - uses: actions/upload-artifact@v1
-      id: upload_1
-      with:
-        path: ./qt5_.zip
-        name: qt5
-
-    - uses: actions/upload-artifact@v1
-      id: upload_2
-      with:
-        path: ./qtcreator_.zip
-        name: qtcreator
 
   deploy:
     if: contains(github.ref, 'tags/v')
