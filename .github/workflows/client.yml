@@ -221,8 +221,13 @@ jobs:
           file(COPY "client/release/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
           
           file(COPY "client/lib/openh264.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
+          
+          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/*/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "client/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/")
           execute_process(
             COMMAND dir
+          )
+          execute_process(
+            COMMAND dir "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/"
           )
           execute_process(
             COMMAND windeployqt "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}"
@@ -241,6 +246,8 @@ jobs:
             WORKING_DIRECTORY "client/deploy/"
           )
         elseif ("${{ runner.os }}" STREQUAL "macOS")
+          
+          file(COPY "client/lib/libopenh264.5.dylib" DESTINATION "/usr/local/lib/")
           execute_process(
             COMMAND ls -l
           )
