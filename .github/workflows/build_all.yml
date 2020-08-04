@@ -3,6 +3,7 @@ name: Build All
 # on: [push]
 on:
   workflow_dispatch:
+  push:
 
 env:
   QT_VERSION: 5.15.1
