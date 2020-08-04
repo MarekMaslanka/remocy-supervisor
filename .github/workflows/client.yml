@@ -129,6 +129,9 @@ jobs:
           COMMAND ls -l "qt5"
         )
         execute_process(
+          COMMAND ls -l "qt5/${qt_version}"
+        )
+        execute_process(
           COMMAND ls -l "qt5/${qt_dir_prefix}"
         )
         execute_process(
