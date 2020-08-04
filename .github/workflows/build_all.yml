@@ -1,6 +1,8 @@
-name: Build remocy matrix
+name: Build All
 
-on: [push]
+# on: [push]
+on:
+  workflow_dispatch:
 
 env:
   QT_VERSION: 5.15.1
