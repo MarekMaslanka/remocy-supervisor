@@ -3,7 +3,7 @@ name: Build remocy matrix
 on: [push]
 
 env:
-  QT_VERSION: 5.15.0
+  QT_VERSION: 5.15.1
   QT_CREATOR_VERSION: 4.12.3
   SUPERVISOR_APPLICATION_NAME: remocy-supervisor
   SUPERVISOR_APPLICATION_PRO: remocy-supervisor.pro
