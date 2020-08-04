@@ -177,6 +177,9 @@ jobs:
         execute_process(
           COMMAND ls -l
         )
+        execute_process(
+          COMMAND ls -l qt5
+        )
         if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
           execute_process(
             COMMAND "${{ matrix.config.environment_script }}" && set
@@ -203,7 +206,7 @@ jobs:
             RESULT_VARIABLE result
           )
           if (NOT result EQUAL 0)
-            message(FATAL_ERROR "Bad exit status")
+            message(FATAL_ERROR "Bad exit status for qmake")
           endif()
         endforeach()
     - name: Build
@@ -229,7 +232,7 @@ jobs:
            WORKING_DIRECTORY "${app}"
           )
           if (NOT result EQUAL 0)
-            message(FATAL_ERROR "Bad exit status")
+            message(FATAL_ERROR "Bad exit status for make")
           endif()
           file(MAKE_DIRECTORY "${app}/deploy")
         endforeach()
