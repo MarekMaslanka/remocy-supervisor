@@ -309,6 +309,12 @@ jobs:
             WORKING_DIRECTORY "client/deploy/"
           )
         endif()
+          execute_process(COMMAND
+            ls -l
+          )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf qt5 --format=zip "qt5"
+          )
 
     - uses: actions/upload-artifact@v1
       id: upload_server_artifact
@@ -325,8 +331,8 @@ jobs:
     - uses: actions/upload-artifact@v1
       id: upload_all
       with:
-        path: .
-        name: all
+        path: ./qt5.zip
+        name: qt5
 
   deploy:
     if: contains(github.ref, 'tags/v')
