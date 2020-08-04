@@ -122,21 +122,6 @@ jobs:
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qt5/${qt_dir_prefix}" qt_dir)
         message("::set-output name=qt_dir::${qt_dir}")
 
-        execute_process(
-          COMMAND ls -l
-        )
-        execute_process(
-          COMMAND ls -l "qt5"
-        )
-        execute_process(
-          COMMAND ls -l "qt5/${qt_version}"
-        )
-        execute_process(
-          COMMAND ls -l "qt5/${qt_dir_prefix}"
-        )
-        execute_process(
-          COMMAND ls -l "qt5/${qt_dir_prefix}/mkspecs"
-        )
         file(READ "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" qtconfig)
         string(REPLACE "Enterprise" "OpenSource" qtconfig "${qtconfig}")
         string(REPLACE "licheck.exe" "" qtconfig "${qtconfig}")
@@ -260,18 +245,20 @@ jobs:
         foreach(app tray client)
           execute_process(
             COMMAND ${make_program}
-           RESULT_VARIABLE result
-           WORKING_DIRECTORY "${app}"
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY "${app}"
           )
           if (NOT result EQUAL 0)
             message(FATAL_ERROR "Bad exit status for make")
           endif()
           file(MAKE_DIRECTORY "${app}/deploy")
         endforeach()
+
         file(MAKE_DIRECTORY "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
         file(MAKE_DIRECTORY "client/deploy/$ENV{CLIENT_APPLICATION_NAME}")
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{SUPERVISOR_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" supervisor_artifact)
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{CLIENT_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" client_artifact)
+        
         if ("${{ runner.os }}" STREQUAL "Windows")
           file(COPY "tray/release/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/")
           file(COPY "client/release/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
