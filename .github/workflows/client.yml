@@ -63,7 +63,7 @@ jobs:
 
     - name: Download Qt from cache
       uses: actions/cache@v2
-      id: cache-packages
+      id: cache-qt5
       with:
         path: qt5
         key: qt5
@@ -71,7 +71,7 @@ jobs:
     - name: Download Qt
       id: qt
       shell: cmake -P {0}
-      if: steps.cache-packages.outputs.cache-hit != 'true'
+      if: steps.cache-qt5.outputs.cache-hit != 'true'
       run: |
         set(qt_version $ENV{QT_VERSION})
         string(REPLACE "." "" qt_version_dotless "${qt_version}")
@@ -115,9 +115,19 @@ jobs:
         string(REPLACE "licheck64" "" qtconfig "${qtconfig}")
         string(REPLACE "licheck_mac" "" qtconfig "${qtconfig}")
         file(WRITE "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" "${qtconfig}")
+    
+
+    - name: Download Qt Creator from cache
+      uses: actions/cache@v2
+      id: cache-qtcreator
+      with:
+        path: qtcreator
+        key: qtcreator
+
     - name: Download Qt Creator
       id: qt_creator
       shell: cmake -P {0}
+      if: steps.cache-qtcreator.outputs.cache-hit != 'true'
       run: |
         string(REGEX MATCH "([0-9]+.[0-9]+).[0-9]+" outvar "$ENV{QT_CREATOR_VERSION}")
         set(qtc_base_url "https://download.qt.io/official_releases/qtcreator/${CMAKE_MATCH_1}/$ENV{QT_CREATOR_VERSION}")
