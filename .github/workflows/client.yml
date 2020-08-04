@@ -222,7 +222,7 @@ jobs:
           
           file(COPY "client/lib/openh264.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
           
-          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/*/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "client/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/")
+#          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/*/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "client/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/")
           execute_process(
             COMMAND dir
           )
