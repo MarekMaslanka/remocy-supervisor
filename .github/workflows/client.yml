@@ -51,7 +51,7 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(
-            COMMAND sudo apt install p7zip-full libgl1-mesa-dev tree libxkbcommon-x11-0
+            COMMAND sudo apt install p7zip-full libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4
           )
           execute_process(
             COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
@@ -181,6 +181,9 @@ jobs:
             WORKING_DIRECTORY "${app}"
             RESULT_VARIABLE result
           )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status")
+          endif()
         endforeach()
     - name: Build
       shell: cmake -P {0}
@@ -204,6 +207,9 @@ jobs:
            RESULT_VARIABLE result
            WORKING_DIRECTORY "${app}"
           )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status")
+          endif()
           file(MAKE_DIRECTORY "${app}/deploy")
         endforeach()
         file(MAKE_DIRECTORY "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}")
@@ -303,41 +309,18 @@ jobs:
             WORKING_DIRECTORY "client/deploy/"
           )
         endif()
-          execute_process(COMMAND
-            ls -l
-          )
-          execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cf qt5_.zip --format=zip "qt5"
-          )
-          execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cf qtcreator_.zip --format=zip "qtcreator"
-          )
-          execute_process(COMMAND
-            ls -l
-          )
 
-#     - uses: actions/upload-artifact@v1
-#       id: upload_server_artifact
-#       with:
-#         path: ./${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-#         name: ${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+    - uses: actions/upload-artifact@v1
+      id: upload_server_artifact
+      with:
+        path: ./${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        name: ${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
     
-#     - uses: actions/upload-artifact@v1
-#       id: upload_client_artifact
-#       with:
-#         path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-#         name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-    - uses: actions/upload-artifact@v1	
-      id: upload_1	
-      with:	
-        path: ./qt5_.zip	
-        name: qt5	
-
-    - uses: actions/upload-artifact@v1	
-      id: upload_2	
-      with:	
-        path: ./qtcreator_.zip	
-        name: qtcreator	
+    - uses: actions/upload-artifact@v1
+      id: upload_client_artifact
+      with:
+        path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
 
   deploy:
     if: contains(github.ref, 'tags/v')
