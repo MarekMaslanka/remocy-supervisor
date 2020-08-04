@@ -122,6 +122,18 @@ jobs:
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qt5/${qt_dir_prefix}" qt_dir)
         message("::set-output name=qt_dir::${qt_dir}")
 
+        execute_process(
+          COMMAND ls -l
+        )
+        execute_process(
+          COMMAND ls -l "qt5"
+        )
+        execute_process(
+          COMMAND ls -l "qt5/${qt_dir_prefix}"
+        )
+        execute_process(
+          COMMAND ls -l "qt5/${qt_dir_prefix}/mkspecs"
+        )
         file(READ "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" qtconfig)
         string(REPLACE "Enterprise" "OpenSource" qtconfig "${qtconfig}")
         string(REPLACE "licheck.exe" "" qtconfig "${qtconfig}")
