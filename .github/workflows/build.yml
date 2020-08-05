@@ -19,7 +19,7 @@ jobs:
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           }
         - {
-            name: "Linux Latest x64", artifact: "Linux-x64.zip",
+            name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
             os: ubuntu-latest
           }
 #         - {
@@ -150,7 +150,7 @@ jobs:
             ls -l server/deploy/$ENV{SERVER_APPLICATION_NAME}/
           )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=tar "$ENV{SERVER_APPLICATION_NAME}"
+            ${CMAKE_COMMAND} -E tar czvf ${server_artifact} "$ENV{SERVER_APPLICATION_NAME}"
             WORKING_DIRECTORY "server/deploy/"
           )
         endif()
