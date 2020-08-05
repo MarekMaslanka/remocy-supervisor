@@ -112,7 +112,7 @@ jobs:
           set(server_exec_name "lunremote.exe")
           file(COPY "server/Release/${server_exec_name}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
-          file(COPY "server/lib/*.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "server/lib/libyuv.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
           file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/msvcp140.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
