@@ -127,11 +127,11 @@ jobs:
         else()
           set(server_exec_name "lunremote")
           file(COPY "server/${server_exec_name}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          
+          file(COPY "server/lib/linux/libyuv2.so" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           file(COPY "server/tools/linux/crashpad_handler" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
           execute_process(COMMAND
-            cp /usr/lib/x86_64-linux-gnu/libavformat.* "server/deploy/$ENV{SERVER_APPLICATION_NAME}/"
+            cp /usr/lib/x86_64-linux-gnu/libav.* "server/deploy/$ENV{SERVER_APPLICATION_NAME}/"
           )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "$ENV{SERVER_APPLICATION_NAME}"
