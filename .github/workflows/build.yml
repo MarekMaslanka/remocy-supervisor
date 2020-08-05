@@ -85,7 +85,7 @@ jobs:
             WORKING_DIRECTORY "server"
           )
                   execute_process(
-            COMMAND cmake --build .
+            COMMAND dir
             WORKING_DIRECTORY "server"
           )
           
