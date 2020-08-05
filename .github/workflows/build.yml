@@ -50,13 +50,14 @@ jobs:
       shell: cmake -P {0}
       run: |
         set(CMAKE_VERBOSE_MAKEFILE ON)
+        set(CMAKE_BUILD_TYPE Release)
         execute_process(
           COMMAND ls -l
         )
 
         foreach(app server)
           execute_process(
-            COMMAND cmake . --config Release
+            COMMAND cmake .
             WORKING_DIRECTORY "${app}"
             RESULT_VARIABLE result
           )
@@ -69,6 +70,7 @@ jobs:
       shell: cmake -P {0}
       run: |
         set(CMAKE_VERBOSE_MAKEFILE ON)
+        set(CMAKE_BUILD_TYPE Release)
         include(ProcessorCount)
         ProcessorCount(N)
         set(make_program make -j ${N})
