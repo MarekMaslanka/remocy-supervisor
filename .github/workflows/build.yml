@@ -57,7 +57,7 @@ jobs:
 
         foreach(app server)
           execute_process(
-            COMMAND cmake .
+            COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>"
             WORKING_DIRECTORY "${app}"
             RESULT_VARIABLE result
           )
@@ -76,6 +76,7 @@ jobs:
         set(make_program make -j ${N})
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(make_program "cmake --build . --config Release")
+#          set(make_program "cmake --build . -- -property:Configuration=Release -verbosity:minimal")
         endif()
         
                   execute_process(
@@ -83,7 +84,7 @@ jobs:
             WORKING_DIRECTORY "server"
           )
                   execute_process(
-            COMMAND cmake --build .
+            COMMAND ${make_program}
             WORKING_DIRECTORY "server"
           )
                   execute_process(
