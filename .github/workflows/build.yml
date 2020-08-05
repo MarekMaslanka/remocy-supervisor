@@ -1,6 +1,7 @@
 name: Build s
 
-on: [push]
+# on: [push]
+on: [workflow_dispatch]
 
 env:
   SERVER_APPLICATION_NAME: lunremote
