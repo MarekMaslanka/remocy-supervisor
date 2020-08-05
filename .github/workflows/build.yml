@@ -76,7 +76,6 @@ jobs:
         set(make_program make -j ${N})
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(make_program "cmake --build . --config Release")
-#set(make_program "cmake --build . -- -property:Configuration=Release -verbosity:minimal")
         endif()
         
                   execute_process(
