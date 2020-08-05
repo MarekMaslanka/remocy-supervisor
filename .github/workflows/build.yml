@@ -1,7 +1,6 @@
 name: Build s
 
-# on: [push]
-on: [workflow_dispatch]
+on: [push]
 
 env:
   SERVER_APPLICATION_NAME: lunremote
@@ -130,7 +129,10 @@ jobs:
           file(COPY "server/${server_exec_name}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
           file(COPY "server/tools/linux/crashpad_handler" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-
+          
+          execute_process(COMMAND
+            cp /usr/lib/x86_64-linux-gnu/libavformat.* "server/deploy/$ENV{SERVER_APPLICATION_NAME}/"
+          )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "$ENV{SERVER_APPLICATION_NAME}"
             WORKING_DIRECTORY "server/deploy/"
