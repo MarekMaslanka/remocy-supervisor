@@ -142,10 +142,8 @@ jobs:
             WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
           )
           execute_process(
-            COMMAND ln -s libavcodec.so.57.107.100 libavcodec.so.57
-            COMMAND ln -s libavutil.so.55.78.100 libavutil.so.55
-            COMMAND ln -s libswresample.so.2.9.100 libswresample.so.2
-            WORKING_DIRECTORY "server/deploy/"
+            COMMAND patchelf --set-rpath '$ORIGIN' "${server_exec_name}"
+            WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
           )
                     execute_process(COMMAND
             ls -l server/deploy/$ENV{SERVER_APPLICATION_NAME}/
