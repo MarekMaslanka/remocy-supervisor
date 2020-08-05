@@ -71,6 +71,8 @@ jobs:
       run: |
         set(CMAKE_VERBOSE_MAKEFILE ON)
         set(CMAKE_BUILD_TYPE Release)
+        set(server_exec_name "lunremote.exe")
+
         include(ProcessorCount)
         ProcessorCount(N)
         set(make_program make -j ${N})
