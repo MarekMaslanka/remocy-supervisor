@@ -147,7 +147,7 @@ jobs:
           )
           execute_process(
             COMMAND patchelf --print-rpath "${server_exec_name}"
-            COMMAND patchelf --debug --set-rpath "'$ORIGIN'" "${server_exec_name}"
+            COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}"
             COMMAND patchelf --print-rpath "${server_exec_name}"
             COMMAND ls -l "${server_exec_name}"
             WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
