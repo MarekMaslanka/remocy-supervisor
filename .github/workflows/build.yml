@@ -139,6 +139,12 @@ jobs:
             COMMAND ${CMAKE_COMMAND} -E create_symlink libavcodec.so.57.107.100 libavcodec.so.57
             COMMAND ${CMAKE_COMMAND} -E create_symlink libavutil.so.55.78.100 libavutil.so.55
             COMMAND ${CMAKE_COMMAND} -E create_symlink libswresample.so.2.9.100 libswresample.so.2
+            WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
+          )
+          execute_process(
+            COMMAND ln -s libavcodec.so.57.107.100 libavcodec.so.57
+            COMMAND ln -s libavutil.so.55.78.100 libavutil.so.55
+            COMMAND ln -s libswresample.so.2.9.100 libswresample.so.2
             WORKING_DIRECTORY "server/deploy/"
           )
                     execute_process(COMMAND
