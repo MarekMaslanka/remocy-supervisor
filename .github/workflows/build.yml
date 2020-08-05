@@ -145,12 +145,14 @@ jobs:
             COMMAND ${CMAKE_COMMAND} -E create_symlink libvpx.so.5.0.0 libvpx.so.5
             WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
           )
-
+          
+          file(WRITE "server/deploy/$ENV{SERVER_APPLICATION_NAME}/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
           execute_process(
             COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}"
-            COMMAND ls -l "${server_exec_name}"
+            COMMAND chmod a+x "${server_exec_name}.sh"
             WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
           )
+          
                     execute_process(COMMAND
             ls -l server/deploy/$ENV{SERVER_APPLICATION_NAME}/
           )
