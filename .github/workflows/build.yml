@@ -100,12 +100,8 @@ jobs:
         foreach(app server)
           execute_process(
             COMMAND ${make_program}
-            RESULT_VARIABLE result
             WORKING_DIRECTORY "${app}"
           )
-          if (NOT result EQUAL 0)
-            message(FATAL_ERROR "Bad exit status for make")
-          endif()
           file(MAKE_DIRECTORY "${app}/deploy")
         endforeach()
 
