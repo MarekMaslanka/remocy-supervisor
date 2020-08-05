@@ -130,11 +130,21 @@ jobs:
           file(COPY "server/lib/linux/libyuv2.so" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           file(COPY "server/tools/linux/crashpad_handler" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
-          execute_process(COMMAND
-            ls -l /usr/lib/x86_64-linux-gnu/libav*
+          execute_process(COMMAND cp /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 "server/deploy/$ENV{SERVER_APPLICATION_NAME}/"
           )
           execute_process(COMMAND
-            cp /usr/lib/x86_64-linux-gnu/libav* "server/deploy/$ENV{SERVER_APPLICATION_NAME}/"
+            cp /usr/lib/x86_64-linux-gnu/libavcodec.so.57 "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          execute_process(COMMAND
+            cp /usr/lib/x86_64-linux-gnu/libavcodec.so "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          execute_process(COMMAND
+            cp /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          execute_process(COMMAND
+            cp /usr/lib/x86_64-linux-gnu/libavutil.so.55 "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          execute_process(COMMAND
+            cp /usr/lib/x86_64-linux-gnu/libavutil.so "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+
+                    execute_process(COMMAND
+            ls -l server/deploy/$ENV{SERVER_APPLICATION_NAME}/
           )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "$ENV{SERVER_APPLICATION_NAME}"
