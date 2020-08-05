@@ -131,13 +131,7 @@ jobs:
           file(COPY "server/tools/linux/crashpad_handler" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
           execute_process(COMMAND
-            ls -l /usr/
-          )
-          execute_process(COMMAND
-            ls -l /usr/lib/
-          )
-          execute_process(COMMAND
-            ls -l /usr/lib/x86_64-linux-gnu/
+            ls -l /usr/lib/x86_64-linux-gnu/libav*
           )
           execute_process(COMMAND
             cp /usr/lib/x86_64-linux-gnu/libav* "server/deploy/$ENV{SERVER_APPLICATION_NAME}/"
