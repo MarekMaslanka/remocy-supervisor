@@ -56,7 +56,7 @@ jobs:
 
         foreach(app server)
           execute_process(
-            COMMAND cmake .
+            COMMAND cmake --build . --config Release
             WORKING_DIRECTORY "${app}"
             RESULT_VARIABLE result
           )
