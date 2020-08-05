@@ -51,6 +51,8 @@ jobs:
       run: |
         set(CMAKE_VERBOSE_MAKEFILE ON)
         set(CMAKE_BUILD_TYPE Release)
+        set(CMAKE_INSTALL_RPATH ".")
+        set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
         execute_process(
           COMMAND ls -l
         )
@@ -71,6 +73,8 @@ jobs:
       run: |
         set(CMAKE_VERBOSE_MAKEFILE ON)
         set(CMAKE_BUILD_TYPE Release)
+        set(CMAKE_INSTALL_RPATH ".")
+        set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
         set(server_exec_name "lunremote.exe")
 
         include(ProcessorCount)
@@ -143,7 +147,7 @@ jobs:
           )
           execute_process(
             COMMAND patchelf --print-rpath "${server_exec_name}"
-            COMMAND patchelf "--debug --set-rpath '$ORIGIN' ${server_exec_name}"
+            COMMAND patchelf --debug --set-rpath "'$ORIGIN'" "${server_exec_name}"
             COMMAND patchelf --print-rpath "${server_exec_name}"
             COMMAND ls -l "${server_exec_name}"
             WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
