@@ -130,19 +130,12 @@ jobs:
           file(COPY "server/lib/linux/libyuv2.so" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           file(COPY "server/tools/linux/crashpad_handler" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
-          execute_process(COMMAND cp /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 "server/deploy/$ENV{SERVER_APPLICATION_NAME}/"
-          )
-          execute_process(COMMAND
-            cp /usr/lib/x86_64-linux-gnu/libavcodec.so.57 "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          execute_process(COMMAND
-            cp /usr/lib/x86_64-linux-gnu/libavcodec.so "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          execute_process(COMMAND
-            cp /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          execute_process(COMMAND
-            cp /usr/lib/x86_64-linux-gnu/libavutil.so.55 "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          execute_process(COMMAND
-            cp /usr/lib/x86_64-linux-gnu/libavutil.so "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-
+          file(COPY /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/libavcodec.so.57")
+          file(COPY /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/libavutil.so.55.78.100")
+          file(COPY /usr/lib/x86_64-linux-gnu/libswresample.so.2.9.100 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/libswresample.so.2")
+          file(COPY /usr/lib/x86_64-linux-gnu/libx264.so.152 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/libx264.so.152")
+          file(COPY /usr/lib/x86_64-linux-gnu/libx265.so.146 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/libx265.so.146")
+          
                     execute_process(COMMAND
             ls -l server/deploy/$ENV{SERVER_APPLICATION_NAME}/
           )
