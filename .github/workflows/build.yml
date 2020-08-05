@@ -143,8 +143,8 @@ jobs:
             COMMAND ${CMAKE_COMMAND} -E create_symlink libcrystalhd.so.3.6 libcrystalhd.so.3
             WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
           )
+#          execute_process(COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}")
           execute_process(
-#            COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}"
             COMMAND ls -l "${server_exec_name}"
             WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
           )
