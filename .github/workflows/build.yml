@@ -42,7 +42,7 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(
-            COMMAND sudo apt install tree libxfixes-dev libxtst-dev libavformat-dev libswscale-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 
+            COMMAND sudo apt install tree libxfixes-dev libxtst-dev libavformat-dev libswscale-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xfixes0-dev
           )
         endif()
 
@@ -56,7 +56,7 @@ jobs:
 
         foreach(app server)
           execute_process(
-            COMMAND cmake --build . --config Release
+            COMMAND cmake .
             WORKING_DIRECTORY "${app}"
             RESULT_VARIABLE result
           )
