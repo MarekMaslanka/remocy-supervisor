@@ -126,7 +126,7 @@ jobs:
         elseif ("${{ runner.os }}" STREQUAL "macOS")
         else()
           set(server_exec_name "lunremote")
-          file(COPY "server/Release/${server_exec_name}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "server/${server_exec_name}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
           file(COPY "server/tools/linux/crashpad_handler" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
 
