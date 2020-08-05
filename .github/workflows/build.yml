@@ -75,7 +75,7 @@ jobs:
         ProcessorCount(N)
         set(make_program make -j ${N})
         if ("${{ runner.os }}" STREQUAL "Windows")
-          set(make_program "cmake --build . -- -property:Configuration=Release")
+          set(make_program "cmake --build . --config Release")
         endif()
         
                   execute_process(
@@ -83,7 +83,7 @@ jobs:
             WORKING_DIRECTORY "server"
           )
                   execute_process(
-            COMMAND cmake --build . --config Release
+            COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
             WORKING_DIRECTORY "server"
           )
                   execute_process(
@@ -111,40 +111,27 @@ jobs:
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{SERVER_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" server_artifact)
         
         if ("${{ runner.os }}" STREQUAL "Windows")
-          file(COPY "server/release/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}" DESTINATION "server/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/")
+          set(server_exec_name "lunremote.exe")
+          file(COPY "server/Release/${{ server_exec_name }}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
-          file(COPY "client/lib/openh264.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
-          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/msvcp140.dll" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/")
-          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/")
-          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140_1.dll" DESTINATION "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/")
-          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/msvcp140.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
-          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
-          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140_1.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
+          file(COPY "server/lib/*.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          
+          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/msvcp140.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140_1.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          
           execute_process(
             COMMAND dir
           )
           execute_process(
-            COMMAND dir "client/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/"
+            COMMAND dir "server/deploy/$ENV{SERVER_APPLICATION_NAME}/"
           )
-          execute_process(
-            COMMAND dir "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/"
-          )
-          execute_process(
-            COMMAND windeployqt "tray/deploy/$ENV{SUPERVISOR_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_tray_name }}"
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
-          )
-          execute_process(
-            COMMAND windeployqt "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
-            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
-          )
+
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "$ENV{SUPERVISOR_APPLICATION_NAME}"
-            WORKING_DIRECTORY "tray/deploy/"
+            ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "$ENV{SERVER_APPLICATION_NAME}"
+            WORKING_DIRECTORY "server/deploy/"
           )
-          execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${client_artifact} --format=zip "$ENV{CLIENT_APPLICATION_NAME}"
-            WORKING_DIRECTORY "client/deploy/"
-          )
+
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           file(COPY "client/lib/libopenh264.5.dylib" DESTINATION "/usr/local/lib/")
           execute_process(
@@ -205,15 +192,9 @@ jobs:
     - uses: actions/upload-artifact@v1
       id: upload_server_artifact
       with:
-        path: ./${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-        name: ${{ env.SUPERVISOR_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        path: ./${{ env.SERVER_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        name: ${{ env.SERVER_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
     
-    - uses: actions/upload-artifact@v1
-      id: upload_client_artifact
-      with:
-        path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-        name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-
   deploy:
     if: contains(github.ref, 'tags/v')
     runs-on: ubuntu-latest
