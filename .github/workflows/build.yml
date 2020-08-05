@@ -135,10 +135,12 @@ jobs:
           file(COPY /usr/lib/x86_64-linux-gnu/libswresample.so.2.9.100 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           file(COPY /usr/lib/x86_64-linux-gnu/libx264.so.152 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           file(COPY /usr/lib/x86_64-linux-gnu/libx265.so.146 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY /usr/lib/x86_64-linux-gnu/libcrystalhd.so.3.6 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           execute_process(
             COMMAND ${CMAKE_COMMAND} -E create_symlink libavcodec.so.57.107.100 libavcodec.so.57
             COMMAND ${CMAKE_COMMAND} -E create_symlink libavutil.so.55.78.100 libavutil.so.55
             COMMAND ${CMAKE_COMMAND} -E create_symlink libswresample.so.2.9.100 libswresample.so.2
+            COMMAND ${CMAKE_COMMAND} -E create_symlink libcrystalhd.so.3.6 libcrystalhd.so.3
             WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
           )
           execute_process(
