@@ -114,7 +114,7 @@ jobs:
         
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(server_exec_name "lunremote.exe")
-          file(COPY "server/Release/${{ server_exec_name }}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "server/Release/${server_exec_name}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
           file(COPY "server/lib/*.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
           
