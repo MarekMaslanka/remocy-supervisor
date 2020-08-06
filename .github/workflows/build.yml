@@ -81,7 +81,7 @@ jobs:
               tar -version
             )
           execute_process(COMMAND
-            tar -a -cvf ${server_artifact} "server/build/Release/"
+            zip -r ${server_artifact} "server/build/Release/"
           )
           execute_process(COMMAND ls -l)
           execute_process(COMMAND ls -l server/)
