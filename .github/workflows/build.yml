@@ -74,7 +74,7 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
-            COMMAND xcodebuild -project "lunremote.xcodeproj"
+            COMMAND xcodebuild -project "lunremote.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO
             WORKING_DIRECTORY "server"
           )
         else()
