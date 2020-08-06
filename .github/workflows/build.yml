@@ -77,11 +77,10 @@ jobs:
             COMMAND xcodebuild -project "lunremote.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO
             WORKING_DIRECTORY "server"
           )
-            execute_process(COMMAND
-              tar -version
-            )
+          file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{SERVER_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" server_artifact)
+
           execute_process(COMMAND
-            zip -r ${server_artifact} "server/build/Release/"
+            tar -a -cvf ${server_artifact} "server/build/Release/"
           )
           execute_process(COMMAND ls -l)
           execute_process(COMMAND ls -l server/)
