@@ -78,8 +78,7 @@ jobs:
             WORKING_DIRECTORY "server"
           )
             execute_process(COMMAND
-              ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "$ENV{SERVER_APPLICATION_NAME}"
-              WORKING_DIRECTORY "server/build/Release/"
+              ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "server/build/Release/"
             )
           execute_process(COMMAND ls -l)
           execute_process(COMMAND ls -l server/)
