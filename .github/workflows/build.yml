@@ -77,14 +77,14 @@ jobs:
             COMMAND xcodebuild -project "lunremote.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO
             WORKING_DIRECTORY "server"
           )
-          execute_process(COMMAND ls -l)
-          execute_process(COMMAND ls -l server/)
-          execute_process(COMMAND ls -l server/build/)
-          execute_process(COMMAND ls -l server/build/Release/)
             execute_process(COMMAND
               ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "$ENV{SERVER_APPLICATION_NAME}"
               WORKING_DIRECTORY "server/build/Release/"
             )
+          execute_process(COMMAND ls -l)
+          execute_process(COMMAND ls -l server/)
+          execute_process(COMMAND ls -l server/build/)
+          execute_process(COMMAND ls -l server/build/Release/)
         else()
           set(CMAKE_VERBOSE_MAKEFILE ON)
           set(CMAKE_BUILD_TYPE Release)
