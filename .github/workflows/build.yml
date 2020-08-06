@@ -13,19 +13,19 @@ jobs:
     strategy:
       matrix:
         config:
-        - {
-            name: "Windows Latest x64", artifact: "Windows-x64.zip",
-            os: windows-latest,
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-          }
-        - {
-            name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
-            os: ubuntu-latest
-          }
 #         - {
-#             name: "macOS Latest x64", artifact: "macOS-x64.zip",
-#             os: macos-latest
+#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
+#             os: windows-latest,
+#             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
 #           }
+#         - {
+#             name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
+#             os: ubuntu-latest
+#           }
+        - {
+            name: "macOS Latest x64", artifact: "macOS-x64.zip",
+            os: macos-latest
+          }
 
     steps:
 
@@ -34,7 +34,7 @@ jobs:
       with:
         path: server
         repository: MarekMaslanka/remocy-server
-        ref: build
+#        ref: build
         token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Installing system libs
@@ -49,117 +49,128 @@ jobs:
     - name: Configure
       shell: cmake -P {0}
       run: |
-        set(CMAKE_VERBOSE_MAKEFILE ON)
-        set(CMAKE_BUILD_TYPE Release)
-        execute_process(
-          COMMAND ls -l
-        )
-
-        foreach(app server)
+        if ("${{ runner.os }}" STREQUAL "macOS")
+        else()
+          if ("${{ runner.os }}" STREQUAL "Windows")
+          set(CMAKE_VERBOSE_MAKEFILE ON)
+          set(CMAKE_BUILD_TYPE Release)
           execute_process(
-            COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>"
-            WORKING_DIRECTORY "${app}"
-            RESULT_VARIABLE result
+            COMMAND ls -l
           )
-          if (NOT result EQUAL 0)
-            message(FATAL_ERROR "Bad exit status for cmake")
-          endif()
-        endforeach()
+
+          foreach(app server)
+            execute_process(
+              COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>"
+              WORKING_DIRECTORY "${app}"
+              RESULT_VARIABLE result
+            )
+            if (NOT result EQUAL 0)
+              message(FATAL_ERROR "Bad exit status for cmake")
+            endif()
+          endforeach()
+        endif()
 
     - name: Build
       shell: cmake -P {0}
       run: |
-        set(CMAKE_VERBOSE_MAKEFILE ON)
-        set(CMAKE_BUILD_TYPE Release)
-        set(server_exec_name "lunremote.exe")
-
-        include(ProcessorCount)
-        ProcessorCount(N)
-        set(make_program make -j ${N})
-        if ("${{ runner.os }}" STREQUAL "Windows")
-          set(make_program "cmake --build . --config Release")
-        endif()
-        
-                  execute_process(
-            COMMAND dir
-            WORKING_DIRECTORY "server"
-          )
-                  execute_process(
-            COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
-            WORKING_DIRECTORY "server"
-          )
-                  execute_process(
-            COMMAND dir
-            WORKING_DIRECTORY "server"
-          )
-                  execute_process(
-            COMMAND dir
-            WORKING_DIRECTORY "server/Release"
-          )
-          
-        foreach(app server)
+        if ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
-            COMMAND ${make_program}
-            WORKING_DIRECTORY "${app}"
+            COMMAND xcodebuild -project "lunremote.xcodeproj"
+            WORKING_DIRECTORY "server"
           )
-          file(MAKE_DIRECTORY "${app}/deploy")
-        endforeach()
-
-        file(MAKE_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}")
-        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{SERVER_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" server_artifact)
-        
-        if ("${{ runner.os }}" STREQUAL "Windows")
-          set(server_exec_name "lunremote.exe")
-          file(COPY "server/Release/${server_exec_name}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          
-          file(COPY "server/tools/win/crashpad_handler.exe" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          
-          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/msvcp140.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140_1.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-
-          execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "$ENV{SERVER_APPLICATION_NAME}"
-            WORKING_DIRECTORY "server/deploy/"
-          )
-
-        elseif ("${{ runner.os }}" STREQUAL "macOS")
         else()
-          set(server_exec_name "lunremote")
-          file(COPY "server/${server_exec_name}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          file(COPY "server/lib/linux/libyuv2.so" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          file(COPY "server/tools/linux/crashpad_handler" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          
-          file(COPY /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          file(COPY /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          file(COPY /usr/lib/x86_64-linux-gnu/libswresample.so.2.9.100 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          file(COPY /usr/lib/x86_64-linux-gnu/libx264.so.152 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          file(COPY /usr/lib/x86_64-linux-gnu/libx265.so.146 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          file(COPY /usr/lib/x86_64-linux-gnu/libcrystalhd.so.3.6 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          file(COPY /usr/lib/x86_64-linux-gnu/libvpx.so.5.0.0 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
-          execute_process(
-            COMMAND ${CMAKE_COMMAND} -E create_symlink libavcodec.so.57.107.100 libavcodec.so.57
-            COMMAND ${CMAKE_COMMAND} -E create_symlink libavutil.so.55.78.100 libavutil.so.55
-            COMMAND ${CMAKE_COMMAND} -E create_symlink libswresample.so.2.9.100 libswresample.so.2
-            COMMAND ${CMAKE_COMMAND} -E create_symlink libcrystalhd.so.3.6 libcrystalhd.so.3
-            COMMAND ${CMAKE_COMMAND} -E create_symlink libvpx.so.5.0.0 libvpx.so.5
-            WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
-          )
-          
-          file(WRITE "server/deploy/$ENV{SERVER_APPLICATION_NAME}/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
-          execute_process(
-            COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}"
-            COMMAND chmod a+x "${server_exec_name}.sh"
-            WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
-          )
-          
-                    execute_process(COMMAND
-            ls -l server/deploy/$ENV{SERVER_APPLICATION_NAME}/
-          )
-          execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar czvf ${server_artifact} "$ENV{SERVER_APPLICATION_NAME}"
-            WORKING_DIRECTORY "server/deploy/"
-          )
+          set(CMAKE_VERBOSE_MAKEFILE ON)
+          set(CMAKE_BUILD_TYPE Release)
+          set(server_exec_name "lunremote.exe")
+
+          include(ProcessorCount)
+          ProcessorCount(N)
+          set(make_program make -j ${N})
+          if ("${{ runner.os }}" STREQUAL "Windows")
+            set(make_program "cmake --build . --config Release")
+          endif()
+
+                    execute_process(
+              COMMAND dir
+              WORKING_DIRECTORY "server"
+            )
+                    execute_process(
+              COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
+              WORKING_DIRECTORY "server"
+            )
+                    execute_process(
+              COMMAND dir
+              WORKING_DIRECTORY "server"
+            )
+                    execute_process(
+              COMMAND dir
+              WORKING_DIRECTORY "server/Release"
+            )
+
+          foreach(app server)
+            execute_process(
+              COMMAND ${make_program}
+              WORKING_DIRECTORY "${app}"
+            )
+            file(MAKE_DIRECTORY "${app}/deploy")
+          endforeach()
+
+          file(MAKE_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}")
+          file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{SERVER_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" server_artifact)
+
+          if ("${{ runner.os }}" STREQUAL "Windows")
+            set(server_exec_name "lunremote.exe")
+            file(COPY "server/Release/${server_exec_name}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+
+            file(COPY "server/tools/win/crashpad_handler.exe" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+
+            file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/msvcp140.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140_1.dll" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+
+            execute_process(COMMAND
+              ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "$ENV{SERVER_APPLICATION_NAME}"
+              WORKING_DIRECTORY "server/deploy/"
+            )
+
+          elseif ("${{ runner.os }}" STREQUAL "macOS")
+          else()
+            set(server_exec_name "lunremote")
+            file(COPY "server/${server_exec_name}" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            file(COPY "server/lib/linux/libyuv2.so" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            file(COPY "server/tools/linux/crashpad_handler" DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+
+            file(COPY /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libswresample.so.2.9.100 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libx264.so.152 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libx265.so.146 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libcrystalhd.so.3.6 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libvpx.so.5.0.0 DESTINATION "server/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+            execute_process(
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libavcodec.so.57.107.100 libavcodec.so.57
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libavutil.so.55.78.100 libavutil.so.55
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libswresample.so.2.9.100 libswresample.so.2
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libcrystalhd.so.3.6 libcrystalhd.so.3
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libvpx.so.5.0.0 libvpx.so.5
+              WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
+            )
+
+            file(WRITE "server/deploy/$ENV{SERVER_APPLICATION_NAME}/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
+            execute_process(
+              COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}"
+              COMMAND chmod a+x "${server_exec_name}.sh"
+              WORKING_DIRECTORY "server/deploy/$ENV{SERVER_APPLICATION_NAME}"
+            )
+
+                      execute_process(COMMAND
+              ls -l server/deploy/$ENV{SERVER_APPLICATION_NAME}/
+            )
+            execute_process(COMMAND
+              ${CMAKE_COMMAND} -E tar czvf ${server_artifact} "$ENV{SERVER_APPLICATION_NAME}"
+              WORKING_DIRECTORY "server/deploy/"
+            )
+          endif()
         endif()
 
     - uses: actions/upload-artifact@v1
