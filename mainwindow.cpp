@@ -11,21 +11,20 @@
 using namespace std;
 
 #if defined (Q_OS_WIN)
-#define DAEMON_PROG "lunremote.exe"
+#define DAEMON_PROG "lunremoted.exe"
 #elif defined (Q_OS_MAC)
-#define DAEMON_PROG "lunremote"
+#define DAEMON_PROG "lunremoted"
 #else
-#define DAEMON_PROG "lunremote"
+#define DAEMON_PROG "lunremoted"
 #endif
 
-#define DAEMON_PATH "daemon/" DAEMON_PROG
-#define DAEMON_PATH "/Users/marek/workspaces/other/remocy-server/xcode/Release/" DAEMON_PROG
+#define DAEMON_PATH "lunremoted/" DAEMON_PROG
+//#define DAEMON_PATH "/Users/marek/workspaces/other/remocy-server/xcode/Release/" DAEMON_PROG
 
 ClientMsg makeMsg(MsgType type)
 {
 	static uint32_t seq = 1;
 	ClientMsg msg;
-	memset(&msg, 0, sizeof(msg));
 	msg.type = type;
 	msg.seq = seq++;
 	return msg;
@@ -89,7 +88,7 @@ void MainWindow::createTrayIcon()
 	QString suffix = Macos::isDarkMode() ? "white" : "black";
 	QIcon icon = QIcon(":/icons/tray-icon-macos-" + suffix);
 #else
-	QIcon icon = QIcon(":/icons/trayicon");
+	QIcon icon = QIcon(":/icons/remocy-icon");
 #endif
 	trayIcon = new QSystemTrayIcon(this);
 	trayIcon->setContextMenu(trayIconMenu);

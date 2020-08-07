@@ -10,7 +10,7 @@
 // https://stackoverflow.com/questions/29803232/how-to-hide-application-on-taskbar
 int main(int argc, char *argv[])
 {
-	RunGuard guard( "lunremote" );
+	RunGuard guard( "lunremote-server" );
 	if (!guard.tryToRun())
 		return 0;
 
