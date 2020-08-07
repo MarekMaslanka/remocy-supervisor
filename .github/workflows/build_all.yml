@@ -1,0 +1,577 @@
+name: Build All
+
+on: [push]
+
+env:
+  QT_VERSION: 5.15.1
+  QT_CREATOR_VERSION: 4.12.3
+  SERVER_APPLICATION_NAME: lunremote-server
+  SERVER_APPLICATION_PRO: remocy-supervisor.pro
+  CLIENT_APPLICATION_NAME: lunremote
+  CLIENT_APPLICATION_PRO: remocy-client.pro
+  DAEMON_APPLICATION_NAME: lunremoted
+  APPLICATION_VERSION: 0.7.0
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+        - {
+            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            os: windows-latest,
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          }
+        - {
+            name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
+            os: ubuntu-latest
+          }
+        - {
+            name: "macOS Latest x64", artifact: "macOS-x64.zip",
+            os: macos-latest
+          }
+
+    steps:
+    - name: Checkout server tray
+      uses: actions/checkout@v2
+      with:
+        path: tray
+
+    - name: Checkout client
+      uses: actions/checkout@v2
+      with:
+        path: client
+        repository: MarekMaslanka/remocy-client
+#         ref: build
+        token: ${{ secrets.ACCESS_TOKEN }}
+
+    - name: Checkout daemon
+      uses: actions/checkout@v2
+      with:
+        path: daemon
+        repository: MarekMaslanka/remocy-server
+#         ref: build
+        token: ${{ secrets.ACCESS_TOKEN }}
+
+    - name: Installing system libs
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "Linux")
+          execute_process(COMMAND sudo apt update)
+          execute_process(
+            COMMAND sudo apt install libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxfixes-dev libxtst-dev libavformat-dev libswscale-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev
+          )
+
+          execute_process(
+            COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
+          )
+          execute_process(
+            COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
+          )
+        endif()
+
+    - name: Download Qt from cache
+      uses: actions/cache@v2
+      id: cache-qt5
+      with:
+        path: qt5
+        key: qt5-${{ runner.os }}-${{ env.QT_VERSION }}
+
+    - name: Download Qt
+      id: download_qt
+      shell: cmake -P {0}
+      if: steps.cache-qt5.outputs.cache-hit != 'true'
+      run: |
+        set(qt_version $ENV{QT_VERSION})
+        string(REPLACE "." "" qt_version_dotless "${qt_version}")
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(url_os "windows_x86")
+          set(qt_package_name "qt.qt5.${qt_version_dotless}.win64_msvc2019_64")
+          set(qt_extras "qtwinextras")
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          set(url_os "linux_x64")
+          set(qt_package_name "qt.qt5.${qt_version_dotless}.gcc_64")
+          set(qt_extras "qtx11extras")
+        elseif ("${{ runner.os }}" STREQUAL "macOS")
+          set(url_os "mac_x64")
+          set(qt_package_name "qt.qt5.${qt_version_dotless}.clang_64")
+          set(qt_extras "qtmacextras")
+        endif()
+        set(qt_base_url "https://download.qt.io/online/qtsdkrepository/${url_os}/desktop/qt5_${qt_version_dotless}")
+        file(DOWNLOAD "${qt_base_url}/Updates.xml" ./Updates.xml)
+        file(READ ./Updates.xml updates_xml)
+        string(REGEX MATCH "<Name>${qt_package_name}.*<Version>([0-9+-.]+)</Version>.*<DownloadableArchives>qtbase([a-zA-Z0-9_-]+).7z"
+          updates_xml_output "${updates_xml}")
+        set(package_version ${CMAKE_MATCH_1})
+        set(package_suffix ${CMAKE_MATCH_2})
+        string(REPLACE "-debug-symbols" "" package_suffix "${package_suffix}")
+        file(MAKE_DIRECTORY qt5)
+
+        foreach(package qtbase qtdeclarative qttools qtsvg ${qt_extras})
+          file(DOWNLOAD
+            "${qt_base_url}/${qt_package_name}/${package_version}${package}${package_suffix}.7z" ./${package}.7z
+          )
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ../${package}.7z WORKING_DIRECTORY qt5)
+        endforeach()
+
+    - name: Configure Qt
+      id: qt
+      shell: cmake -P {0}
+      run: |
+        set(qt_version $ENV{QT_VERSION})
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(qt_dir_prefix "${qt_version}/msvc2019_64")
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          set(qt_dir_prefix "${qt_version}/gcc_64")
+        elseif ("${{ runner.os }}" STREQUAL "macOS")
+          set(qt_dir_prefix "${qt_version}/clang_64")
+        endif()
+
+        # Save the path for other steps
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qt5/${qt_dir_prefix}" qt_dir)
+        message("::set-output name=qt_dir::${qt_dir}")
+
+        file(READ "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" qtconfig)
+        string(REPLACE "Enterprise" "OpenSource" qtconfig "${qtconfig}")
+        string(REPLACE "licheck.exe" "" qtconfig "${qtconfig}")
+        string(REPLACE "licheck64" "" qtconfig "${qtconfig}")
+        string(REPLACE "licheck_mac" "" qtconfig "${qtconfig}")
+        file(WRITE "qt5/${qt_dir_prefix}/mkspecs/qconfig.pri" "${qtconfig}")
+
+    - name: Download Qt Creator from cache
+      uses: actions/cache@v2
+      id: cache-qtcreator
+      with:
+        path: qtcreator
+        key: qtcreator-${{ runner.os }}-${{ env.QT_VERSION }}
+
+    - name: Download Qt Creator
+      id: download_qt_creator
+      shell: cmake -P {0}
+      if: steps.cache-qtcreator.outputs.cache-hit != 'true'
+      run: |
+        string(REGEX MATCH "([0-9]+.[0-9]+).[0-9]+" outvar "$ENV{QT_CREATOR_VERSION}")
+        set(qtc_base_url "https://download.qt.io/official_releases/qtcreator/${CMAKE_MATCH_1}/$ENV{QT_CREATOR_VERSION}")
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(qtc_platform "windows_msvc2017_x64")
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          set(qtc_platform "linux_gcc_64_rhel72")
+        elseif ("${{ runner.os }}" STREQUAL "macOS")
+          set(qtc_platform "mac_x64")
+        endif()
+        file(MAKE_DIRECTORY qtcreator)
+        foreach(package qtcreator qtcreator_dev)
+          file(DOWNLOAD
+            "${qtc_base_url}/installer_source/${qtc_platform}/${package}.7z" ./${package}.7z)
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar xvf ../${package}.7z WORKING_DIRECTORY qtcreator)
+        endforeach()
+
+    - name: Configure Qt Creator
+      id: qt_creator
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(qtc_binary_tray_name "$ENV{SERVER_APPLICATION_NAME}.exe")
+          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.exe")
+          set(qtc_binary_daemon_name "$ENV{DAEMON_APPLICATION_NAME}.exe")
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          set(qtc_binary_tray_name "$ENV{SERVER_APPLICATION_NAME}")
+          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}")
+          set(qtc_binary_daemon_name "$ENV{DAEMON_APPLICATION_NAME}")
+        elseif ("${{ runner.os }}" STREQUAL "macOS")
+          set(qtc_binary_tray_name "$ENV{SERVER_APPLICATION_NAME}.app")
+          set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.app")
+          set(qtc_binary_daemon_name "$ENV{DAEMON_APPLICATION_NAME}.app")
+        endif()
+        # Save the path for other steps
+        message("::set-output name=qtc_binary_tray_name::${qtc_binary_tray_name}")
+        message("::set-output name=qtc_binary_client_name::${qtc_binary_client_name}")
+        message("::set-output name=qtc_binary_daemon_name::${qtc_binary_daemon_name}")
+
+        if ("${{ runner.os }}" STREQUAL "macOS")
+          execute_process(
+            COMMAND ${CMAKE_COMMAND} -E make_directory qtcreator/bin
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
+              "$ENV{GITHUB_WORKSPACE}/qtcreator/Qt Creator.app"
+              "$ENV{GITHUB_WORKSPACE}/qtcreator/bin/Qt Creator.app"
+          )
+        endif()
+
+    - name: Configure client and server
+      shell: cmake -P {0}
+      run: |
+        set(CMAKE_VERBOSE_MAKEFILE ON)
+        execute_process(
+          COMMAND ls -l
+        )
+        if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
+          execute_process(
+            COMMAND "${{ matrix.config.environment_script }}" && set
+            OUTPUT_FILE environment_script_output.txt
+          )
+          file(STRINGS environment_script_output.txt output_lines)
+          foreach(line IN LISTS output_lines)
+            if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
+              set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
+              # Set for other steps
+              message("::set-env name=${CMAKE_MATCH_1}::${CMAKE_MATCH_2}")
+            endif()
+          endforeach()
+        endif()
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qtcreator" qtcreator_dir)
+        foreach(app tray client)
+          execute_process(
+            COMMAND ${{ steps.qt.outputs.qt_dir }}/bin/qmake
+              $ENV{APPLICATION_PRO}
+              CONFIG+=release
+              QTC_SOURCE="${qtcreator_dir}"
+              QTC_BUILD="${qtcreator_dir}"
+            WORKING_DIRECTORY "${app}"
+            RESULT_VARIABLE result
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status for qmake")
+          endif()
+        endforeach()
+
+    - name: Configure daemon
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "macOS")
+        else()
+          set(CMAKE_VERBOSE_MAKEFILE ON)
+          execute_process(
+            COMMAND ls -l
+          )
+
+          execute_process(
+            COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
+            WORKING_DIRECTORY daemon
+            RESULT_VARIABLE result
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status for cmake")
+          endif()
+        endif()
+  
+    - name: Build daemon
+      shell: cmake -P {0}
+      run: |
+        if ("${{ runner.os }}" STREQUAL "macOS")
+          execute_process(
+            COMMAND xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO
+            WORKING_DIRECTORY daemon
+          )
+        else()
+          set(CMAKE_VERBOSE_MAKEFILE ON)
+
+          include(ProcessorCount)
+          ProcessorCount(N)
+          set(make_program make -j ${N})
+          if ("${{ runner.os }}" STREQUAL "Windows")
+            set(make_program "cmake --build . --config Release")
+          endif()
+
+                    execute_process(
+              COMMAND dir
+              WORKING_DIRECTORY daemon
+            )
+                    execute_process(
+              COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
+              WORKING_DIRECTORY daemon
+            )
+                    execute_process(
+              COMMAND dir
+              WORKING_DIRECTORY daemon
+            )
+                    execute_process(
+              COMMAND dir
+              WORKING_DIRECTORY "daemon/Release"
+            )
+
+          execute_process(
+            COMMAND ${make_program}
+            WORKING_DIRECTORY daemon
+          )
+          file(MAKE_DIRECTORY "daemon/deploy")
+
+          file(MAKE_DIRECTORY "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}")
+          file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{DAEMON_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" server_artifact)
+
+          if ("${{ runner.os }}" STREQUAL "Windows")
+            set(server_exec_name "lunremoted.exe")
+            file(COPY "daemon/Release/${server_exec_name}" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+
+            file(COPY "daemon/tools/win/crashpad_handler.exe" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+
+            file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/msvcp140.dll" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140_1.dll" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+
+            execute_process(COMMAND
+              ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "$ENV{DAEMON_APPLICATION_NAME}"
+              WORKING_DIRECTORY "daemon/deploy/"
+            )
+
+          elseif ("${{ runner.os }}" STREQUAL "macOS")
+          else()
+            set(server_exec_name "lunremoted")
+            file(COPY "daemon/${server_exec_name}" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            file(COPY "daemon/lib/linux/libyuv2.so" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            file(COPY "daemon/tools/linux/crashpad_handler" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+
+            file(COPY /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libswresample.so.2.9.100 DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libx264.so.152 DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libx265.so.146 DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libcrystalhd.so.3.6 DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libvpx.so.5.0.0 DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            execute_process(
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libavcodec.so.57.107.100 libavcodec.so.57
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libavutil.so.55.78.100 libavutil.so.55
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libswresample.so.2.9.100 libswresample.so.2
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libcrystalhd.so.3.6 libcrystalhd.so.3
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libvpx.so.5.0.0 libvpx.so.5
+              WORKING_DIRECTORY "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}"
+            )
+
+            file(WRITE "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
+            execute_process(
+              COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}"
+              COMMAND chmod a+x "${server_exec_name}.sh"
+              WORKING_DIRECTORY "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}"
+            )
+
+                      execute_process(COMMAND
+              ls -l daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/
+            )
+            execute_process(COMMAND
+              ${CMAKE_COMMAND} -E tar czvf ${server_artifact} "$ENV{DAEMON_APPLICATION_NAME}"
+              WORKING_DIRECTORY "daemon/deploy/"
+            )
+          endif()
+        endif()
+    - name: Build client and server
+      shell: cmake -P {0}
+      run: |
+        set(CMAKE_VERBOSE_MAKEFILE ON)
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(ENV{PATH} "${{ steps.qt.outputs.qt_dir }}/bin/;$ENV{PATH}")
+        else()
+          set(ENV{PATH} "${{ steps.qt.outputs.qt_dir }}/bin/:$ENV{PATH}")
+          set(ENV{LD_LIBRARY_PATH} "qtcreator/lib/Qt/lib:$ENV{LD_LIBRARY_PATH}")
+        endif()
+        include(ProcessorCount)
+        ProcessorCount(N)
+        set(make_program make -j ${N})
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(make_program "../qtcreator/bin/jom")
+        endif()
+        foreach(app tray client)
+          execute_process(
+            COMMAND ${make_program}
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY "${app}"
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status for make")
+          endif()
+          file(MAKE_DIRECTORY "${app}/deploy")
+        endforeach()
+
+        file(MAKE_DIRECTORY "tray/deploy/$ENV{SERVER_APPLICATION_NAME}")
+        file(MAKE_DIRECTORY "client/deploy/$ENV{CLIENT_APPLICATION_NAME}")
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{SERVER_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" supervisor_artifact)
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/$ENV{CLIENT_APPLICATION_NAME}-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}" client_artifact)
+        
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          execute_process(
+            COMMAND dir
+          )
+          execute_process(
+            COMMAND dir daemon
+          )
+          execute_process(
+            COMMAND dir daemon/deploy
+          )
+          file(COPY "tray/release/lunremote-server.exe" DESTINATION "tray/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "daemon/deploy/lunremoted" DESTINATION "tray/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "client/release/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
+          
+          set(rtlib_dir "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/")
+          file(COPY "client/lib/openh264.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
+          file(COPY "${rtlib_dir}/msvcp140.dll" DESTINATION "tray/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "${rtlib_dir}/vcruntime140.dll" DESTINATION "tray/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "${rtlib_dir}/vcruntime140_1.dll" DESTINATION "tray/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "${rtlib_dir}/msvcp140.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
+          file(COPY "${rtlib_dir}/vcruntime140.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
+          file(COPY "${rtlib_dir}/vcruntime140_1.dll" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
+          execute_process(
+            COMMAND dir
+          )
+          execute_process(
+            COMMAND dir "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/"
+          )
+          execute_process(
+            COMMAND windeployqt "tray/deploy/$ENV{SERVER_APPLICATION_NAME}/lunremote-server.exe"
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
+          )
+          execute_process(
+            COMMAND windeployqt "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/lunremote.exe"
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
+          )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "$ENV{SERVER_APPLICATION_NAME}"
+            WORKING_DIRECTORY "tray/deploy/"
+          )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${client_artifact} --format=zip "$ENV{CLIENT_APPLICATION_NAME}"
+            WORKING_DIRECTORY "client/deploy/"
+          )
+        elseif ("${{ runner.os }}" STREQUAL "macOS")
+          file(COPY "daemon/build/Release/lunremoted" DESTINATION "tray/lunremote-server.app/Contents/MacOS/")
+
+          file(COPY "client/lib/libopenh264.5.dylib" DESTINATION "/usr/local/lib/")
+          execute_process(
+            COMMAND ls -l tray
+          )
+          execute_process(
+            COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "tray/lunremote-server.app"
+            #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
+          )
+          execute_process(
+            COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" -verbose=2
+            #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
+          )
+          execute_process(
+            COMMAND ls -l
+            WORKING_DIRECTORY "tray/lunremote-server.app"
+          )
+          execute_process(
+            COMMAND ls -l
+            WORKING_DIRECTORY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
+          )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "tray/lunremote-server.app"
+          )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar cvf ${client_artifact} --format=zip "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
+          )
+        else()
+          file(COPY "tray/lunremote-server" DESTINATION "tray/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}" DESTINATION "tray/deploy/$ENV{SERVER_APPLICATION_NAME}/")
+          file(COPY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "client/deploy/$ENV{CLIENT_APPLICATION_NAME}/")
+          
+          file(COPY "client/lib/libopenh264.so" DESTINATION "qt5/$ENV{QT_VERSION}/gcc_64/lib/")
+          file(COPY "client/lib/libopenh264.so.5" DESTINATION "qt5/$ENV{QT_VERSION}/gcc_64/lib/")
+          
+          file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "linuxdeployqt")
+          
+          execute_process(
+            COMMAND chmod a+x linuxdeployqt
+          )
+          execute_process(
+            COMMAND ../../../../linuxdeployqt ../../../../client/deploy/$ENV{CLIENT_APPLICATION_NAME}/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=2
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
+          )
+          execute_process(	
+            COMMAND ../../../../linuxdeployqt ../../../../tray/deploy/$ENV{SERVER_APPLICATION_NAME}/lunremote-server -verbose=2
+            WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
+          )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar czvf ${supervisor_artifact} "$ENV{SERVER_APPLICATION_NAME}"
+            WORKING_DIRECTORY "tray/deploy/"
+          )
+          execute_process(COMMAND
+            ${CMAKE_COMMAND} -E tar czvf ${client_artifact} "$ENV{CLIENT_APPLICATION_NAME}"
+            WORKING_DIRECTORY "client/deploy/"
+          )
+        endif()
+
+    - uses: actions/upload-artifact@v1
+      id: upload_server_artifact
+      with:
+        path: ./${{ env.SERVER_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        name: ${{ env.SERVER_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+    
+    - uses: actions/upload-artifact@v1
+      id: upload_client_artifact
+      with:
+        path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+
+    - uses: actions/upload-artifact@v2
+      id: upload_server_dsym
+      with:
+        path: ./daemon/build/Release/lunremoted.dSYM
+        name: lunremoted.dSYM
+
+  deploy:
+    if: contains(github.ref, 'tags/v')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config:
+        - {
+            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            os: windows-latest
+          }
+        - {
+            name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
+            os: ubuntu-latest
+          }
+        - {
+            name: "macOS Latest x64", artifact: "macOS-x64.zip",
+            os: macos-latest
+          }
+    needs: build
+
+    steps:
+    - name: Download server artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: ${{ env.SERVER_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        path: ./
+
+    - name: Download client artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        path: ./
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Deploy server
+      id: server_upload_to_release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ env.SERVER_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        asset_name: ${{ env.SERVER_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        asset_content_type: application/zip
+
+    - name: Deploy client
+      id: client_upload_to_release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        asset_name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        asset_content_type: application/zip
