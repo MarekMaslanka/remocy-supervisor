@@ -437,6 +437,7 @@ jobs:
           )
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           file(COPY "daemon/build/Release/lunremoted" DESTINATION "tray/lunremote-server.app/Contents/MacOS/")
+          file(COPY "daemon/build/Release/crashpad_handler" DESTINATION "tray/lunremote-server.app/Contents/MacOS/")
 
           file(COPY "client/lib/libopenh264.5.dylib" DESTINATION "/usr/local/lib/")
           execute_process(
@@ -459,7 +460,8 @@ jobs:
             WORKING_DIRECTORY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
           )
           execute_process(COMMAND
-            ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "tray/lunremote-server.app"
+            ${CMAKE_COMMAND} -E tar cvf ${supervisor_artifact} --format=zip "lunremote-server.app"
+            WORKING_DIRECTORY "tray"
           )
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar cvf ${client_artifact} --format=zip "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
