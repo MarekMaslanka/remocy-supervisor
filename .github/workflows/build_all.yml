@@ -34,10 +34,13 @@ jobs:
           }
 
     steps:
-    - name: Checkout server tray
+    - name: Checkout server
       uses: actions/checkout@v2
       with:
         path: tray
+        repository: MarekMaslanka/remocy-supervisor
+        ref: build
+        token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Checkout client
       uses: actions/checkout@v2
