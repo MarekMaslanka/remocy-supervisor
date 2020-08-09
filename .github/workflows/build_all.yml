@@ -39,7 +39,7 @@ jobs:
       with:
         path: tray
         repository: MarekMaslanka/remocy-supervisor
-#         ref: build
+        ref: master
         token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Checkout client
