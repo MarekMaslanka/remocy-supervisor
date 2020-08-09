@@ -11,15 +11,12 @@
 using namespace std;
 
 #if defined (Q_OS_WIN)
-#define DAEMON_PROG "lunremoted.exe"
+#define DAEMON_PATH "lunremoted/lunremoted.exe"
 #elif defined (Q_OS_MAC)
-#define DAEMON_PROG "lunremoted"
+#define DAEMON_PATH "lunremoted"
 #else
-#define DAEMON_PROG "lunremoted"
+#define DAEMON_PATH "lunremoted/lunremoted"
 #endif
-
-#define DAEMON_PATH "lunremoted/" DAEMON_PROG
-//#define DAEMON_PATH "/Users/marek/workspaces/other/remocy-server/xcode/Release/" DAEMON_PROG
 
 ClientMsg makeMsg(MsgType type)
 {
@@ -37,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	createActions();
 	createTrayIcon();
-	process.setProgram(DAEMON_PATH);
+	process.setProgram(qApp->applicationDirPath()+"/"+DAEMON_PATH);
 
 	pingTimer = new QTimer(this);
 	pingTimer->setInterval(500);
@@ -51,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	connect(&process, &QProcess::errorOccurred, this, &MainWindow::processErrorOccurred);
 	connect(&process, &QProcess::started, this, &MainWindow::processStarted);
-	connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &MainWindow::processStarted);
+	connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &MainWindow::processFinished);
 
 	socket->connectToHost(QHostAddress::LocalHost, 5800);
 }
@@ -96,6 +93,14 @@ void MainWindow::createTrayIcon()
 	trayIcon->show();
 }
 
+void MainWindow::processStopped()
+{
+	isRunning = false;
+	startAction->setEnabled(true);
+	stopAction->setEnabled(false);
+	socket->abort();
+}
+
 void MainWindow::startDaemon()
 {
 	isRunning = true;
@@ -111,34 +116,39 @@ void MainWindow::stopDaemon()
 	isRunning = false;
 	process.terminate();
 	socket->abort();
-	startAction->setEnabled(true);
-	stopAction->setEnabled(false);
 }
 
 void MainWindow::processErrorOccurred(QProcess::ProcessError error)
 {
-	qDebug() << "processErrorOccurred:" << error;
-
+	qWarning() << "Process error occurred:" << error;
 	if(isQuitting)
 	{
 		QCoreApplication::quit();
+		return;
 	}
+	processStopped();
+
+	QMessageBox::warning(this, tr("Server error"),
+							 tr("lunremote has stopped unexpectedly. Code: %1")
+							 .arg(error));
 }
 
 void MainWindow::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-	qDebug() << "processFinished:" << exitCode << exitStatus;
+	qInfo() << "Process finished:" << exitCode << exitStatus;
 	waitForProcessStopTimer->stop();
+	processStopped();
 
 	if(isQuitting)
 	{
 		QCoreApplication::quit();
+		return;
 	}
 }
 
 void MainWindow::processStarted()
 {
-	qDebug() << "processStarted";
+	qInfo() << "Server has launched";
 }
 
 void MainWindow::connectToServer()
@@ -240,6 +250,8 @@ void MainWindow::refreshScreens()
 
 void MainWindow::quit()
 {
+	if(!isRunning)
+		QApplication::quit();
 	isQuitting = true;
 	stopDaemon();
 //	QTimer::singleShot(1000, []() {

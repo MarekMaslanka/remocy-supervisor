@@ -57,6 +57,7 @@ private:
 
 	void createActions();
 	void createTrayIcon();
+	void processStopped();
 	int sendMsg(ClientMsg &msg, QByteArray *data = nullptr);
 	void connectToServer();
 	void sendToServer();
