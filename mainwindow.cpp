@@ -51,6 +51,8 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &MainWindow::processFinished);
 
 	socket->connectToHost(QHostAddress::LocalHost, 5800);
+
+	startDaemon();
 }
 
 MainWindow::~MainWindow()
@@ -85,7 +87,7 @@ void MainWindow::createTrayIcon()
 	QString suffix = Macos::isDarkMode() ? "white" : "black";
 	QIcon icon = QIcon(":/icons/tray-icon-macos-" + suffix);
 #else
-	QIcon icon = QIcon(":/icons/remocy-icon");
+	QIcon icon = QIcon(":/icons/tray-icon");
 #endif
 	trayIcon = new QSystemTrayIcon(this);
 	trayIcon->setContextMenu(trayIconMenu);

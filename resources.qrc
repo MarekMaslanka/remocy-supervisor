@@ -2,7 +2,7 @@
     <qresource prefix="/icons">
         <file alias="tray-icon-macos-white">resources/icons/tray_icon_macos_white.png</file>
         <file alias="tray-icon-macos-black">resources/icons/tray_icon_macos_black.png</file>
-        <file alias="trayicon">resources/icons/lunremote_trayicon.png</file>
+        <file alias="tray-icon">resources/icons/lunremote_trayicon.png</file>
     </qresource>
     <qresource prefix="/fonts/ubuntu">
         <file alias="bold">resources/fonts/Ubuntu/Ubuntu-Bold.ttf</file>
