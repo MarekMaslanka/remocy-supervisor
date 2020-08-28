@@ -73,6 +73,11 @@ jobs:
           execute_process(
             COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
           )
+        elseif ("${{ runner.os }}" STREQUAL "Windows")
+          execute_process(COMMAND dir)
+          file(DOWNLOAD "https://aka.ms/vs/16/release/vc_redist.x64.exe" vc_redist.x64.exe)
+          execute_process(COMMAND vc_redist.x64.exe /install /quiet /norestart)
+          execute_process(COMMAND dir)
         endif()
 
     - name: Download Qt from cache
@@ -310,9 +315,9 @@ jobs:
 
             file(COPY "daemon/tools/win/crashpad_handler.exe" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
 
-            file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/msvcp140.dll" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
-            file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
-            file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140_1.dll" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            #file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/msvcp140.dll" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            #file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140.dll" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
+            #file(COPY "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.26.28801/bin/Hostx64/x64/vcruntime140_1.dll" DESTINATION "daemon/deploy/$ENV{DAEMON_APPLICATION_NAME}/")
 
             execute_process(COMMAND
               ${CMAKE_COMMAND} -E tar cvf ${server_artifact} --format=zip "$ENV{DAEMON_APPLICATION_NAME}"
