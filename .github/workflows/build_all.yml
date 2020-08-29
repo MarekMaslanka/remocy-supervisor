@@ -77,7 +77,7 @@ jobs:
           execute_process(COMMAND dir)
           file(DOWNLOAD "https://aka.ms/vs/16/release/vc_redist.x64.exe" vc_redist.x64.exe)
           execute_process(COMMAND vc_redist.x64.exe /install /quiet /norestart)
-          execute_process(COMMAND where /r c:\ msvcp140.dll)
+          execute_process(COMMAND "where /r c:\ msvcp140.dll")
         endif()
 
     - name: Download Qt from cache
