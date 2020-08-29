@@ -76,7 +76,7 @@ jobs:
         elseif ("${{ runner.os }}" STREQUAL "Windows")
           execute_process(COMMAND dir)
           file(DOWNLOAD "https://aka.ms/vs/16/release/vc_redist.x64.exe" vc_redist.x64.exe)
-          execute_process(COMMAND vc_redist.x64.exe /install /norestart /log log.txt)
+          execute_process(COMMAND /install /quiet /norestart /log "log.txt")
           execute_process(COMMAND dir)
           execute_process(COMMAND type log.txt)
         endif()
