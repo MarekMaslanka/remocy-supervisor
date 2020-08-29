@@ -78,7 +78,8 @@ jobs:
           file(DOWNLOAD "https://aka.ms/vs/16/release/vc_redist.x64.exe" vc_redist.x64.exe)
           execute_process(COMMAND vc_redist.x64.exe /install /quiet /norestart /log "log.txt")
           execute_process(COMMAND dir)
-          execute_process(COMMAND type log.txt)
+          file(READ "log.txt" VLOG)
+          message("LOG:${VLOG}")
         endif()
 
     - name: Download Qt from cache
