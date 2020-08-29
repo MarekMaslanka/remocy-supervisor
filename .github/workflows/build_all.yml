@@ -77,10 +77,11 @@ jobs:
           execute_process(COMMAND dir)
           file(DOWNLOAD "https://aka.ms/vs/16/release/vc_redist.x64.exe" vc_redist.x64.exe)
           execute_process(COMMAND vc_redist.x64.exe /install /quiet /norestart)
-          file(COPY "c:\Windows\System32\msvcp140.dll" DESTINATION "msvcp140.dll")
-          file(COPY "c:\Windows\System32\vcruntime140.dll" DESTINATION "vcruntime140.dll")
-          file(COPY "c:\Windows\System32\vcruntime140_1.dll" DESTINATION "vcruntime140_1.dll")
+          file(COPY "c:/Windows/System32/msvcp140.dll" DESTINATION "msvcp140.dll")
+          file(COPY "c:/Windows/System32/vcruntime140.dll" DESTINATION "vcruntime140.dll")
+          file(COPY "c:/Windows/System32/vcruntime140_1.dll" DESTINATION "vcruntime140_1.dll")
           execute_process(COMMAND dir)
+          execute_process(COMMAND where /r C: msvcp140.dll)
         endif()
     - name: Download Qt from cache
       uses: actions/cache@v2
