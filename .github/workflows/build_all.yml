@@ -81,8 +81,8 @@ jobs:
           file(COPY "c:\Windows\System32\vcruntime140.dll" DESTINATION "vcruntime140.dll")
           file(COPY "c:\Windows\System32\vcruntime140_1.dll" DESTINATION "vcruntime140_1.dll")
           execute_process(COMMAND dir)
+          where /r c:\ msvcp140.dll
         endif()
-        where /r c:\ msvcp140.dll
     - name: Download Qt from cache
       uses: actions/cache@v2
       id: cache-qt5
