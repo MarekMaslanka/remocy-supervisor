@@ -411,15 +411,15 @@ jobs:
 #           }
 
     steps:
-    - name: Pre-download
-      shell: cmake -P {0}
-      run: file(MAKE_DIRECTORY "lunremote")
+    # - name: Pre-download
+    #   shell: cmake -P {0}
+    #   run: file(MAKE_DIRECTORY "lunremote")
 
     - name: Download lunremote artifact
-      uses: actions/download-artifact@v1
+      uses: actions/download-artifact@v2
       with:
         name: deploy
-        path: ./lunremote
+        path: lunremote
 
     - name: Checkout installer
       uses: actions/checkout@v2
@@ -439,6 +439,7 @@ jobs:
       run: |
         dir
         dir lunremote
+        dir installer
         cd installer
         ../wix/heat.exe dir "../lunremote" -cg MyComponentGroup -dr INSTALLDIR -gg -sfrag -srd -var var.SourceFilesDir -out "Components.wxs"
         ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension lunremote.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
