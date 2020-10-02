@@ -411,7 +411,7 @@ jobs:
 #           }
 
     steps:
-    - name Pre-download
+    - name: Pre-download
       shell: cmake -P {0}
       run: file(MAKE_DIRECTORY "lunremote")
 
