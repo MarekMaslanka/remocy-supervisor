@@ -411,11 +411,15 @@ jobs:
 #           }
 
     steps:
+    - name Pre-download
+      shell: cmake -P {0}
+      run: file(MAKE_DIRECTORY "lunremote")
+
     - name: Download lunremote artifact
       uses: actions/download-artifact@v1
       with:
         name: deploy
-        path: ./
+        path: ./lunremote
 
     - name: Checkout installer
       uses: actions/checkout@v2
