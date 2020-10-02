@@ -415,7 +415,7 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: deploy
-        path: ./"
+        path: ./
 
     - name: Checkout installer
       uses: actions/checkout@v2
