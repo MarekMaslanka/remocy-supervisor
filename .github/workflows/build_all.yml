@@ -377,7 +377,7 @@ jobs:
           endif()
         endif()
     
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v2
       id: upload_product_artifact
       with:
         path: ./deploy
@@ -425,6 +425,8 @@ jobs:
       uses: actions/checkout@v2
       with:
         path: installer
+        repository: MarekMaslanka/remocy-installer
+        token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Installing system libs
       shell: cmake -P {0}
