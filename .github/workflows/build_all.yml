@@ -326,6 +326,10 @@ jobs:
           execute_process(COMMAND dir WORKING_DIRECTORY daemon)
           execute_process(
             COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
+            WORKING_DIRECTORY daemon
+          )
+  
+          execute_process(
             COMMAND ${make_program}
             WORKING_DIRECTORY daemon
           )
