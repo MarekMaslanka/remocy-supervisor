@@ -415,7 +415,7 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: deploy
-        path: ./lunremote-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}"
+        path: ./lunremote"
 
     - name: Checkout installer
       uses: actions/checkout@v2
@@ -434,8 +434,9 @@ jobs:
       if: matrix.config.os == 'windows-latest'
       run: |
         dir
-        dir deploy
+        dir lunremote
         cd installer
+        ../wix/heat.exe dir "../lunremote" -cg MyComponentGroup -dr INSTALLDIR -gg -sfrag -srd -var var.SourceFilesDir -out "Components.wxs"
         ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension lunremote.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
         ../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out lunremote.msi
 
@@ -443,7 +444,8 @@ jobs:
       if: matrix.config.os == 'windows-latest'
       id: upload_win_msi_installer
       with:
-        path: ./installer/lunremote.msi
+        # path: ./installer/lunremote.msi
+        path: ./installer
         name: lunremote.msi
 
   deploy:
