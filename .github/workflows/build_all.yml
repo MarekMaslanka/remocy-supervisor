@@ -246,15 +246,11 @@ jobs:
         file(MAKE_DIRECTORY "deploy")
 
         if ("${{ runner.os }}" STREQUAL "Windows")
-          execute_process(
-            COMMAND dir
-            COMMAND dir daemon
-          )
           file(COPY "client/release/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "deploy/")
           file(COPY "client/lib/openh264.dll" DESTINATION "deploy/")
-          file(COPY "c:/Windows/System32/msvcp140.dll" DESTINATION "deploy/msvcp140.dll")
-          file(COPY "c:/Windows/System32/vcruntime140.dll" DESTINATION "deploy/vcruntime140.dll")
-          file(COPY "c:/Windows/System32/vcruntime140_1.dll" DESTINATION "deploy/vcruntime140_1.dll")
+          file(COPY "c:/Windows/System32/msvcp140.dll" DESTINATION "deploy/")
+          file(COPY "c:/Windows/System32/vcruntime140.dll" DESTINATION "deploy/")
+          file(COPY "c:/Windows/System32/vcruntime140_1.dll" DESTINATION "deploy/")
 
           execute_process(
             COMMAND windeployqt "deploy/lunremote.exe"
@@ -330,18 +326,6 @@ jobs:
           execute_process(COMMAND dir WORKING_DIRECTORY daemon)
           execute_process(
             COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
-            WORKING_DIRECTORY daemon
-          )
-          execute_process(
-            COMMAND dir
-            WORKING_DIRECTORY daemon
-          )
-          execute_process(
-            COMMAND dir
-            WORKING_DIRECTORY "daemon/Release"
-          )
-
-          execute_process(
             COMMAND ${make_program}
             WORKING_DIRECTORY daemon
           )
@@ -410,7 +394,7 @@ jobs:
       matrix:
         config:
         - {
-            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            name: "Windows Latest x64", artifact: "Windows-x64.msi",
             os: windows-latest,
           }
 #         - {
@@ -427,7 +411,7 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: deploy
-        path: ./
+        path: ./lunremote-$ENV{APPLICATION_VERSION}-${{ matrix.config.artifact }}"
 
     - name: Checkout installer
       uses: actions/checkout@v2
