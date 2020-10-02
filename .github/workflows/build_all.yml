@@ -508,14 +508,14 @@ jobs:
     - uses: actions/upload-artifact@v1
       id: upload_server_artifact2
       with:
-        path: ./${{ env.SERVER_APPLICATION_NAME }}-${{ matrix.config.artifact }}
-        name: ${{ env.SERVER_APPLICATION_NAME }}-${{ matrix.config.artifact }}
+        path: ./tray
+        name: tray/deploy/
     
     - uses: actions/upload-artifact@v1
       id: upload_client_artifact2
       with:
-        path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ matrix.config.artifact }}
-        name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ matrix.config.artifact }}
+        path: ./client
+        name: client/deploy/
 
     - uses: actions/upload-artifact@v1
       id: upload_server_artifact
@@ -559,13 +559,13 @@ jobs:
     - name: Download server artifact
       uses: actions/download-artifact@v1
       with:
-        name: ${{ env.SERVER_APPLICATION_NAME }}-${{ matrix.config.artifact }}
+        name: tray
         path: ./
 
     - name: Download client artifact
       uses: actions/download-artifact@v1
       with:
-        name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ matrix.config.artifact }}
+        name: client
         path: ./
 
     - name: Checkout installer
@@ -585,6 +585,8 @@ jobs:
       if: matrix.config.os == 'windows-latest'
       run: |
         dir
+        dir client
+        dir tray
         cd installer
         ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension lunremote.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
         ../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out lunremote.msi
