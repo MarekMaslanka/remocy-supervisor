@@ -60,7 +60,6 @@ jobs:
             COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
           )
         elseif ("${{ runner.os }}" STREQUAL "Windows")
-          execute_process(COMMAND dir)
           file(DOWNLOAD "https://aka.ms/vs/16/release/vc_redist.x64.exe" vc_redist.x64.exe)
           execute_process(COMMAND vc_redist.x64.exe /install /quiet /norestart)
         endif()
@@ -323,7 +322,6 @@ jobs:
             set(make_program "cmake --build . --config Release")
           endif()
 
-          execute_process(COMMAND dir WORKING_DIRECTORY daemon)
           execute_process(
             COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
             WORKING_DIRECTORY daemon
@@ -337,6 +335,7 @@ jobs:
           if ("${{ runner.os }}" STREQUAL "Windows")
             set(server_exec_name "lunremoted.exe")
             file(COPY "daemon/Release/${server_exec_name}" DESTINATION "deploy/")
+            file(COPY "daemon/Release/lunremotesvc.exe" DESTINATION "deploy/")
             file(COPY "daemon/tools/win/crashpad_handler.exe" DESTINATION "deploy/")
 
           elseif ("${{ runner.os }}" STREQUAL "macOS")
@@ -439,9 +438,6 @@ jobs:
     - name: Build MSI installer
       if: matrix.config.os == 'windows-latest'
       run: |
-        dir
-        dir lunremote
-        dir installer
         cd installer
 
         move ../lunremote/lunremote.exe .
