@@ -18,19 +18,19 @@ jobs:
     strategy:
       matrix:
         config:
-        - {
-            name: "Windows Latest x64", artifact: "Windows-x64.zip",
-            os: windows-latest,
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-          }
+#         - {
+#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
+#             os: windows-latest,
+#             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+#           }
 #        - {
 #            name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
 #            os: ubuntu-latest
 #          }
-#        - {
-#            name: "macOS Latest x64", artifact: "macOS-x64.zip",
-#            os: macos-latest
-#          }
+       - {
+           name: "macOS Latest x64", artifact: "macOS-x64.zip",
+           os: macos-latest
+         }
 
     steps:
     - name: Checkout client
@@ -213,6 +213,7 @@ jobs:
           COMMAND ${{ steps.qt.outputs.qt_dir }}/bin/qmake
             $ENV{APPLICATION_PRO}
             CONFIG+=release
+            DEFINES+=VERSION=\\\"v0.7.1-dev\\\"
             QTC_SOURCE="${qtcreator_dir}"
             QTC_BUILD="${qtcreator_dir}"
           WORKING_DIRECTORY "client"
