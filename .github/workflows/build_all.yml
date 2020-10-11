@@ -213,7 +213,7 @@ jobs:
           COMMAND ${{ steps.qt.outputs.qt_dir }}/bin/qmake
             $ENV{APPLICATION_PRO}
             CONFIG+=release
-            DEFINES+=VERSION=\"v0.7.1-dev\""
+            DEFINES+=VERSION='"\\\"v0.7.1-dev\\\""'
             QTC_SOURCE="${qtcreator_dir}"
             QTC_BUILD="${qtcreator_dir}"
           WORKING_DIRECTORY "client"
