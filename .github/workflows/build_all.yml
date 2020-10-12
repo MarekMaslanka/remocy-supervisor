@@ -19,16 +19,16 @@ jobs:
       matrix:
         config:
           - {
-              name: "Windows Latest x64", artifact: "Windows-x64.zip",
+              name: "Windows Latest x64"
               os: windows-latest,
               environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
             }
           - {
-              name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
+              name: "Linux Latest x64"
               os: ubuntu-latest
             }
           - {
-              name: "macOS Latest x64", artifact: "macOS-x64.zip",
+              name: "macOS Latest x64"
               os: macos-latest
             }
 
@@ -408,15 +408,15 @@ jobs:
       matrix:
         config:
           - {
-               name: "Windows Latest x64", artifact: "Windows-x64.zip",
+               name: "Windows Latest x64"
                os: windows-latest,
             }
           - {
-               name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
+               name: "Linux Latest x64"
                os: ubuntu-latest
             }
           - {
-               name: "macOS Latest x64", artifact: "macOS-x64.zip",
+               name: "macOS Latest x64"
                os: macos-latest
             }
 
@@ -477,9 +477,6 @@ jobs:
         mkdir -p installer/lunremote/usr/bin/
         mv deploy/* installer/lunremote/usr/bin/
         dpkg-deb --build installer/lunremote
-        ls -l
-        ls -l installer
-        ls -l installer/lunremote
 
     - uses: actions/upload-artifact@v1
       if: matrix.config.os == 'windows-latest'
@@ -499,7 +496,7 @@ jobs:
       if: matrix.config.os == 'ubuntu-latest'
       id: upload_linux_deb
       with:
-        path: ./lunremote.deb
+        path: installer/lunremote.deb
         name: lunremote-${{ env.APPLICATION_VERSION }}.deb
 
   deploy:
