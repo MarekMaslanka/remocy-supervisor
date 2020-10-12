@@ -370,6 +370,13 @@ jobs:
             file(COPY "client/lunremote.app/" DESTINATION "deploy/")
             execute_process(
               COMMAND ls -l
+              WORKING_DIRECTORY "client"
+            )
+            execute_process(
+              COMMAND ls -l
+            )
+            execute_process(
+              COMMAND ls -l
               WORKING_DIRECTORY "deploy"
             )
           else()
