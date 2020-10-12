@@ -494,7 +494,7 @@ jobs:
         ls -l lunremote.app
         ls -l lunremote.app/Contents
         npm install --global create-dmg
-        create-dmg 'lunremote.app'
+        create-dmg --identity='Mac Developer' 'lunremote.app'
 
     - uses: actions/upload-artifact@v1
       if: matrix.config.os == 'windows-latest'
