@@ -447,13 +447,14 @@ jobs:
         name: deploy-${{ matrix.config.os }}.tar
         path: lunremote
 
+    - name: UnTar files
+      run: tar -xf lunremote/deploy.tar -C lunremote
+
     - name: ls files
       run: |
         ls -l
         ls -l lunremote
-
-    - name: UnTar files
-      run: tar -xf lunremote/deploy-${{ matrix.config.os }}.tar -C lunremote
+        ls -l lunremote/*
 
     - name: Checkout installer
       uses: actions/checkout@v2
