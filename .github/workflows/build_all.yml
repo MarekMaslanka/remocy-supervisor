@@ -362,7 +362,15 @@ jobs:
             file(COPY "daemon/${server_exec_name}" DESTINATION "deploy/")
           else()
             set(server_exec_name "lunremoted")
-            file(COPY "daemon/${server_exec_name}" DESTINATION "deploy/")
+            execute_process(
+              COMMAND ls
+              WORKING_DIRECTORY daemon
+            )
+            execute_process(
+              COMMAND ls build
+              WORKING_DIRECTORY daemon
+            )
+            file(COPY "daemon/build/${server_exec_name}" DESTINATION "deploy/")
             file(COPY "daemon/lib/linux/libyuv2.so" DESTINATION "deploy/")
             file(COPY "daemon/tools/linux/crashpad_handler" DESTINATION "deploy/")
 
