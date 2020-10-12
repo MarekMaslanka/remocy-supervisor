@@ -329,6 +329,21 @@ jobs:
             COMMAND xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO
             WORKING_DIRECTORY daemon
           )
+          execute_process(
+            COMMAND ls -l
+            WORKING_DIRECTORY "client"
+          )
+          execute_process(
+            COMMAND ls -l
+          )
+          execute_process(
+            COMMAND ls -l
+            WORKING_DIRECTORY "daemon"
+          )
+          set(server_exec_name "lunremoted")
+          file(COPY "daemon/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
+          file(COPY "daemon/build/Release/crashpad_handler" DESTINATION "client/lunremote.app/Contents/MacOS/")
+          file(COPY "client/lunremote.app/" DESTINATION "deploy/")
         else()
           set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -364,21 +379,6 @@ jobs:
             file(COPY "daemon/tools/win/crashpad_handler.exe" DESTINATION "deploy/")
 
           elseif ("${{ runner.os }}" STREQUAL "macOS")
-            set(server_exec_name "lunremoted")
-            file(COPY "daemon/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
-            file(COPY "daemon/build/Release/crashpad_handler" DESTINATION "client/lunremote.app/Contents/MacOS/")
-            file(COPY "client/lunremote.app/" DESTINATION "deploy/")
-            execute_process(
-              COMMAND ls -l
-              WORKING_DIRECTORY "client"
-            )
-            execute_process(
-              COMMAND ls -l
-            )
-            execute_process(
-              COMMAND ls -l
-              WORKING_DIRECTORY "deploy"
-            )
           else()
             set(server_exec_name "lunremoted")
             file(COPY "daemon/${server_exec_name}" DESTINATION "deploy/")
