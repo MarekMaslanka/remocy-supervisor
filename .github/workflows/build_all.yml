@@ -492,7 +492,7 @@ jobs:
       shell: cmake -P {0}
       run: |
         execute_process(COMMAND mv lunremote lunremote.app)
-        execute_process(COMMAND create-dmg 'lunremote.app')
+        execute_process(COMMAND create-dmg lunremote.app)
         execute_process(COMMAND ls -l)        
 
     - uses: actions/upload-artifact@v1
