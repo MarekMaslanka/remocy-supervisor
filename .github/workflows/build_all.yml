@@ -279,9 +279,10 @@ jobs:
             COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" -verbose=2
             #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
+          file(COPY "client/resources/Info.plist" DESTINATION "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}/Contents/")
           execute_process(
             COMMAND ls -l
-            WORKING_DIRECTORY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}"
+            WORKING_DIRECTORY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}/Contents"
           )
         else()
           file(COPY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "deploy/")
