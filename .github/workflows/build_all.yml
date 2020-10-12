@@ -330,10 +330,10 @@ jobs:
           file(COPY "daemon/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
           file(COPY "daemon/build/Release/crashpad_handler" DESTINATION "client/lunremote.app/Contents/MacOS/")
           file(COPY "client/lunremote.app/" DESTINATION "deploy/")
-          execute_process(
-            COMMAND chmod a+x *
-            WORKING_DIRECTORY "client/lunremote.app/Contents/MacOS/"
-          )
+#          execute_process(
+#            COMMAND chmod a+x *
+#            WORKING_DIRECTORY "client/lunremote.app/Contents/MacOS/"
+#          )
           execute_process(
             COMMAND ls -l
             WORKING_DIRECTORY "client/lunremote.app/Contents/MacOS/"
@@ -411,7 +411,7 @@ jobs:
       id: upload_product_artifact
       with:
         path: ./deploy.tar
-        name: deploy-${{ matrix.config.artifact }}
+        name: deploy-${{ matrix.config.os }}.tar
 
     - uses: actions/upload-artifact@v2
       if: matrix.config.os == 'macos-latest'
@@ -448,11 +448,11 @@ jobs:
     - name: Download lunremote artifact
       uses: actions/download-artifact@v2
       with:
-        name: deploy-${{ matrix.config.artifact }}
+        name: deploy-${{ matrix.config.os }}.tar
         path: lunremote
 
     - name: UnTar files
-      run: tar -xf deploy.tar -C lunremote
+      run: tar -xf deploy-${{ matrix.config.os }}.tar -C lunremote
 
     - name: Checkout installer
       uses: actions/checkout@v2
