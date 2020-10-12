@@ -55,7 +55,7 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(COMMAND sudo apt update)
           execute_process(
-            COMMAND sudo apt install libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxfixes-dev libxtst-dev libavformat-dev libswscale-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev
+            COMMAND sudo apt install libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxfixes-dev libxtst-dev libavformat-dev libswscale-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev tree
           )
           execute_process(
             COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
@@ -350,6 +350,14 @@ jobs:
           )
 
           if ("${{ runner.os }}" STREQUAL "Windows")
+            execute_process(
+              COMMAND dir
+              WORKING_DIRECTORY daemon
+            )
+            execute_process(
+              COMMAND dir
+              WORKING_DIRECTORY daemon/Release
+            )
             set(server_exec_name "lunremoted.exe")
             file(COPY "daemon/Release/${server_exec_name}" DESTINATION "deploy/")
             file(COPY "daemon/Release/lunremotesvc.exe" DESTINATION "deploy/")
@@ -363,11 +371,7 @@ jobs:
           else()
             set(server_exec_name "lunremoted")
             execute_process(
-              COMMAND ls -l build
-              WORKING_DIRECTORY daemon
-            )
-            execute_process(
-              COMMAND ls -l build/linux
+              COMMAND tree
               WORKING_DIRECTORY daemon
             )
             file(COPY "daemon/build/linux/${server_exec_name}" DESTINATION "deploy/")
