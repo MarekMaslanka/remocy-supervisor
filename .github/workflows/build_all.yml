@@ -488,8 +488,10 @@ jobs:
     - name: Build macOS DMG
       if: matrix.config.os == 'macos-latest'
       run: |
+        mv lunremote lunremote.app
         ls -l
-        ls -l lunremote
+        ls -l lunremote.app
+        ls -l lunremote.app/Contents
         npm install --global create-dmg
         create-dmg 'lunremote.app'
 
