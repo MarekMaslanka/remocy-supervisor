@@ -9,7 +9,7 @@ env:
   CLIENT_APPLICATION_NAME: lunremote
   CLIENT_APPLICATION_PRO: remocy-client.pro
   DAEMON_APPLICATION_NAME: lunremoted
-  APPLICATION_VERSION: 0.7.0
+  APPLICATION_VERSION: v0.7.0-dev
 
 jobs:
   build:
@@ -18,15 +18,15 @@ jobs:
     strategy:
       matrix:
         config:
-#         - {
-#             name: "Windows Latest x64", artifact: "Windows-x64.zip",
-#             os: windows-latest,
-#             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-#           }
-#        - {
-#            name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
-#            os: ubuntu-latest
-#          }
+          - {
+              name: "Windows Latest x64", artifact: "Windows-x64.zip",
+              os: windows-latest,
+              environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+            }
+          - {
+              name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
+              os: ubuntu-latest
+            }
           - {
               name: "macOS Latest x64", artifact: "macOS-x64.zip",
               os: macos-latest
@@ -213,7 +213,7 @@ jobs:
           COMMAND ${{ steps.qt.outputs.qt_dir }}/bin/qmake
             $ENV{APPLICATION_PRO}
             CONFIG+=release
-            DEFINES+=VERSION='"\\\"v0.7.1-dev\\\""'
+            DEFINES+=VERSION="$ENV{APPLICATION_VERSION}"
             QTC_SOURCE="${qtcreator_dir}"
             QTC_BUILD="${qtcreator_dir}"
           WORKING_DIRECTORY "client"
@@ -372,8 +372,6 @@ jobs:
               COMMAND chmod a+x "${server_exec_name}.sh"
               WORKING_DIRECTORY "deploy"
             )
-
-            execute_process(COMMAND ls -l deploy/)
           endif()
         endif()
     
@@ -397,18 +395,18 @@ jobs:
     strategy:
       matrix:
         config:
-        - {
-            name: "Windows Latest x64", artifact: "Windows-x64.msi",
-            os: windows-latest,
-          }
-#         - {
-#             name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
-#             os: ubuntu-latest
-#           }
-#         - {
-#             name: "macOS Latest x64", artifact: "macOS-x64.zip",
-#             os: macos-latest
-#           }
+          - {
+               name: "Windows Latest x64", artifact: "Windows-x64.msi",
+               os: windows-latest,
+            }
+          - {
+               name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
+               os: ubuntu-latest
+            }
+          - {
+               name: "macOS Latest x64", artifact: "macOS-x64.zip",
+               os: macos-latest
+            }
 
     steps:
     # - name: Pre-download
