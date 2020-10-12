@@ -468,6 +468,8 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Windows")
           file(DOWNLOAD "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip" wix311-binaries.zip)
           file(ARCHIVE_EXTRACT INPUT wix311-binaries.zip DESTINATION wix)
+        elseif ("${{ runner.os }}" STREQUAL "macOS")
+          execute_process(COMMAND npm install --global create-dmg)
         endif()
 
     - name: Build MSI installer
@@ -485,13 +487,11 @@ jobs:
         ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../lunremote/" lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
         ../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension Components.wixobj lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out lunremote.msi
 
-
     - name: Build macOS DMG
       if: matrix.config.os == 'macos-latest'
       shell: cmake -P {0}
       run: |
         execute_process(COMMAND mv lunremote lunremote.app)
-        execute_process(COMMAND npm install --global create-dmgp)
         execute_process(COMMAND create-dmg 'lunremote.app')
         execute_process(COMMAND ls -l)        
 
@@ -502,6 +502,13 @@ jobs:
         path: ./installer/lunremote.msi
         # path: ./installer
         name: lunremote-${{ env.APPLICATION_VERSION }}.msi
+
+    - uses: actions/upload-artifact@v1
+      if: matrix.config.os == 'macos-latest'
+      id: upload_macos_dmg
+      with:
+        path: ./lunremote.dmg
+        name: lunremote-${{ env.APPLICATION_VERSION }}.dmg
 
   deploy:
     if: contains(github.ref, 'tags/v')
