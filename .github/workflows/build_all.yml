@@ -46,7 +46,7 @@ jobs:
       with:
         path: daemon
         repository: MarekMaslanka/remocy-server
-#         ref: build
+        ref: build
         token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Installing system libs
