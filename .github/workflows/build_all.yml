@@ -488,13 +488,12 @@ jobs:
 
     - name: Build macOS DMG
       if: matrix.config.os == 'macos-latest'
+      shell: cmake -P {0}
       run: |
-        mv lunremote lunremote.app
-        ls -l
-        ls -l lunremote.app
-        ls -l lunremote.app/Contents
-        npm install --global create-dmg
-        create-dmg --identity='Mac Developer' 'lunremote.app'
+        execute_process(COMMAND mv lunremote lunremote.app)
+        execute_process(COMMAND npm install --global create-dmgp)
+        execute_process(COMMAND create-dmg 'lunremote.app')
+        execute_process(COMMAND ls -l)        
 
     - uses: actions/upload-artifact@v1
       if: matrix.config.os == 'windows-latest'
