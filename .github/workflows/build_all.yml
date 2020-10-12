@@ -207,9 +207,6 @@ jobs:
       shell: cmake -P {0}
       run: |
         set(CMAKE_VERBOSE_MAKEFILE ON)
-        execute_process(
-          COMMAND ls -l
-        )
         if ("${{ runner.os }}" STREQUAL "Windows" AND NOT "x${{ matrix.config.environment_script }}" STREQUAL "x")
           execute_process(
             COMMAND "${{ matrix.config.environment_script }}" && set
@@ -279,11 +276,11 @@ jobs:
             COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" -verbose=2
             #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
+          file(READ "client/resources/Info.plist" info_plist)
+          string(REPLACE "v0.0.0" "${{ env.APPLICATION_VERSION }}" info_plist "${info_plist}")
+          file(WRITE "client/resources/Info.plist" info_plist)
+
           file(COPY "client/resources/Info.plist" DESTINATION "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}/Contents/")
-          execute_process(
-            COMMAND ls -l
-            WORKING_DIRECTORY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}/Contents"
-          )
         else()
           file(COPY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "deploy/")
           
