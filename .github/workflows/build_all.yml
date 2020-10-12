@@ -423,10 +423,10 @@ jobs:
     strategy:
       matrix:
         config:
-          - {
-               name: "Windows Latest x64", artifact: "Windows-x64.zip",
-               os: windows-latest,
-            }
+#           - {
+#                name: "Windows Latest x64", artifact: "Windows-x64.zip",
+#                os: windows-latest,
+#             }
           - {
                name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
                os: ubuntu-latest
@@ -519,10 +519,10 @@ jobs:
     strategy:
       matrix:
         config:
-#        - {
-#            name: "Windows Latest x64", artifact: "Windows-x64.zip",
-#            os: windows-latest
-#          }
+        - {
+            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            os: windows-latest
+          }
         - {
             name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
             os: ubuntu-latest
