@@ -367,7 +367,11 @@ jobs:
             set(server_exec_name "lunremoted")
             file(COPY "daemon/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
             file(COPY "daemon/build/Release/crashpad_handler" DESTINATION "client/lunremote.app/Contents/MacOS/")
-            file(COPY "client/lunremote.app" DESTINATION "deploy/")
+            file(COPY "client/lunremote.app/" DESTINATION "deploy/")
+            execute_process(
+              COMMAND ls -l
+              WORKING_DIRECTORY "deploy"
+            )
           else()
             set(server_exec_name "lunremoted")
             file(COPY "daemon/${server_exec_name}" DESTINATION "deploy/")
