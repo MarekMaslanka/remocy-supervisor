@@ -46,7 +46,7 @@ jobs:
       with:
         path: daemon
         repository: MarekMaslanka/remocy-server
-        ref: build
+#        ref: build
         token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Installing system libs
@@ -370,6 +370,10 @@ jobs:
             file(COPY "daemon/${server_exec_name}" DESTINATION "deploy/")
           else()
             set(server_exec_name "lunremoted")
+            execute_process(
+              COMMAND ls -l
+              WORKING_DIRECTORY daemon
+            )
             execute_process(
               COMMAND tree
               WORKING_DIRECTORY daemon
