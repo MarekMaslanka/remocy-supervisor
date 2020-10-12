@@ -56,8 +56,9 @@ jobs:
           execute_process(
             COMMAND sudo apt update
             COMMAND sudo apt install libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxfixes-dev libxtst-dev libavformat-dev libswscale-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev
-            COMMAND wget -q https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
-            COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
+            COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
+            COMMAND ls /usr/lib/x86_64-linux-gnu/
+            COMMAND sudo tar -xvf libicu.tar -C /usr/lib/x86_64-linux-gnu/
           )
         elseif ("${{ runner.os }}" STREQUAL "Windows")
           file(DOWNLOAD "https://aka.ms/vs/16/release/vc_redist.x64.exe" vc_redist.x64.exe)
