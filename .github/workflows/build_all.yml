@@ -71,9 +71,9 @@ jobs:
         APPLICATION_VERSION: ${GITHUB_REF/refs\/tags\//}
 
     - name: Printenv
-        run: |
-          echo "APPLICATION_VERSION=${APPLICATION_VERSION}"
-          printenv
+      run: |
+        echo "APPLICATION_VERSION=${APPLICATION_VERSION}"
+        printenv
 
     - name: Download Qt from cache
       uses: actions/cache@v2
