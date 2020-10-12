@@ -452,7 +452,7 @@ jobs:
         path: lunremote
 
     - name: UnTar files
-      run: tar -xf lunremote.tar -C lunremote
+      run: tar -xf deploy.tar -C lunremote
 
     - name: Checkout installer
       uses: actions/checkout@v2
