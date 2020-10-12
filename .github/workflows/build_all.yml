@@ -340,7 +340,7 @@ jobs:
           endif()
 
           execute_process(
-            COMMAND cmake --build . -- -property:Configuration=Release
+            COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
             WORKING_DIRECTORY daemon
           )
   
