@@ -474,8 +474,9 @@ jobs:
     - name: Build linux DEB
       if: matrix.config.os == 'ubuntu-latest'
       run: |
-        mkdir -p installer/lunremote/usr/bin/
-        mv deploy/* installer/lunremote/usr/bin/
+        mkdir -p installer/lunremote/opt
+        mv deploy/* installer/lunremote/opt/
+        sed -i 's/0.0.0/${{ env.APPLICATION_VERSION }}/g' installer/lunremote/DEBIAN/control
         dpkg-deb --build installer/lunremote
 
     - uses: actions/upload-artifact@v1
