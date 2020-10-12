@@ -306,10 +306,6 @@ jobs:
         else()
           set(CMAKE_VERBOSE_MAKEFILE ON)
           execute_process(
-            COMMAND ls -l
-          )
-
-          execute_process(
             COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
             WORKING_DIRECTORY daemon
             RESULT_VARIABLE result
@@ -330,10 +326,6 @@ jobs:
           file(COPY "daemon/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
           file(COPY "daemon/build/Release/crashpad_handler" DESTINATION "client/lunremote.app/Contents/MacOS/")
           file(COPY "client/lunremote.app/" DESTINATION "deploy/")
-          execute_process(
-            COMMAND ls -l
-            WORKING_DIRECTORY "client/lunremote.app/Contents/MacOS/"
-          )
         else()
           set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -355,14 +347,6 @@ jobs:
           )
 
           if ("${{ runner.os }}" STREQUAL "Windows")
-            execute_process(
-              COMMAND dir
-              WORKING_DIRECTORY daemon
-            )
-            execute_process(
-              COMMAND dir
-              WORKING_DIRECTORY daemon/Release
-            )
             set(server_exec_name "lunremoted.exe")
             file(COPY "daemon/Release/${server_exec_name}" DESTINATION "deploy/")
             file(COPY "daemon/Release/lunremotesvc.exe" DESTINATION "deploy/")
@@ -423,10 +407,10 @@ jobs:
     strategy:
       matrix:
         config:
-#           - {
-#                name: "Windows Latest x64", artifact: "Windows-x64.zip",
-#                os: windows-latest,
-#             }
+          - {
+               name: "Windows Latest x64", artifact: "Windows-x64.zip",
+               os: windows-latest,
+            }
           - {
                name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
                os: ubuntu-latest
@@ -437,24 +421,13 @@ jobs:
             }
 
     steps:
-    # - name: Pre-download
-    #   shell: cmake -P {0}
-    #   run: file(MAKE_DIRECTORY "lunremote")
-
     - name: Download lunremote artifact
       uses: actions/download-artifact@v2
       with:
         name: deploy-${{ matrix.config.os }}.tar
-        path: lunremote
 
     - name: UnTar files
-      run: tar -xf lunremote/deploy.tar -C lunremote
-
-    - name: ls files
-      run: |
-        ls -l
-        ls -l lunremote
-        ls -l lunremote/*
+      run: tar -xf deploy.tar
 
     - name: Checkout installer
       uses: actions/checkout@v2
@@ -471,8 +444,6 @@ jobs:
           file(ARCHIVE_EXTRACT INPUT wix311-binaries.zip DESTINATION wix)
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(COMMAND npm install --global create-dmg)
-          execute_process(COMMAND ls -l)
-          execute_process(COMMAND ls -l lunremote)
         endif()
 
     - name: Build MSI installer
@@ -480,23 +451,22 @@ jobs:
       run: |
         cd installer
 
-        move ../lunremote/lunremote.exe .
-        move ../lunremote/lunremoted.exe .
-        move ../lunremote/lunremotesvc.exe .
-        ../wix/heat.exe dir "../lunremote" -cg RestProductComponentsGroup -dr INSTALLDIR -gg -sfrag -srd -var var.SourceFilesDir -out "Components.wxs"
-        move lunremote.exe ../lunremote/
-        move lunremoted.exe ../lunremote/
-        move lunremotesvc.exe ../lunremote/
-        ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../lunremote/" lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
+        move ../deploy/lunremote.exe .
+        move ../deploy/lunremoted.exe .
+        move ../deploy/lunremotesvc.exe .
+        ../wix/heat.exe dir "../deploy" -cg RestProductComponentsGroup -dr INSTALLDIR -gg -sfrag -srd -var var.SourceFilesDir -out "Components.wxs"
+        move lunremote.exe ../deploy/
+        move lunremoted.exe ../deploy/
+        move lunremotesvc.exe ../deploy/
+        ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../deploy/" lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
         ../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension Components.wixobj lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out lunremote.msi
 
     - name: Build macOS DMG
       if: matrix.config.os == 'macos-latest'
       shell: cmake -P {0}
       run: |
-        execute_process(COMMAND mv lunremote/deploy lunremote.app)
+        execute_process(COMMAND mv deploy lunremote.app)
         execute_process(COMMAND create-dmg lunremote.app)
-        execute_process(COMMAND ls -l)        
 
     - uses: actions/upload-artifact@v1
       if: matrix.config.os == 'windows-latest'
