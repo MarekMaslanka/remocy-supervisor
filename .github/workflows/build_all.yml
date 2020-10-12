@@ -448,7 +448,7 @@ jobs:
         path: lunremote
 
     - name: UnTar files
-      run: tar -xf deploy-${{ matrix.config.os }}.tar -C lunremote
+      run: tar -xf lunremote/deploy-${{ matrix.config.os }}.tar -C lunremote
 
     - name: Checkout installer
       uses: actions/checkout@v2
