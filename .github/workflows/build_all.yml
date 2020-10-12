@@ -403,11 +403,14 @@ jobs:
             )
           endif()
         endif()
+
+    - name: 'Tar files'
+      run: tar -cf deploy.tar deploy
     
     - uses: actions/upload-artifact@v2
       id: upload_product_artifact
       with:
-        path: ./deploy
+        path: ./deploy.tar
         name: deploy-${{ matrix.config.artifact }}
 
     - uses: actions/upload-artifact@v2
@@ -448,6 +451,9 @@ jobs:
         name: deploy-${{ matrix.config.artifact }}
         path: lunremote
 
+    - name: UnTar files
+      run: tar -xf lunremote.tar -C lunremote
+
     - name: Checkout installer
       uses: actions/checkout@v2
       with:
@@ -463,6 +469,8 @@ jobs:
           file(ARCHIVE_EXTRACT INPUT wix311-binaries.zip DESTINATION wix)
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(COMMAND npm install --global create-dmg)
+          execute_process(COMMAND ls -l)
+          execute_process(COMMAND ls -l lunremote)
         endif()
 
     - name: Build MSI installer
