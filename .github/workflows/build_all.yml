@@ -69,12 +69,17 @@ jobs:
           execute_process(COMMAND vc_redist.x64.exe /install /quiet /norestart)
         endif()
     
+    - name: Get tag version
+      if: contains(github.ref, 'tags/')
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
     - name: Set git tag version variable
       if: contains(github.ref, 'tags/')
       uses: allenevans/set-env@v1.0.0
       with:
         overwrite: true
-        APPLICATION_VERSION: ${{ github.event.release.tag_name }}
+        APPLICATION_VERSION: ${{ steps.get_version.outputs.VERSION }}
 
     - name: Prepare short version variable
       id: prepare_short_version
@@ -440,12 +445,17 @@ jobs:
             }
 
     steps:
+    - name: Get tag version
+      if: contains(github.ref, 'tags/')
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
     - name: Set git tag version variable
       if: contains(github.ref, 'tags/')
       uses: allenevans/set-env@v1.0.0
       with:
         overwrite: true
-        APPLICATION_VERSION: ${{ github.event.release.tag_name }}
+        APPLICATION_VERSION: ${{ steps.get_version.outputs.VERSION }}
 
     - name: Prepare short version variable
       id: prepare_short_version
@@ -570,12 +580,17 @@ jobs:
     needs: installer
 
     steps:
+    - name: Get tag version
+      if: contains(github.ref, 'tags/')
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
     - name: Set git tag version variable
       if: contains(github.ref, 'tags/')
       uses: allenevans/set-env@v1.0.0
       with:
         overwrite: true
-        APPLICATION_VERSION: ${{ github.event.release.tag_name }}
+        APPLICATION_VERSION: ${{ steps.get_version.outputs.VERSION }}
 
     - name: Prepare short version variable
       id: prepare_short_version
