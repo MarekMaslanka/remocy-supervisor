@@ -45,7 +45,7 @@ jobs:
     - name: Checkout server
       uses: actions/checkout@v2
       with:
-        path: daemon
+        path: server
         repository: MarekMaslanka/remocy-server
 #        ref: build
         token: ${{ secrets.ACCESS_TOKEN }}
@@ -191,17 +191,17 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.exe")
-          set(qtc_binary_daemon_name "$ENV{SERVER_APPLICATION_NAME}.exe")
+          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}.exe")
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}")
-          set(qtc_binary_daemon_name "$ENV{SERVER_APPLICATION_NAME}")
+          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}")
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.app")
-          set(qtc_binary_daemon_name "$ENV{SERVER_APPLICATION_NAME}.app")
+          set(qtc_binary_server_name "$ENV{SERVER_APPLICATION_NAME}.app")
         endif()
         # Save the path for other steps
         message("::set-output name=qtc_binary_client_name::${qtc_binary_client_name}")
-        message("::set-output name=qtc_binary_daemon_name::${qtc_binary_daemon_name}")
+        message("::set-output name=qtc_binary_server_name::${qtc_binary_server_name}")
 
         if ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
@@ -315,7 +315,7 @@ jobs:
           set(CMAKE_VERBOSE_MAKEFILE ON)
           execute_process(
             COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
-            WORKING_DIRECTORY daemon
+            WORKING_DIRECTORY server
             RESULT_VARIABLE result
           )
           if (NOT result EQUAL 0)
@@ -329,10 +329,10 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
             COMMAND xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO
-            WORKING_DIRECTORY daemon
+            WORKING_DIRECTORY server
           )
-          file(COPY "daemon/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
-          file(COPY "daemon/build/Release/crashpad_handler" DESTINATION "client/lunremote.app/Contents/MacOS/")
+          file(COPY "server/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
+          file(COPY "server/build/Release/crashpad_handler" DESTINATION "client/lunremote.app/Contents/MacOS/")
           file(COPY "client/lunremote.app/" DESTINATION "artifact/")
         else()
           set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -346,26 +346,26 @@ jobs:
 
           execute_process(
             COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
-            WORKING_DIRECTORY daemon
+            WORKING_DIRECTORY server
           )
   
           execute_process(
             COMMAND ${make_program}
-            WORKING_DIRECTORY daemon
+            WORKING_DIRECTORY server
           )
 
           if ("${{ runner.os }}" STREQUAL "Windows")
             set(server_exec_name "lunremoted.exe")
-            file(COPY "daemon/Release/${server_exec_name}" DESTINATION "artifact/")
-            file(COPY "daemon/Release/lunremotesvc.exe" DESTINATION "artifact/")
-            file(COPY "daemon/tools/win/crashpad_handler.exe" DESTINATION "artifact/")
+            file(COPY "server/Release/${server_exec_name}" DESTINATION "artifact/")
+            file(COPY "server/Release/lunremotesvc.exe" DESTINATION "artifact/")
+            file(COPY "server/tools/win/crashpad_handler.exe" DESTINATION "artifact/")
 
           elseif ("${{ runner.os }}" STREQUAL "macOS")
           else()
             set(server_exec_name "lunremoted")
-            file(COPY "daemon/${server_exec_name}" DESTINATION "artifact/")
-            file(COPY "daemon/lib/linux/libyuv2.so" DESTINATION "artifact/")
-            file(COPY "daemon/tools/linux/crashpad_handler" DESTINATION "artifact/")
+            file(COPY "server/${server_exec_name}" DESTINATION "artifact/")
+            file(COPY "server/lib/linux/libyuv2.so" DESTINATION "artifact/")
+            file(COPY "server/tools/linux/crashpad_handler" DESTINATION "artifact/")
 
             file(COPY /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 DESTINATION "artifact/")
             file(COPY /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 DESTINATION "artifact/")
@@ -405,7 +405,7 @@ jobs:
       if: matrix.config.os == 'macos-latest'
       id: upload_server_dsym
       with:
-        path: ./daemon/build/Release/lunremoted.dSYM
+        path: ./server/build/Release/lunremoted.dSYM
         name: lunremoted-${{ env.APPLICATION_VERSION }}.dSYM
 
   installer:
