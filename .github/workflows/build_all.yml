@@ -547,16 +547,16 @@ jobs:
             ext: ".msi",
             os: windows-latest
           }
-        - {
-            name: "Linux Latest x64",
-            ext: ".deb",
-            os: ubuntu-latest
-          }
-        - {
-            name: "macOS Latest x64",
-            ext: ".dmg",
-            os: macos-latest
-          }
+#         - {
+#             name: "Linux Latest x64",
+#             ext: ".deb",
+#             os: ubuntu-latest
+#           }
+#         - {
+#             name: "macOS Latest x64",
+#             ext: ".dmg",
+#             os: macos-latest
+#           }
     needs: installer
 
     steps:
