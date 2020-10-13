@@ -68,11 +68,13 @@ jobs:
           file(DOWNLOAD "https://aka.ms/vs/16/release/vc_redist.x64.exe" vc_redist.x64.exe)
           execute_process(COMMAND vc_redist.x64.exe /install /quiet /norestart)
         endif()
-    
-    - name: Get tag version
-      if: contains(github.ref, 'tags/')
+
+    - name: Prepare short version variable2
       id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      shell: cmake -P {0}
+      run: |
+        STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" APP_VER $ENV{GITHUB_REF}})
+        message("::set-output name=VERSION::${APP_VER}")
 
     - name: Set git tag version variable
       if: contains(github.ref, 'tags/')
