@@ -577,7 +577,6 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
-        path: ./
 
     - name: Create Release
       id: create_release
@@ -590,10 +589,9 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Build macOS DMG
+    - name: ls
       run: |
         ls -l
-        tree
 
     - name: Deploy server
       uses: actions/upload-release-asset@v1
