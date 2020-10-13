@@ -74,7 +74,7 @@ jobs:
       uses: allenevans/set-env@v1.0.0
       with:
         overwrite: true
-        APPLICATION_VERSION: ${GITHUB_REF/refs\/tags\//}
+        APPLICATION_VERSION: ${{ github.event.release.tag_name }}
 
     - name: Prepare short version variable
       id: prepare_short_version
@@ -445,7 +445,7 @@ jobs:
       uses: allenevans/set-env@v1.0.0
       with:
         overwrite: true
-        APPLICATION_VERSION: ${GITHUB_REF/refs\/tags\//}
+        APPLICATION_VERSION: ${{ github.event.release.tag_name }}
 
     - name: Prepare short version variable
       id: prepare_short_version
@@ -575,7 +575,7 @@ jobs:
       uses: allenevans/set-env@v1.0.0
       with:
         overwrite: true
-        APPLICATION_VERSION: ${GITHUB_REF/refs\/tags\//}
+        APPLICATION_VERSION: ${{ github.event.release.tag_name }}
 
     - name: Prepare short version variable
       id: prepare_short_version
