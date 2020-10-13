@@ -85,6 +85,7 @@ jobs:
     - name: Set short version variable
       uses: allenevans/set-env@v1.0.0
       with:
+        overwrite: true
         APPLICATION_SHORT_VERSION: ${{ steps.set_short_version.outputs.short_ver }}
 
     - name: Printenv
