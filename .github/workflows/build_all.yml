@@ -69,7 +69,7 @@ jobs:
           execute_process(COMMAND vc_redist.x64.exe /install /quiet /norestart)
         endif()
     
-    - name: Set version variable
+    - name: Set git tag version variable
       if: contains(github.ref, 'tags/')
       uses: allenevans/set-env@v1.0.0
       with:
@@ -77,25 +77,17 @@ jobs:
         APPLICATION_VERSION: ${GITHUB_REF/refs\/tags\//}
 
     - name: Prepare short version variable
-      id: set_short_version
+      id: prepare_short_version
       shell: cmake -P {0}
       run: |
         STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
         message("::set-output name=short_ver::${SHORT_VER}")
-        message("::save-state name=APPLICATION_SHORT_VERSION4::${SHORT_VER}")
-        message("'APPLICATION_SHORT_VERSION3=${SHORT_VER}' >> $GITHUB_ENV")
-        message("APPLICATION_SHORT_VERSION4=${SHORT_VER} >> $GITHUB_ENV")
 
     - name: Set short version variable
       uses: allenevans/set-env@v1.0.0
       with:
         overwrite: true
-        APPLICATION_SHORT_VERSION: ${{ steps.set_short_version.outputs.short_ver }}
-
-    - name: set env1
-      run: |
-        echo "APPLICATION_SHORT_VERSION=${{ steps.set_short_version.outputs.short_ver }}" >> $GITHUB_ENV
-        echo 'APPLICATION_SHORT_VERSION2=${{ steps.set_short_version.outputs.short_ver }}' >> $GITHUB_ENV
+        APPLICATION_SHORT_VERSION: ${{ steps.prepare_short_version.outputs.short_ver }}
 
     - name: Printenv
       run: |
@@ -448,6 +440,26 @@ jobs:
             }
 
     steps:
+    - name: Set git tag version variable
+      if: contains(github.ref, 'tags/')
+      uses: allenevans/set-env@v1.0.0
+      with:
+        overwrite: true
+        APPLICATION_VERSION: ${GITHUB_REF/refs\/tags\//}
+
+    - name: Prepare short version variable
+      id: prepare_short_version
+      shell: cmake -P {0}
+      run: |
+        STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+        message("::set-output name=short_ver::${SHORT_VER}")
+
+    - name: Set short version variable
+      uses: allenevans/set-env@v1.0.0
+      with:
+        overwrite: true
+        APPLICATION_SHORT_VERSION: ${{ steps.prepare_short_version.outputs.short_ver }}
+
     - name: Printenv
       run: |
         echo "APPLICATION_VERSION=${APPLICATION_VERSION}"
@@ -558,6 +570,26 @@ jobs:
     needs: installer
 
     steps:
+    - name: Set git tag version variable
+      if: contains(github.ref, 'tags/')
+      uses: allenevans/set-env@v1.0.0
+      with:
+        overwrite: true
+        APPLICATION_VERSION: ${GITHUB_REF/refs\/tags\//}
+
+    - name: Prepare short version variable
+      id: prepare_short_version
+      shell: cmake -P {0}
+      run: |
+        STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+        message("::set-output name=short_ver::${SHORT_VER}")
+
+    - name: Set short version variable
+      uses: allenevans/set-env@v1.0.0
+      with:
+        overwrite: true
+        APPLICATION_SHORT_VERSION: ${{ steps.prepare_short_version.outputs.short_ver }}
+
     - name: Download server artifact
       uses: actions/download-artifact@v1
       with:
