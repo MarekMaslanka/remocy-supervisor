@@ -514,9 +514,6 @@ jobs:
         sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/lunremote/DEBIAN/control
         cat installer/lunremote/DEBIAN/control
         dpkg-deb --build installer/lunremote
-        ls -l
-        ls -l installer
-        ls -l installer/lunremote
 
     - uses: actions/upload-artifact@v1
       if: matrix.config.os == 'windows-latest'
@@ -580,6 +577,7 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
+        path: artifact
 
     - name: Create Release
       id: create_release
@@ -596,7 +594,7 @@ jobs:
       run: |
         ls -l
         ls -l *
-        ls -l ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
+        ls -l artifact/*
 
     - name: Deploy server
       uses: actions/upload-release-asset@v1
@@ -604,6 +602,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
+        asset_path: artifact/${{ env.APPLICATION_NAME }}${{ matrix.config.ext }}
         asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
         asset_content_type: application/octet-stream
