@@ -542,16 +542,16 @@ jobs:
     strategy:
       matrix:
         config:
-        - {
-            name: "Windows Latest x64",
-            ext: ".msi",
-            os: windows-latest
-          }
-        - {
-            name: "Linux Latest x64",
-            ext: ".deb",
-            os: ubuntu-latest
-          }
+#         - {
+#             name: "Windows Latest x64",
+#             ext: ".msi",
+#             os: windows-latest
+#           }
+#         - {
+#             name: "Linux Latest x64",
+#             ext: ".deb",
+#             os: ubuntu-latest
+#           }
         - {
             name: "macOS Latest x64",
             ext: ".dmg",
@@ -589,6 +589,11 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
+
+    - name: ls
+      run: |
+        ls -l	 
+        ls -l *
 
     - name: Deploy server
       uses: actions/upload-release-asset@v1
