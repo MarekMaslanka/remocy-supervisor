@@ -308,7 +308,7 @@ jobs:
 
         endif()
 
-    - name: Configure daemon
+    - name: Configure server
       shell: cmake -P {0}
       run: |
         if ("${{ runner.os }}" STREQUAL "macOS")
@@ -324,7 +324,7 @@ jobs:
           endif()
         endif()
   
-    - name: Build daemon
+    - name: Build server
       shell: cmake -P {0}
       run: |
         if ("${{ runner.os }}" STREQUAL "macOS")
@@ -450,7 +450,7 @@ jobs:
         echo "APPLICATION_VERSION=${APPLICATION_VERSION}"
         printenv
 
-    - name: Download lunremote artifact
+    - name: Download artifact
       uses: actions/download-artifact@v2
       with:
         name: artifact-${{ matrix.config.os }}.tar
