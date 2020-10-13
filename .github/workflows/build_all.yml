@@ -542,21 +542,21 @@ jobs:
     strategy:
       matrix:
         config:
-#         - {
-#             name: "Windows Latest x64",
-#             ext: ".msi",
-#             os: windows-latest
-#           }
+        - {
+            name: "Windows Latest x64",
+            ext: ".msi",
+            os: windows-latest
+          }
         - {
             name: "Linux Latest x64",
             ext: ".deb",
             os: ubuntu-latest
           }
-#         - {
-#             name: "macOS Latest x64",
-#             ext: ".dmg",
-#             os: macos-latest
-#           }
+        - {
+            name: "macOS Latest x64",
+            ext: ".dmg",
+            os: macos-latest
+          }
     needs: installer
 
     steps:
@@ -589,12 +589,6 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-
-    - name: ls
-      run: |
-        ls -l
-        ls -l *
-        ls -l artifact/*
 
     - name: Deploy server
       uses: actions/upload-release-asset@v1
