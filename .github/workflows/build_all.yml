@@ -91,8 +91,14 @@ jobs:
 
     - name: Printenv
       run: |
+        echo "APPLICATION_SHORT_VERSION=${{ steps.set_short_version.outputs.short_ver }}" >> $GITHUB_ENV
+        echo "APPLICATION_SHORT_VERSION2=${{ steps.set_short_version.outputs.short_ver }}" >> $GITHUB_ENV
+
+    - name: Printenv2
+      run: |
         echo "APPLICATION_VERSION=${APPLICATION_VERSION}"
         echo "APPLICATION_SHORT_VERSION=${APPLICATION_SHORT_VERSION}"
+        echo "APPLICATION_SHORT_VERSION2=${APPLICATION_SHORT_VERSION2}"
         printenv
 
     - name: Download Qt from cache
@@ -437,6 +443,13 @@ jobs:
             }
 
     steps:
+    - name: Printenv2
+      run: |
+        echo "APPLICATION_VERSION=${APPLICATION_VERSION}"
+        echo "APPLICATION_SHORT_VERSION=${APPLICATION_SHORT_VERSION}"
+        echo "APPLICATION_SHORT_VERSION2=${APPLICATION_SHORT_VERSION2}"
+        printenv
+
     - name: Download lunremote artifact
       uses: actions/download-artifact@v2
       with:
