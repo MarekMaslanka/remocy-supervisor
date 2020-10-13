@@ -418,17 +418,19 @@ jobs:
         config:
           - {
                name: "Windows Latest x64",
+               ext: ".msi",
                os: windows-latest,
             }
           - {
                name: "Linux Latest x64",
+               ext: ".deb",
                os: ubuntu-latest
             }
           - {
                name: "macOS Latest x64",
+               ext: ".dmg",
                os: macos-latest
             }
-
     steps:
     - name: Prepare versions variable
       shell: cmake -P {0}
@@ -446,10 +448,6 @@ jobs:
     - name: Printenv
       run: |
         echo "APPLICATION_VERSION=${APPLICATION_VERSION}"
-        echo "APPLICATION_SHORT_VERSION=${APPLICATION_SHORT_VERSION}"
-        echo "APPLICATION_SHORT_VERSION2=${APPLICATION_SHORT_VERSION2}"
-        echo "APPLICATION_SHORT_VERSION3=${APPLICATION_SHORT_VERSION3}"
-        echo "APPLICATION_SHORT_VERSION4=${APPLICATION_SHORT_VERSION4}"
         printenv
 
     - name: Download lunremote artifact
@@ -488,7 +486,6 @@ jobs:
       if: matrix.config.os == 'windows-latest'
       run: |
         cd installer
-
         move ../deploy/lunremote.exe .
         move ../deploy/lunremoted.exe .
         move ../deploy/lunremotesvc.exe .
@@ -518,47 +515,13 @@ jobs:
         mv installer/lunremote.deb ./lunremote-${{ env.APPLICATION_VERSION }}.deb
 
     - uses: actions/upload-artifact@v1
-      if: matrix.config.os == 'windows-latest'
-      id: upload_win_msi_installer
       with:
-        path: ./lunremote-${{ env.APPLICATION_VERSION }}.msi
-        name: lunremote-${{ env.APPLICATION_VERSION }}.msi
-
-    - uses: actions/upload-artifact@v1
-      if: matrix.config.os == 'macos-latest'
-      id: upload_macos_dmg
-      with:
-        path: ./lunremote-${{ env.APPLICATION_VERSION }}.dmg
-        name: lunremote-${{ env.APPLICATION_VERSION }}.dmg
-
-    - uses: actions/upload-artifact@v1
-      if: matrix.config.os == 'ubuntu-latest'
-      id: upload_linux_deb
-      with:
-        path: ./lunremote-${{ env.APPLICATION_VERSION }}.deb
-        name: lunremote-${{ env.APPLICATION_VERSION }}.deb
+        path: ./lunremote-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
+        name: lunremote-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
 
   deploy:
-    if: contains(github.ref, 'tags/')
+#     if: contains(github.ref, 'tags/')
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        config:
-#         - {
-#             name: "Windows Latest x64",
-#             ext: ".msi",
-#             os: windows-latest
-#           }
-        - {
-            name: "Linux Latest x64",
-            ext: ".deb",
-            os: ubuntu-latest
-          }
-        - {
-            name: "macOS Latest x64",
-            ext: ".dmg",
-            os: macos-latest
-          }
     needs: installer
 
     steps:
@@ -576,10 +539,7 @@ jobs:
         endif()
 
     - name: Download artifact
-      uses: actions/download-artifact@v1
-      with:
-        name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
-        path: artifact
+      uses: actions/download-artifact@v2
 
     - name: Create Release
       id: create_release
