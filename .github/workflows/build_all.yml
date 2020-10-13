@@ -83,6 +83,8 @@ jobs:
         STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
         message("::set-output name=short_ver::${SHORT_VER}")
         message("::save-state name=APPLICATION_SHORT_VERSION4::${SHORT_VER}")
+        message("'APPLICATION_SHORT_VERSION3=${SHORT_VER}' >> $GITHUB_ENV")
+        message("APPLICATION_SHORT_VERSION4=${SHORT_VER} >> $GITHUB_ENV")
 
     - name: Set short version variable
       uses: allenevans/set-env@v1.0.0
@@ -93,15 +95,7 @@ jobs:
     - name: set env1
       run: |
         echo "APPLICATION_SHORT_VERSION=${{ steps.set_short_version.outputs.short_ver }}" >> $GITHUB_ENV
-        echo "APPLICATION_SHORT_VERSION2=${{ steps.set_short_version.outputs.short_ver }}" >> $GITHUB_ENV
-
-    - name: set env2
-      run: |
-        echo "::set-output name=action_fruit::strawberry"
-        echo "::save-state name=action_fruit2::strawberry"
-        echo "::save-state name=processID2::12345"
-        echo "::save-state name=APPLICATION_SHORT_VERSION::${{ steps.set_short_version.outputs.short_ver }}"
-        echo "::save-state name=APPLICATION_SHORT_VERSION3::${{ steps.set_short_version.outputs.short_ver }}"
+        echo 'APPLICATION_SHORT_VERSION2=${{ steps.set_short_version.outputs.short_ver }}' >> $GITHUB_ENV
 
     - name: Printenv
       run: |
