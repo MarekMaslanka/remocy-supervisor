@@ -74,9 +74,16 @@ jobs:
       with:
         APPLICATION_VERSION: ${GITHUB_REF/refs\/tags\//}
 
+    - name: Set short version variable
+      shell: cmake -P {0}
+      run: |
+        STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER ${APPLICATION_VERSION})
+        set(SHORT_VERSION ${SHORT_VER})
+
     - name: Printenv
       run: |
         echo "APPLICATION_VERSION=${APPLICATION_VERSION}"
+        echo "SHORT_VERSION=${SHORT_VERSION}"
         printenv
 
     - name: Download Qt from cache
