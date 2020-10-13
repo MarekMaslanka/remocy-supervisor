@@ -82,6 +82,7 @@ jobs:
       run: |
         STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
         message("::set-output name=short_ver::${SHORT_VER}")
+        message("::save-state name=APPLICATION_SHORT_VERSION4::${SHORT_VER}")
 
     - name: Set short version variable
       uses: allenevans/set-env@v1.0.0
@@ -99,8 +100,8 @@ jobs:
         echo "::set-output name=action_fruit::strawberry"
         echo "::save-state name=action_fruit2::strawberry"
         echo "::save-state name=processID2::12345"
-        console.log('::save-state name=APPLICATION_SHORT_VERSION::${{ steps.set_short_version.outputs.short_ver }}')
-        console.log('::save-state name=APPLICATION_SHORT_VERSION3::${{ steps.set_short_version.outputs.short_ver }}')
+        echo "::save-state name=APPLICATION_SHORT_VERSION::${{ steps.set_short_version.outputs.short_ver }}"
+        echo "::save-state name=APPLICATION_SHORT_VERSION3::${{ steps.set_short_version.outputs.short_ver }}"
 
     - name: Printenv
       run: |
@@ -108,6 +109,7 @@ jobs:
         echo "APPLICATION_SHORT_VERSION=${APPLICATION_SHORT_VERSION}"
         echo "APPLICATION_SHORT_VERSION2=${APPLICATION_SHORT_VERSION2}"
         echo "APPLICATION_SHORT_VERSION3=${APPLICATION_SHORT_VERSION3}"
+        echo "APPLICATION_SHORT_VERSION4=${APPLICATION_SHORT_VERSION4}"
         printenv
 
     - name: Download Qt from cache
@@ -458,6 +460,7 @@ jobs:
         echo "APPLICATION_SHORT_VERSION=${APPLICATION_SHORT_VERSION}"
         echo "APPLICATION_SHORT_VERSION2=${APPLICATION_SHORT_VERSION2}"
         echo "APPLICATION_SHORT_VERSION3=${APPLICATION_SHORT_VERSION3}"
+        echo "APPLICATION_SHORT_VERSION4=${APPLICATION_SHORT_VERSION4}"
         printenv
 
     - name: Download lunremote artifact
