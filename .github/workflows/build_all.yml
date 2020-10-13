@@ -74,26 +74,22 @@ jobs:
       with:
         APPLICATION_VERSION: ${GITHUB_REF/refs\/tags\//}
 
-    - name: Set short version variable
+    - name: Prepare short version variable
       id: set_short_version
       shell: cmake -P {0}
       run: |
         STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
-        set(SHORT_VERSION ${SHORT_VER})
-        set(ENV{SHORT_VERSION} "${SHORT_VER}")
         message("::set-output name=short_ver::${SHORT_VER}")
 
-    - name: Set version2 variable
+    - name: Set short version variable
       uses: allenevans/set-env@v1.0.0
       with:
-        SHORT_VERSION: ${{ steps.set_short_version.outputs.short_ver }}
-        SHORT_VERSION2: ${steps.set_short_version.outputs.short_ver}
+        APPLICATION_SHORT_VERSION: ${{ steps.set_short_version.outputs.short_ver }}
 
     - name: Printenv
       run: |
         echo "APPLICATION_VERSION=${APPLICATION_VERSION}"
-        echo "SHORT_VERSION=${SHORT_VERSION}"
-        echo "SHORT_VERSION2=${SHORT_VERSION2}"
+        echo "APPLICATION_SHORT_VERSION=${APPLICATION_SHORT_VERSION}"
         printenv
 
     - name: Download Qt from cache
@@ -493,7 +489,7 @@ jobs:
       run: |
         mkdir -p installer/lunremote/opt
         mv deploy/* installer/lunremote/opt/
-        sed -i 's/0.0.0/${{ env.SHORT_VER }}/g' installer/lunremote/DEBIAN/control
+        sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/lunremote/DEBIAN/control
         dpkg-deb --build installer/lunremote
 
     - uses: actions/upload-artifact@v1
@@ -501,14 +497,14 @@ jobs:
       id: upload_win_msi_installer
       with:
         path: ./installer/lunremote.msi
-        name: lunremote-${{ env.APPLICATION_VERSION }}.msi
+        name: lunremote-${{ env.APPLICATION_SHORT_VERSION }}.msi
 
     - uses: actions/upload-artifact@v1
       if: matrix.config.os == 'macos-latest'
       id: upload_macos_dmg
       with:
         path: ./lunremote ${{ env.APPLICATION_VERSION }}.dmg
-        name: lunremote-${{ env.APPLICATION_VERSION }}.dmg
+        name: lunremote-${{ env.APPLICATION_SHORT_VERSION }}.dmg
 
     - uses: actions/upload-artifact@v1
       if: matrix.config.os == 'ubuntu-latest'
