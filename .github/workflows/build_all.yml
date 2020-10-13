@@ -480,6 +480,10 @@ jobs:
           execute_process(COMMAND apt install build-essential)
         endif()
 
+    - name: Set UUID
+      id: generate-uuid
+      uses: filipstefansson/uuid-action@v1
+
     - name: Build MSI installer
       if: matrix.config.os == 'windows-latest'
       run: |
@@ -492,7 +496,7 @@ jobs:
         move lunremote.exe ../deploy/
         move lunremoted.exe ../deploy/
         move lunremotesvc.exe ../deploy/
-        ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../deploy/" lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
+        ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../deploy/" -dProductVersion="${{ env.APPLICATION_SHORT_VERSION }}" -dProductUpgradeCode=${{ steps.generate-uuid.outputs.uuid }} lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
         ../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension Components.wixobj lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out lunremote.msi
 
     - name: Build macOS DMG
@@ -533,21 +537,24 @@ jobs:
         name: lunremote-${{ env.APPLICATION_VERSION }}.deb
 
   deploy:
-    if: contains(github.ref, 'tags/v')
+    if: contains(github.ref, 'tags/')
     runs-on: ubuntu-latest
     strategy:
       matrix:
         config:
         - {
-            name: "Windows Latest x64", artifact: "Windows-x64.zip",
+            name: "Windows Latest x64",
+            ext: ".msi",
             os: windows-latest
           }
         - {
-            name: "Linux Latest x64", artifact: "Linux-x64.tar.gz",
+            name: "Linux Latest x64",
+            ext: ".deb",
             os: ubuntu-latest
           }
         - {
-            name: "macOS Latest x64", artifact: "macOS-x64.zip",
+            name: "macOS Latest x64",
+            ext: ".dmg",
             os: macos-latest
           }
     needs: installer
@@ -566,16 +573,10 @@ jobs:
           message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
         endif()
 
-    - name: Download server artifact
+    - name: Download artifact
       uses: actions/download-artifact@v1
       with:
-        name: ${{ env.SERVER_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-        path: ./
-
-    - name: Download client artifact
-      uses: actions/download-artifact@v1
-      with:
-        name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
         path: ./
 
     - name: Create Release
@@ -590,23 +591,11 @@ jobs:
         prerelease: false
 
     - name: Deploy server
-      id: server_upload_to_release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.SERVER_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-        asset_name: ${{ env.SERVER_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-        asset_content_type: application/zip
-
-    - name: Deploy client
-      id: client_upload_to_release
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
-        asset_name: ${{ env.CLIENT_APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}-${{ matrix.config.artifact }}
+        asset_path: ./${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
+        asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
         asset_content_type: application/zip
