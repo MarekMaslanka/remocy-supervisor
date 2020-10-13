@@ -8,7 +8,7 @@ env:
   APPLICATION_NAME: lunremote
   CLIENT_APPLICATION_NAME: lunremote
   CLIENT_APPLICATION_PRO: remocy-client.pro
-  DAEMON_APPLICATION_NAME: lunremoted
+  SERVER_APPLICATION_NAME: lunremoted
   APPLICATION_VERSION: v0.0.1-dev
   APPLICATION_SHORT_VERSION: 0.0.0
 
@@ -191,13 +191,13 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.exe")
-          set(qtc_binary_daemon_name "$ENV{DAEMON_APPLICATION_NAME}.exe")
+          set(qtc_binary_daemon_name "$ENV{SERVER_APPLICATION_NAME}.exe")
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}")
-          set(qtc_binary_daemon_name "$ENV{DAEMON_APPLICATION_NAME}")
+          set(qtc_binary_daemon_name "$ENV{SERVER_APPLICATION_NAME}")
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           set(qtc_binary_client_name "$ENV{CLIENT_APPLICATION_NAME}.app")
-          set(qtc_binary_daemon_name "$ENV{DAEMON_APPLICATION_NAME}.app")
+          set(qtc_binary_daemon_name "$ENV{SERVER_APPLICATION_NAME}.app")
         endif()
         # Save the path for other steps
         message("::set-output name=qtc_binary_client_name::${qtc_binary_client_name}")
@@ -283,7 +283,6 @@ jobs:
 
           execute_process(
             COMMAND "qt5/$ENV{QT_VERSION}/clang_64/bin/macdeployqt" "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" -verbose=2
-            #WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/clang_64/bin/"
           )
           file(READ "client/resources/Info.plist" infoPlistIn)
           string(REPLACE "v0.0.0" "${{ env.APPLICATION_VERSION }}" infoPlistOut "${infoPlistIn}")
@@ -445,11 +444,6 @@ jobs:
           message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
         endif()
 
-    - name: Printenv
-      run: |
-        echo "APPLICATION_VERSION=${APPLICATION_VERSION}"
-        printenv
-
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
@@ -520,10 +514,10 @@ jobs:
         name: lunremote-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
 
   deploy:
-#     if: contains(github.ref, 'tags/')
+    name: "Deploy"
+    if: contains(github.ref, 'tags/')
     runs-on: ubuntu-latest
     needs: installer
-
     steps:
     - name: Prepare versions variable
       shell: cmake -P {0}
@@ -553,10 +547,6 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-
-    - name: ls
-      run: |
-        ls -l artifacts/*
 
     - name: Deploy Windows application
       uses: actions/upload-release-asset@v1
