@@ -265,17 +265,17 @@ jobs:
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status for make")
         endif()
-        file(MAKE_DIRECTORY "deploy")
+        file(MAKE_DIRECTORY "artifact")
 
         if ("${{ runner.os }}" STREQUAL "Windows")
-          file(COPY "client/release/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "deploy/")
-          file(COPY "client/lib/openh264.dll" DESTINATION "deploy/")
-          file(COPY "c:/Windows/System32/msvcp140.dll" DESTINATION "deploy/")
-          file(COPY "c:/Windows/System32/vcruntime140.dll" DESTINATION "deploy/")
-          file(COPY "c:/Windows/System32/vcruntime140_1.dll" DESTINATION "deploy/")
+          file(COPY "client/release/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "artifact/")
+          file(COPY "client/lib/openh264.dll" DESTINATION "artifact/")
+          file(COPY "c:/Windows/System32/msvcp140.dll" DESTINATION "artifact/")
+          file(COPY "c:/Windows/System32/vcruntime140.dll" DESTINATION "artifact/")
+          file(COPY "c:/Windows/System32/vcruntime140_1.dll" DESTINATION "artifact/")
 
           execute_process(
-            COMMAND windeployqt "deploy/lunremote.exe"
+            COMMAND windeployqt "artifact/lunremote.exe"
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/bin/"
           )
         elseif ("${{ runner.os }}" STREQUAL "macOS")
@@ -291,7 +291,7 @@ jobs:
 
           file(COPY "client/resources/Info.plist" DESTINATION "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}/Contents/")
         else()
-          file(COPY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "deploy/")
+          file(COPY "client/${{ steps.qt_creator.outputs.qtc_binary_client_name }}" DESTINATION "artifact/")
           
           file(COPY "client/lib/libopenh264.so" DESTINATION "qt5/$ENV{QT_VERSION}/gcc_64/lib/")
           file(COPY "client/lib/libopenh264.so.5" DESTINATION "qt5/$ENV{QT_VERSION}/gcc_64/lib/")
@@ -302,7 +302,7 @@ jobs:
             COMMAND chmod a+x linuxdeployqt
           )
           execute_process(
-            COMMAND ../../../../linuxdeployqt ../../../../deploy/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=2
+            COMMAND ../../../../linuxdeployqt ../../../../artifact/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=2
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
 
@@ -334,7 +334,7 @@ jobs:
           )
           file(COPY "daemon/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
           file(COPY "daemon/build/Release/crashpad_handler" DESTINATION "client/lunremote.app/Contents/MacOS/")
-          file(COPY "client/lunremote.app/" DESTINATION "deploy/")
+          file(COPY "client/lunremote.app/" DESTINATION "artifact/")
         else()
           set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -357,50 +357,50 @@ jobs:
 
           if ("${{ runner.os }}" STREQUAL "Windows")
             set(server_exec_name "lunremoted.exe")
-            file(COPY "daemon/Release/${server_exec_name}" DESTINATION "deploy/")
-            file(COPY "daemon/Release/lunremotesvc.exe" DESTINATION "deploy/")
-            file(COPY "daemon/tools/win/crashpad_handler.exe" DESTINATION "deploy/")
+            file(COPY "daemon/Release/${server_exec_name}" DESTINATION "artifact/")
+            file(COPY "daemon/Release/lunremotesvc.exe" DESTINATION "artifact/")
+            file(COPY "daemon/tools/win/crashpad_handler.exe" DESTINATION "artifact/")
 
           elseif ("${{ runner.os }}" STREQUAL "macOS")
           else()
             set(server_exec_name "lunremoted")
-            file(COPY "daemon/${server_exec_name}" DESTINATION "deploy/")
-            file(COPY "daemon/lib/linux/libyuv2.so" DESTINATION "deploy/")
-            file(COPY "daemon/tools/linux/crashpad_handler" DESTINATION "deploy/")
+            file(COPY "daemon/${server_exec_name}" DESTINATION "artifact/")
+            file(COPY "daemon/lib/linux/libyuv2.so" DESTINATION "artifact/")
+            file(COPY "daemon/tools/linux/crashpad_handler" DESTINATION "artifact/")
 
-            file(COPY /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 DESTINATION "deploy/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 DESTINATION "deploy/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libswresample.so.2.9.100 DESTINATION "deploy/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libx264.so.152 DESTINATION "deploy/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libx265.so.146 DESTINATION "deploy/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libcrystalhd.so.3.6 DESTINATION "deploy/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libvpx.so.5.0.0 DESTINATION "deploy/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 DESTINATION "artifact/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 DESTINATION "artifact/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libswresample.so.2.9.100 DESTINATION "artifact/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libx264.so.152 DESTINATION "artifact/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libx265.so.146 DESTINATION "artifact/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libcrystalhd.so.3.6 DESTINATION "artifact/")
+            file(COPY /usr/lib/x86_64-linux-gnu/libvpx.so.5.0.0 DESTINATION "artifact/")
             execute_process(
               COMMAND ${CMAKE_COMMAND} -E create_symlink libavcodec.so.57.107.100 libavcodec.so.57
               COMMAND ${CMAKE_COMMAND} -E create_symlink libavutil.so.55.78.100 libavutil.so.55
               COMMAND ${CMAKE_COMMAND} -E create_symlink libswresample.so.2.9.100 libswresample.so.2
               COMMAND ${CMAKE_COMMAND} -E create_symlink libcrystalhd.so.3.6 libcrystalhd.so.3
               COMMAND ${CMAKE_COMMAND} -E create_symlink libvpx.so.5.0.0 libvpx.so.5
-              WORKING_DIRECTORY "deploy"
+              WORKING_DIRECTORY "artifact"
             )
 
-            file(WRITE "deploy/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
+            file(WRITE "artifact/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
             execute_process(
               COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}"
               COMMAND chmod a+x "${server_exec_name}.sh"
-              WORKING_DIRECTORY "deploy"
+              WORKING_DIRECTORY "artifact"
             )
           endif()
         endif()
 
     - name: 'Tar files'
-      run: tar -cf deploy.tar deploy
+      run: tar -cf artifact.tar artifact
     
     - uses: actions/upload-artifact@v2
       id: upload_product_artifact
       with:
-        path: ./deploy.tar
-        name: deploy-${{ matrix.config.os }}.tar
+        path: ./artifact.tar
+        name: artifact-${{ matrix.config.os }}.tar
 
     - uses: actions/upload-artifact@v2
       if: matrix.config.os == 'macos-latest'
@@ -453,10 +453,10 @@ jobs:
     - name: Download lunremote artifact
       uses: actions/download-artifact@v2
       with:
-        name: deploy-${{ matrix.config.os }}.tar
+        name: artifact-${{ matrix.config.os }}.tar
 
     - name: UnTar files
-      run: tar -xf deploy.tar
+      run: tar -xf artifact.tar
 
     - name: Checkout installer
       uses: actions/checkout@v2
@@ -486,21 +486,21 @@ jobs:
       if: matrix.config.os == 'windows-latest'
       run: |
         cd installer
-        move ../deploy/lunremote.exe .
-        move ../deploy/lunremoted.exe .
-        move ../deploy/lunremotesvc.exe .
-        ../wix/heat.exe dir "../deploy" -cg RestProductComponentsGroup -dr INSTALLDIR -gg -sfrag -srd -var var.SourceFilesDir -out "Components.wxs"
-        move lunremote.exe ../deploy/
-        move lunremoted.exe ../deploy/
-        move lunremotesvc.exe ../deploy/
-        ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../deploy/" -dProductVersion="${{ env.APPLICATION_SHORT_VERSION }}" -dProductUpgradeCode=${{ steps.generate-uuid.outputs.uuid }} lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
+        move ../artifact/lunremote.exe .
+        move ../artifact/lunremoted.exe .
+        move ../artifact/lunremotesvc.exe .
+        ../wix/heat.exe dir "../artifact" -cg RestProductComponentsGroup -dr INSTALLDIR -gg -sfrag -srd -var var.SourceFilesDir -out "Components.wxs"
+        move lunremote.exe ../artifact/
+        move lunremoted.exe ../artifact/
+        move lunremotesvc.exe ../artifact/
+        ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../artifact/" -dProductVersion="${{ env.APPLICATION_SHORT_VERSION }}" -dProductUpgradeCode=${{ steps.generate-uuid.outputs.uuid }} lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
         ../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension Components.wixobj lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out ../lunremote-${{ env.APPLICATION_VERSION }}.msi
 
     - name: Build macOS DMG
       if: matrix.config.os == 'macos-latest'
       shell: cmake -P {0}
       run: |
-        execute_process(COMMAND mv deploy lunremote.app)
+        execute_process(COMMAND mv artifact lunremote.app)
         execute_process(COMMAND create-dmg lunremote.app)
         execute_process(COMMAND mv "lunremote ${{ env.APPLICATION_VERSION }}.dmg" lunremote-${{ env.APPLICATION_VERSION }}.dmg)
 
@@ -508,7 +508,7 @@ jobs:
       if: matrix.config.os == 'ubuntu-latest'
       run: |
         mkdir -p installer/lunremote/opt
-        mv deploy/* installer/lunremote/opt/
+        mv artifact/* installer/lunremote/opt/
         sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/lunremote/DEBIAN/control
         cat installer/lunremote/DEBIAN/control
         dpkg-deb --build installer/lunremote
@@ -540,6 +540,8 @@ jobs:
 
     - name: Download artifact
       uses: actions/download-artifact@v2
+      with:
+        path: artifacts
 
     - name: Create Release
       id: create_release
@@ -554,15 +556,14 @@ jobs:
 
     - name: ls
       run: |
-        ls -l	 
-        ls -l *
+        ls -l artifacts/*
 
-    - name: Deploy server
+    - name: Deploy application
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: artifact/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
+        asset_path: artifacts/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
         asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
         asset_content_type: application/octet-stream
