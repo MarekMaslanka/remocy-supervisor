@@ -69,22 +69,18 @@ jobs:
           execute_process(COMMAND vc_redist.x64.exe /install /quiet /norestart)
         endif()
 
-    - name: Prepare git tag short version variable
-      if: contains(github.ref, 'tags/')
-      id: get_version
+    - name: Prepare versions variable
       shell: cmake -P {0}
       run: |
-        STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
-        STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
-        message("::set-env name=APPLICATION_VERSION::${APP_VER}")
-        message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
-
-    - name: Prepare short version variable
-      id: prepare_short_version
-      shell: cmake -P {0}
-      run: |
-        STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
-        message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
+          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
+          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
+          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        else()
+          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        endif()
 
     - name: Printenv
       run: |
@@ -434,22 +430,18 @@ jobs:
             }
 
     steps:
-    - name: Prepare git tag short version variable
-      if: contains(github.ref, 'tags/')
-      id: get_version
+    - name: Prepare versions variable
       shell: cmake -P {0}
       run: |
-        STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
-        STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
-        message("::set-env name=APPLICATION_VERSION::${APP_VER}")
-        message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
-
-    - name: Prepare short version variable
-      id: prepare_short_version
-      shell: cmake -P {0}
-      run: |
-        STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
-        message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
+          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
+          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
+          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        else()
+          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        endif()
 
     - name: Printenv
       run: |
@@ -561,28 +553,18 @@ jobs:
     needs: installer
 
     steps:
-    - name: Prepare git tag short version variable
-      if: contains(github.ref, 'tags/')
-      id: get_version
+    - name: Prepare versions variable
       shell: cmake -P {0}
       run: |
-        STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
-        STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
-        message("::set-env name=APPLICATION_VERSION::${APP_VER}")
-        message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
-
-    - name: Prepare short version variable
-      id: prepare_short_version
-      shell: cmake -P {0}
-      run: |
-        STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
-        message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
-
-    - name: Set short version variable
-      uses: allenevans/set-env@v1.0.0
-      with:
-        overwrite: true
-        APPLICATION_SHORT_VERSION: ${{ steps.prepare_short_version.outputs.short_ver }}
+        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
+          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
+          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
+          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        else()
+          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        endif()
 
     - name: Download server artifact
       uses: actions/download-artifact@v1
