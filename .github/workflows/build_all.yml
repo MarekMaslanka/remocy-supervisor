@@ -477,6 +477,7 @@ jobs:
         mkdir -p installer/lunremote/opt
         mv deploy/* installer/lunremote/opt/
         sed -i 's/0.0.0/${{ env.APPLICATION_VERSION }}/g' installer/lunremote/DEBIAN/control
+        sed -i 's/^Version:\s*v?([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)(-([[:alnum:]]+))?$/Version: \1.\2.\3/g' installer/lunremote/DEBIAN/control
         dpkg-deb --build installer/lunremote
 
     - uses: actions/upload-artifact@v1
