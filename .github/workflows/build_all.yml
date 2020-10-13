@@ -595,7 +595,8 @@ jobs:
     - name: ls
       run: |
         ls -l
-        ls -l lunremote-v0.0.33.deb
+        ls -l *
+        ls -l ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
 
     - name: Deploy server
       uses: actions/upload-release-asset@v1
