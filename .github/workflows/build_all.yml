@@ -99,7 +99,6 @@ jobs:
         echo "::set-output name=action_fruit::strawberry"
         echo "::save-state name=action_fruit2::strawberry"
         echo "::save-state name=processID2::12345"
-        console.log('::save-state name=processID::12345')
         console.log('::save-state name=APPLICATION_SHORT_VERSION::${{ steps.set_short_version.outputs.short_ver }}')
         console.log('::save-state name=APPLICATION_SHORT_VERSION3::${{ steps.set_short_version.outputs.short_ver }}')
 
