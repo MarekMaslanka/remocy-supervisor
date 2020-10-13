@@ -73,6 +73,7 @@ jobs:
       if: contains(github.ref, 'tags/')
       uses: allenevans/set-env@v1.0.0
       with:
+        overwrite: true
         APPLICATION_VERSION: ${GITHUB_REF/refs\/tags\//}
 
     - name: Prepare short version variable
