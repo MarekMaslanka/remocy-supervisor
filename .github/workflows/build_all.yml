@@ -487,7 +487,7 @@ jobs:
         move lunremote.exe ../artifact/
         move lunremoted.exe ../artifact/
         move lunremotesvc.exe ../artifact/
-        ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../artifact/" -dProductVersion="${{ env.APPLICATION_SHORT_VERSION }}" -dProductUpgradeCode=${{ steps.generate-uuid.outputs.uuid }} lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
+        ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../artifact/" -dProductVersion="${{ env.APPLICATION_SHORT_VERSION }}" -dProductId=${{ steps.generate-uuid.outputs.uuid }} lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
         ../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension Components.wixobj lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out ../lunremote-${{ env.APPLICATION_VERSION }}.msi
 
     - name: Build macOS DMG
