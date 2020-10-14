@@ -495,9 +495,8 @@ jobs:
       if: matrix.config.os == 'macos-latest'
       shell: cmake -P {0}
       run: |
-        execute_process(COMMAND ls -l)
-        execute_process(COMMAND ls -l installer)
-        execute_process(COMMAND cp -f installer/dmg-background* /usr/local/lib/node_modules/create-dmg/assets/)
+        execute_process(COMMAND cp -f installer/dmg-background.png /usr/local/lib/node_modules/create-dmg/assets/)
+        execute_process(COMMAND cp -f installer/dmg-background@2x.png /usr/local/lib/node_modules/create-dmg/assets/)
         execute_process(COMMAND mv artifact lunremote.app)
         execute_process(COMMAND create-dmg lunremote.app)
         execute_process(COMMAND mv "lunremote ${{ env.APPLICATION_VERSION }}.dmg" lunremote-${{ env.APPLICATION_VERSION }}.dmg)
