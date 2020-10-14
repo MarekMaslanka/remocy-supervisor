@@ -473,6 +473,7 @@ jobs:
         endif()
 
     - name: Set UUID
+      if: matrix.config.os == 'windows-latest'
       id: generate-uuid
       uses: filipstefansson/uuid-action@v1
 
@@ -494,7 +495,8 @@ jobs:
       if: matrix.config.os == 'macos-latest'
       shell: cmake -P {0}
       run: |
-        execute_process(COMMAND ls -l *)
+        execute_process(COMMAND ls -l)
+        execute_process(COMMAND ls -l installer)
         execute_process(COMMAND cp -f installer/dmg-background* /usr/local/lib/node_modules/create-dmg/assets/)
         execute_process(COMMAND mv artifact lunremote.app)
         execute_process(COMMAND create-dmg lunremote.app)
