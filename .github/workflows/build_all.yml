@@ -468,8 +468,8 @@ jobs:
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(COMMAND npm install --global create-dmg)
         elseif ("${{ runner.os }}" STREQUAL "Linux")
-          execute_process(COMMAND apt update)
-          execute_process(COMMAND apt install build-essential rpmbuild)
+          execute_process(COMMAND sudo apt update)
+          execute_process(COMMAND sudo apt install build-essential rpm)
         endif()
 
     - name: Set UUID
@@ -494,6 +494,8 @@ jobs:
       if: matrix.config.os == 'macos-latest'
       shell: cmake -P {0}
       run: |
+        execute_process(COMMAND ls -l *)
+        execute_process(COMMAND cp -f installer/dmg-background* /usr/local/lib/node_modules/create-dmg/assets/)
         execute_process(COMMAND mv artifact lunremote.app)
         execute_process(COMMAND create-dmg lunremote.app)
         execute_process(COMMAND mv "lunremote ${{ env.APPLICATION_VERSION }}.dmg" lunremote-${{ env.APPLICATION_VERSION }}.dmg)
@@ -507,11 +509,28 @@ jobs:
         cat installer/lunremote/DEBIAN/control
         dpkg-deb --build installer/lunremote
         mv installer/lunremote.deb ./lunremote-${{ env.APPLICATION_VERSION }}.deb
+    
+    - name: Build linux RPM
+      if: matrix.config.os == 'ubuntu-latest'
+      run: |
+        mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+        cp -rf installer/rpmbuild/* ~/rpmbuild/
+        cp artifact.tar ~/rpmbuild/SOURCES/
+        cd ~/rpmbuild/SPECS/
+        rpmbuild -bb lunremote.spec --target x86_64
+        cd -
+        mv ~/rpmbuild/RPMS/x86_64/* ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
     - uses: actions/upload-artifact@v1
       with:
         path: ./lunremote-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
         name: lunremote-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
+
+    - uses: actions/upload-artifact@v1
+      if: matrix.config.os == 'ubuntu-latest'
+      with:
+        path: ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
+        name: lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
   deploy:
     name: "Deploy application"
@@ -568,7 +587,7 @@ jobs:
         asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.dmg
         asset_content_type: application/octet-stream
 
-    - name: Deploy Linux deb application
+    - name: Deploy Linux DEB application
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -576,4 +595,14 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: artifacts/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.deb/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.deb
         asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.deb
+        asset_content_type: application/octet-stream
+
+    - name: Deploy Linux RPM application
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifacts/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.rpm/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.rpm
+        asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.rpm
         asset_content_type: application/octet-stream
