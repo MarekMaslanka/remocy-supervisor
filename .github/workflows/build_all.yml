@@ -56,7 +56,7 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(COMMAND sudo apt update)
           execute_process(
-            COMMAND sudo apt install libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxfixes-dev libxtst-dev libavformat-dev libswscale-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev tree
+            COMMAND sudo apt install libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxfixes-dev libxtst-dev libswscale-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev tree
           )
           execute_process(
             COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
@@ -368,16 +368,10 @@ jobs:
             file(COPY "server/lib/libopenh264-2.1.0-linux64.5.so" DESTINATION "artifact/lib/")
             file(COPY "server/tools/linux/crashpad_handler" DESTINATION "artifact/")
 
-            file(COPY /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 DESTINATION "artifact/lib/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 DESTINATION "artifact/lib/")
             file(COPY /usr/lib/x86_64-linux-gnu/libswresample.so.2.9.100 DESTINATION "artifact/lib/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libx264.so.152 DESTINATION "artifact/lib/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libx265.so.146 DESTINATION "artifact/lib/")
             file(COPY /usr/lib/x86_64-linux-gnu/libcrystalhd.so.3.6 DESTINATION "artifact/lib/")
             file(COPY /usr/lib/x86_64-linux-gnu/libvpx.so.5.0.0 DESTINATION "artifact/lib/")
             execute_process(
-              COMMAND ${CMAKE_COMMAND} -E create_symlink libavcodec.so.57.107.100 libavcodec.so.57
-              COMMAND ${CMAKE_COMMAND} -E create_symlink libavutil.so.55.78.100 libavutil.so.55
               COMMAND ${CMAKE_COMMAND} -E create_symlink libswresample.so.2.9.100 libswresample.so.2
               COMMAND ${CMAKE_COMMAND} -E create_symlink libcrystalhd.so.3.6 libcrystalhd.so.3
               COMMAND ${CMAKE_COMMAND} -E create_symlink libvpx.so.5.0.0 llibvpx.so.5
@@ -506,6 +500,10 @@ jobs:
       run: |
         size=`du -k artifact | tail -n 1 | cut -f 1`
         mkdir -p installer/lunremote/opt/lunremote
+        mkdir -p installer/lunremote/usr/bin
+        cd installer/lunremote/usr/bin
+        ln -s /opt/lunremote/lunremote lunremote
+        cd -
         mv artifact/* installer/lunremote/opt/lunremote/
         sed -i 's/1024/'"${size}"'/g' installer/lunremote/DEBIAN/control
         sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/lunremote/DEBIAN/control
