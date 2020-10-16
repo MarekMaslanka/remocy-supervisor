@@ -386,11 +386,11 @@ jobs:
             )
 
             file(WRITE "artifact/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
-            execute_process(
-              COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}"
-              COMMAND chmod a+x "${server_exec_name}.sh"
-              WORKING_DIRECTORY "artifact"
-            )
+#            execute_process(
+#              COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}"
+#              COMMAND chmod a+x "${server_exec_name}.sh"
+#              WORKING_DIRECTORY "artifact"
+#            )
           endif()
         endif()
 
@@ -468,7 +468,6 @@ jobs:
           file(DOWNLOAD "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip" wix311-binaries.zip)
           file(ARCHIVE_EXTRACT INPUT wix311-binaries.zip DESTINATION wix)
         elseif ("${{ runner.os }}" STREQUAL "macOS")
-          execute_process(COMMAND ls -l /usr/local/lib/node_modules/)
           execute_process(COMMAND npm install --global create-dmg)
           execute_process(COMMAND brew install graphicsmagick imagemagick)
         elseif ("${{ runner.os }}" STREQUAL "Linux")
@@ -499,10 +498,8 @@ jobs:
       if: matrix.config.os == 'macos-latest'
       shell: cmake -P {0}
       run: |
-        execute_process(COMMAND ls -l /usr/local/lib/node_modules/create-dmg/assets/)
         execute_process(COMMAND cp -f installer/dmg-background.png /usr/local/lib/node_modules/create-dmg/assets/)
         execute_process(COMMAND cp -f installer/dmg-background@2x.png /usr/local/lib/node_modules/create-dmg/assets/)
-        execute_process(COMMAND ls -l /usr/local/lib/node_modules/create-dmg/assets/)
         execute_process(COMMAND mv artifact lunremote.app)
         execute_process(COMMAND create-dmg lunremote.app)
         execute_process(COMMAND mv "lunremote ${{ env.APPLICATION_VERSION }}.dmg" lunremote-${{ env.APPLICATION_VERSION }}.dmg)
