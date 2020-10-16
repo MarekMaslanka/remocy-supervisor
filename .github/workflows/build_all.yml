@@ -386,11 +386,8 @@ jobs:
             )
 
             file(WRITE "artifact/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
-#            execute_process(
-#              COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}"
-#              COMMAND chmod a+x "${server_exec_name}.sh"
-#              WORKING_DIRECTORY "artifact"
-#            )
+            # execute_process(COMMAND patchelf --debug --set-rpath "$ORIGIN" "${server_exec_name}" WORKING_DIRECTORY "artifact")
+            execute_process(COMMAND chmod a+x "${server_exec_name}.sh" WORKING_DIRECTORY "artifact")
           endif()
         endif()
 
