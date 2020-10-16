@@ -365,6 +365,7 @@ jobs:
             set(server_exec_name "lunremoted")
             file(COPY "server/${server_exec_name}" DESTINATION "artifact/")
             file(COPY "server/lib/linux/libyuv2.so" DESTINATION "artifact/")
+            file(COPY "server/lib/libopenh264-2.1.0-linux64.5.so" DESTINATION "artifact/")
             file(COPY "server/tools/linux/crashpad_handler" DESTINATION "artifact/")
 
             file(COPY /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 DESTINATION "artifact/")
@@ -380,6 +381,7 @@ jobs:
               COMMAND ${CMAKE_COMMAND} -E create_symlink libswresample.so.2.9.100 libswresample.so.2
               COMMAND ${CMAKE_COMMAND} -E create_symlink libcrystalhd.so.3.6 libcrystalhd.so.3
               COMMAND ${CMAKE_COMMAND} -E create_symlink libvpx.so.5.0.0 libvpx.so.5
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libopenh264-2.1.0-linux64.5.so libopenh264.so.5
               WORKING_DIRECTORY "artifact"
             )
 
@@ -508,8 +510,10 @@ jobs:
     - name: Build linux DEB
       if: matrix.config.os == 'ubuntu-latest'
       run: |
-        mkdir -p installer/lunremote/opt
-        mv artifact/* installer/lunremote/opt/
+        size=`du -k artifact | tail -n 1 | cut -f 1`
+        mkdir -p installer/lunremote/opt/lunremote
+        mv artifact/* installer/lunremote/opt/lunremote/
+        sed -i 's/1024/'"${size}"'/g' installer/lunremote/DEBIAN/control
         sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/lunremote/DEBIAN/control
         cat installer/lunremote/DEBIAN/control
         dpkg-deb --build installer/lunremote
