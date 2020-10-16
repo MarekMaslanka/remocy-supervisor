@@ -376,13 +376,13 @@ jobs:
             file(COPY /usr/lib/x86_64-linux-gnu/libcrystalhd.so.3.6 DESTINATION "artifact/lib/")
             file(COPY /usr/lib/x86_64-linux-gnu/libvpx.so.5.0.0 DESTINATION "artifact/lib/")
             execute_process(
-              COMMAND ${CMAKE_COMMAND} -E create_symlink lib/libavcodec.so.57.107.100 lib/libavcodec.so.57
-              COMMAND ${CMAKE_COMMAND} -E create_symlink lib/libavutil.so.55.78.100 lib/libavutil.so.55
-              COMMAND ${CMAKE_COMMAND} -E create_symlink lib/libswresample.so.2.9.100 lib/libswresample.so.2
-              COMMAND ${CMAKE_COMMAND} -E create_symlink lib/libcrystalhd.so.3.6 lib/libcrystalhd.so.3
-              COMMAND ${CMAKE_COMMAND} -E create_symlink lib/libvpx.so.5.0.0 lib/libvpx.so.5
-              COMMAND ${CMAKE_COMMAND} -E create_symlink lib/libopenh264-2.1.0-linux64.5.so lib/libopenh264.so.5
-              WORKING_DIRECTORY "artifact"
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libavcodec.so.57.107.100 libavcodec.so.57
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libavutil.so.55.78.100 libavutil.so.55
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libswresample.so.2.9.100 libswresample.so.2
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libcrystalhd.so.3.6 libcrystalhd.so.3
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libvpx.so.5.0.0 llibvpx.so.5
+              COMMAND ${CMAKE_COMMAND} -E create_symlink libopenh264-2.1.0-linux64.5.so libopenh264.so.5
+              WORKING_DIRECTORY "artifact/lib"
             )
 
             file(WRITE "artifact/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
