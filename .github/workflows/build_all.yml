@@ -56,7 +56,7 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(COMMAND sudo apt update)
           execute_process(
-            COMMAND sudo apt install libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxfixes-dev libxtst-dev libavformat-dev libswscale-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev tree
+            COMMAND sudo apt install libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxfixes-dev libxtst-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev tree
           )
           execute_process(
             COMMAND wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
@@ -365,25 +365,14 @@ jobs:
             set(server_exec_name "lunremoted")
             file(COPY "server/${server_exec_name}" DESTINATION "artifact/")
             file(COPY "server/lib/linux/libyuv2.so" DESTINATION "artifact/lib/")
+            file(COPY "server/lib/linux/libavcodec.so" DESTINATION "artifact/lib/")
+            file(COPY "server/lib/linux/libavcodec.so.58" DESTINATION "artifact/lib/")
+            file(COPY "server/lib/linux/libavcodec.so.58.111.101" DESTINATION "artifact/lib/")
+            file(COPY "server/lib/linux/libavutil.so" DESTINATION "artifact/lib/")
+            file(COPY "server/lib/linux/libavutil.so.56" DESTINATION "artifact/lib/")
+            file(COPY "server/lib/linux/libavutil.so.56.60.100" DESTINATION "artifact/lib/")
             file(COPY "server/lib/libopenh264-2.1.0-linux64.5.so" DESTINATION "artifact/lib/")
             file(COPY "server/tools/linux/crashpad_handler" DESTINATION "artifact/")
-
-            file(COPY /usr/lib/x86_64-linux-gnu/libavcodec.so.57.107.100 DESTINATION "artifact/lib/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libavutil.so.55.78.100 DESTINATION "artifact/lib/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libswresample.so.2.9.100 DESTINATION "artifact/lib/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libx264.so.152 DESTINATION "artifact/lib/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libx265.so.146 DESTINATION "artifact/lib/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libcrystalhd.so.3.6 DESTINATION "artifact/lib/")
-            file(COPY /usr/lib/x86_64-linux-gnu/libvpx.so.5.0.0 DESTINATION "artifact/lib/")
-            execute_process(
-              COMMAND ${CMAKE_COMMAND} -E create_symlink libavcodec.so.57.107.100 libavcodec.so.57
-              COMMAND ${CMAKE_COMMAND} -E create_symlink libavutil.so.55.78.100 libavutil.so.55
-              COMMAND ${CMAKE_COMMAND} -E create_symlink libswresample.so.2.9.100 libswresample.so.2
-              COMMAND ${CMAKE_COMMAND} -E create_symlink libcrystalhd.so.3.6 libcrystalhd.so.3
-              COMMAND ${CMAKE_COMMAND} -E create_symlink libvpx.so.5.0.0 llibvpx.so.5
-              COMMAND ${CMAKE_COMMAND} -E create_symlink libopenh264-2.1.0-linux64.5.so libopenh264.so.5
-              WORKING_DIRECTORY "artifact/lib"
-            )
 
             file(WRITE "artifact/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
             execute_process(COMMAND patchelf --debug --set-rpath "$ORIGIN/lib" ${server_exec_name} WORKING_DIRECTORY "artifact")
