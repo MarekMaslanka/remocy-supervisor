@@ -374,7 +374,8 @@ jobs:
             file(COPY "server/lib/libopenh264-2.1.0-linux64.5.so" DESTINATION "artifact/lib/")
             file(COPY "server/tools/linux/crashpad_handler" DESTINATION "artifact/")
 
-            file(WRITE "artifact/${server_exec_name}.sh" "LD_LIBRARY_PATH=. ./${server_exec_name}")
+            file(WRITE "artifact/${server_exec_name}.sh" "LD_LIBRARY_PATH=./lib ./${server_exec_name}")
+            execute_process(COMMAND cp ${server_exec_name} ${server_exec_name}2 WORKING_DIRECTORY "artifact")
             execute_process(COMMAND patchelf --debug --set-rpath "$ORIGIN/lib" ${server_exec_name} WORKING_DIRECTORY "artifact")
             execute_process(COMMAND chmod a+x "${server_exec_name}.sh" WORKING_DIRECTORY "artifact")
           endif()
