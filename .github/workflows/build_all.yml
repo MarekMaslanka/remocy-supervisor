@@ -301,7 +301,7 @@ jobs:
             COMMAND chmod a+x linuxdeployqt
           )
           execute_process(
-            COMMAND ../../../../linuxdeployqt ../../../../artifact/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -libpath=../../../../artifact/ -verbose=2
+            COMMAND ../../../../linuxdeployqt ../../../../artifact/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=2
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
 
@@ -377,6 +377,7 @@ jobs:
             execute_process(COMMAND cp ${server_exec_name} ${server_exec_name}2 WORKING_DIRECTORY "artifact")
             execute_process(COMMAND patchelf --debug --set-rpath "$ORIGIN/lib" ${server_exec_name} WORKING_DIRECTORY "artifact")
             execute_process(COMMAND chmod a+x "${server_exec_name}.sh" WORKING_DIRECTORY "artifact")
+            execute_process(COMMAND patchelf --debug --remove-rpath lib/libopenh264.so.5 WORKING_DIRECTORY "artifact")
           endif()
         endif()
 
