@@ -301,7 +301,7 @@ jobs:
             COMMAND chmod a+x linuxdeployqt
           )
           execute_process(
-            COMMAND ../../../../linuxdeployqt ../../../../artifact/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=2
+            COMMAND ../../../../linuxdeployqt ../../../../artifact/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -libpath=../../../../artifact/ -verbose=2
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
 
@@ -371,7 +371,6 @@ jobs:
             file(COPY "server/lib/linux/libavutil.so" DESTINATION "artifact/lib/")
             file(COPY "server/lib/linux/libavutil.so.56" DESTINATION "artifact/lib/")
             file(COPY "server/lib/linux/libavutil.so.56.60.100" DESTINATION "artifact/lib/")
-            file(COPY "server/lib/libopenh264-2.1.0-linux64.5.so" DESTINATION "artifact/lib/")
             file(COPY "server/tools/linux/crashpad_handler" DESTINATION "artifact/")
 
             file(WRITE "artifact/${server_exec_name}.sh" "LD_LIBRARY_PATH=./lib ./${server_exec_name}")
