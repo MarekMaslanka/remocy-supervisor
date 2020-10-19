@@ -470,23 +470,23 @@ jobs:
     - name: Build windows MSI installer
       if: matrix.config.os == 'windows-latest'
       run: |
-        cd installer
-        move ../artifact/lunremote.exe .
-        move ../artifact/lunremoted.exe .
-        move ../artifact/lunremotesvc.exe .
-        ../wix/heat.exe dir "../artifact" -cg RestProductComponentsGroup -dr INSTALLDIR -gg -sfrag -srd -var var.SourceFilesDir -out "Components.wxs"
-        move lunremote.exe ../artifact/
-        move lunremoted.exe ../artifact/
-        move lunremotesvc.exe ../artifact/
-        ../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../artifact/" -dProductVersion="${{ env.APPLICATION_SHORT_VERSION }}" -dProductId=${{ steps.generate-uuid.outputs.uuid }} lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
-        ../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension Components.wixobj lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out ../lunremote-${{ env.APPLICATION_VERSION }}.msi
+        cd installer/win
+        move ../../artifact/lunremote.exe .
+        move ../../artifact/lunremoted.exe .
+        move ../../artifact/lunremotesvc.exe .
+        ../../wix/heat.exe dir "../../artifact" -cg RestProductComponentsGroup -dr INSTALLDIR -gg -sfrag -srd -var var.SourceFilesDir -out "Components.wxs"
+        move lunremote.exe ../../artifact/
+        move lunremoted.exe ../../artifact/
+        move lunremotesvc.exe ../../artifact/
+        ../../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../../artifact/" -dProductVersion="${{ env.APPLICATION_SHORT_VERSION }}" -dProductId=${{ steps.generate-uuid.outputs.uuid }} lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
+        ../../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension Components.wixobj lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out ../../lunremote-${{ env.APPLICATION_VERSION }}.msi
 
     - name: Build macOS DMG
       if: matrix.config.os == 'macos-latest'
       shell: cmake -P {0}
       run: |
-        execute_process(COMMAND cp -f installer/dmg-background.png /usr/local/lib/node_modules/create-dmg/assets/)
-        execute_process(COMMAND cp -f installer/dmg-background@2x.png /usr/local/lib/node_modules/create-dmg/assets/)
+        execute_process(COMMAND cp -f installer/macos/dmg-background.png /usr/local/lib/node_modules/create-dmg/assets/)
+        execute_process(COMMAND cp -f installer/macos/dmg-background@2x.png /usr/local/lib/node_modules/create-dmg/assets/)
         execute_process(COMMAND mv artifact lunremote.app)
         execute_process(COMMAND create-dmg lunremote.app)
         execute_process(COMMAND mv "lunremote ${{ env.APPLICATION_VERSION }}.dmg" lunremote-${{ env.APPLICATION_VERSION }}.dmg)
@@ -495,27 +495,27 @@ jobs:
       if: matrix.config.os == 'ubuntu-latest'
       run: |
         size=`du -k artifact | tail -n 1 | cut -f 1`
-        mkdir -p installer/lunremote/opt/lunremote
-        mkdir -p installer/lunremote/usr/bin
-        cd installer/lunremote/usr/bin
+        mkdir -p installer/linux/deb/lunremote/opt/lunremote
+        mkdir -p installer/linux/deb/lunremote/usr/bin
+        cd installer/linux/deb/lunremote/usr/bin
         ln -s /opt/lunremote/lunremote lunremote
         cd -
-        mv artifact/* installer/lunremote/opt/lunremote/
-        sed -i 's/1024/'"${size}"'/g' installer/lunremote/DEBIAN/control
-        sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/lunremote/DEBIAN/control
-        cat installer/lunremote/DEBIAN/control
-        dpkg-deb --build installer/lunremote
-        mv installer/lunremote.deb ./lunremote-${{ env.APPLICATION_VERSION }}.deb
+        mv installer/linux/root/* installer/linux/deb/lunremote/
+        mv artifact/* installer/linux/deb/lunremote/opt/lunremote/
+        sed -i 's/1024/'"${size}"'/g' installer/linux/deb/lunremote/DEBIAN/control
+        sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/linux/deb/lunremote/DEBIAN/control
+        dpkg-deb --build installer/linux/deb/lunremote
+        mv installer/linux/deb/lunremote.deb ./lunremote-${{ env.APPLICATION_VERSION }}.deb
     
     - name: Build linux RPM
       if: matrix.config.os == 'ubuntu-latest'
       run: |
-        cd installer/linux/
+        cd installer/linux/root
         tar -cf data.tar .
         cd -
         mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
-        cp -rf installer/rpmbuild/* ~/rpmbuild/
-        cp installer/linux/data.tar ~/rpmbuild/SOURCES/
+        cp -rf installer/rpm/* ~/rpmbuild/
+        cp installer/linux/root/data.tar ~/rpmbuild/SOURCES/
         cp artifact.tar ~/rpmbuild/SOURCES/
         cd ~/rpmbuild/SPECS/
         rpmbuild -bb lunremote.spec --target x86_64
