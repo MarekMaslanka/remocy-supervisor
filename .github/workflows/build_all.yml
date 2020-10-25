@@ -394,7 +394,6 @@ jobs:
         path: ./server/build/Release/lunremoted.dSYM
         name: lunremoted-${{ env.APPLICATION_VERSION }}.dSYM
 
-
   build_RPM:
     name: Submit a build from Fedora container
     # Run in Fedora container on Ubuntu VM (no direct Fedora support)
@@ -402,6 +401,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Installing system libs
+      run: |
+        sudo yum -y install cmake rpm-install
+
     - name: Prepare versions variable
       shell: cmake -P {0}
       run: |
@@ -418,7 +421,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
-        name: artifact-${{ matrix.config.os }}.tar
+        name: artifact-ubuntu-latest.tar
 
     - name: UnTar files
       run: tar -xf artifact.tar
@@ -448,7 +451,7 @@ jobs:
 
     - uses: actions/upload-artifact@v1
       with:
-        path: ${{ steps.rpm.outputs.rpm_dir_path }}
+        path: ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
         name: lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
   installer:
@@ -546,7 +549,7 @@ jobs:
         execute_process(COMMAND mv "lunremote ${{ env.APPLICATION_VERSION }}.dmg" lunremote-${{ env.APPLICATION_VERSION }}.dmg)
 
     - name: Build linux DEB package
-      if: matrix.config.os == 'ubuntu-latest1'
+      if: matrix.config.os == 'ubuntu-latest'
       run: |
         size=`du -k artifact | tail -n 1 | cut -f 1`
         mkdir -p installer/linux/deb/lunremote/opt/lunremote
