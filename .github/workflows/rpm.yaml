@@ -22,7 +22,7 @@ jobs:
     steps:
     - name: Installing system libs
       run: |
-        sudo yum -y install cmake rpm-install
+        sudo yum -y install cmake rpm-build
 
     - name: Prepare versions variable
       shell: cmake -P {0}
