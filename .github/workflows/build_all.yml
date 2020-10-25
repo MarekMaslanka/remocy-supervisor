@@ -523,13 +523,15 @@ jobs:
         cp artifact.tar ~/rpmbuild/SOURCES/
         cd ~/rpmbuild/SPECS/
         cd -
+        ls -l ~/rpmbuild/SPECS/lunremote.spec
+        ls -l ~/
 
     - name: Build Linux RPM package
       if: matrix.config.os == 'ubuntu-latest'
       id: rpm
       uses: naveenrajm7/rpmbuild@master
       with:
-        spec_file: "~/rpmbuild/SPECS/lunremote.spec"
+        spec_file: "rpmbuild/SPECS/lunremote.spec"
 
     - uses: actions/upload-artifact@v1
       with:
