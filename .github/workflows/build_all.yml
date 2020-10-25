@@ -510,7 +510,7 @@ jobs:
       run: |
         cd installer/linux/root
         mkdir -p opt/lunremote
-        cp lunremoted.sh opt/lunremote
+        cp ../lunremoted.sh opt/lunremote
         tar -cf data.tar .
         cd -
         mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
