@@ -395,7 +395,7 @@ jobs:
         name: lunremoted-${{ env.APPLICATION_VERSION }}.dSYM
 
 
-  build RPM:
+  build_RPM:
     name: Submit a build from Fedora container
     # Run in Fedora container on Ubuntu VM (no direct Fedora support)
     container: fedora:latest
