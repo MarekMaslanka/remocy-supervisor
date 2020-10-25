@@ -38,7 +38,19 @@ jobs:
         endif()
 
     - name: UnTar files
-      run: touch artifact.tar
+      run:  |
+        mkdir -p artifact/opt/lunremote
+        mkdir -p artifact/usr/bin
+        mkdir -p artifact/usr/lib/systemd/system
+        mkdir -p artifact/usr/share/icons/hicolor
+        mkdir -p artifact/usr/share/applications
+        mkdir -p artifact/usr/share/pixmaps
+        mkdir -p artifact/usr/share/menu
+        cd artifact
+        touch usr/lib/systemd/system/lunremote.service
+        touch usr/binlunremote
+        cd ..
+        tar cf artifact.tar artifact
 
     - name: Checkout installer
       uses: actions/checkout@v2
