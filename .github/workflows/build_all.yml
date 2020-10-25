@@ -373,10 +373,7 @@ jobs:
             file(COPY "server/lib/linux/libavutil.so.56.60.100" DESTINATION "artifact/lib/")
             file(COPY "server/tools/linux/crashpad_handler" DESTINATION "artifact/")
 
-            file(WRITE "artifact/${server_exec_name}.sh" "LD_LIBRARY_PATH=./lib ./${server_exec_name}")
-            execute_process(COMMAND cp ${server_exec_name} ${server_exec_name}2 WORKING_DIRECTORY "artifact")
             execute_process(COMMAND patchelf --debug --set-rpath "$ORIGIN/lib" ${server_exec_name} WORKING_DIRECTORY "artifact")
-            execute_process(COMMAND chmod a+x "${server_exec_name}.sh" WORKING_DIRECTORY "artifact")
             execute_process(COMMAND patchelf --debug --remove-rpath lib/libopenh264.so.5 WORKING_DIRECTORY "artifact")
           endif()
         endif()
@@ -502,6 +499,7 @@ jobs:
         cd -
         mv artifact/* installer/linux/deb/lunremote/opt/lunremote/
         rsync -a installer/linux/root/ installer/linux/deb/lunremote/
+        cp installer/linux/lunremoted.sh installer/linux/deb/lunremote/opt/lunremote
         sed -i 's/1024/'"${size}"'/g' installer/linux/deb/lunremote/DEBIAN/control
         sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/linux/deb/lunremote/DEBIAN/control
         dpkg-deb --build installer/linux/deb/lunremote
@@ -511,6 +509,8 @@ jobs:
       if: matrix.config.os == 'ubuntu-latest'
       run: |
         cd installer/linux/root
+        mkdir -p opt/lunremote
+        cp lunremoted.sh opt/lunremote
         tar -cf data.tar .
         cd -
         mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
