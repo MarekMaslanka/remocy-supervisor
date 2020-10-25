@@ -523,7 +523,7 @@ jobs:
         cp artifact.tar ~/rpmbuild/SOURCES/
         cd ~/rpmbuild/SPECS/
         cd -
-        mv ~/rpmbuild .
+        mv ~/rpmbuild rpmbuild2
         pwd
         ls -l
         ls -l rpmbuild
@@ -534,7 +534,7 @@ jobs:
       id: rpm
       uses: naveenrajm7/rpmbuild@master
       with:
-        spec_file: "./rpmbuild/SPECS/lunremote.spec"
+        spec_file: "./rpmbuild2/SPECS/lunremote.spec"
 
     - uses: actions/upload-artifact@v1
       with:
