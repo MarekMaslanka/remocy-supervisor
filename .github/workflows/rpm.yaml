@@ -1,0 +1,69 @@
+name: Build All
+
+on: [push]
+
+env:
+  QT_VERSION: 5.15.1
+  QT_CREATOR_VERSION: 4.12.3
+  APPLICATION_NAME: lunremote
+  CLIENT_APPLICATION_NAME: lunremote
+  CLIENT_APPLICATION_PRO: remocy-client.pro
+  SERVER_APPLICATION_NAME: lunremoted
+  APPLICATION_VERSION: v0.0.1-dev
+  APPLICATION_SHORT_VERSION: 0.0.0
+
+jobs:
+  build_RPM:
+    name: Submit a build from Fedora container
+    # Run in Fedora container on Ubuntu VM (no direct Fedora support)
+    container: fedora:latest
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Installing system libs
+      run: |
+        sudo yum -y install cmake rpm-install
+
+    - name: Prepare versions variable
+      shell: cmake -P {0}
+      run: |
+        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
+          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
+          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
+          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        else()
+          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        endif()
+
+    - name: UnTar files
+      run: touch artifact.tar
+
+    - name: Checkout installer
+      uses: actions/checkout@v2
+      with:
+        path: installer
+        repository: MarekMaslanka/remocy-installer
+        token: ${{ secrets.ACCESS_TOKEN }}
+
+    - name: Prepare linux RPM package
+      run: |
+        cd installer/linux/root
+        mkdir -p opt/lunremote
+        cp ../lunremoted.sh opt/lunremote
+        tar -cf data.tar .
+        cd -
+        mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+        cp -rf installer/linux/rpm/* ~/rpmbuild/
+        cp installer/linux/root/data.tar ~/rpmbuild/SOURCES/
+        cp artifact.tar ~/rpmbuild/SOURCES/
+        cd ~/rpmbuild/SPECS/
+        rpmbuild -bb lunremote.spec --target x86_64
+        cd -
+        mv ~/rpmbuild/RPMS/x86_64/* ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
+
+    - uses: actions/upload-artifact@v1
+      with:
+        path: ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
+        name: lunremote-${{ env.APPLICATION_VERSION }}.rpm
