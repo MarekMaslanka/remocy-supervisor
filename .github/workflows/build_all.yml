@@ -523,6 +523,9 @@ jobs:
         cp artifact.tar ~/rpmbuild/SOURCES/
         cd ~/rpmbuild/SPECS/
         cd -
+        mv ~/rpmbuild .
+        pwd
+        ls -l
 
     - name: Build Linux RPM package
       if: matrix.config.os == 'ubuntu-latest'
