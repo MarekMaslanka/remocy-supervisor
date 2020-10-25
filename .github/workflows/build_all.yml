@@ -398,6 +398,7 @@ jobs:
     name: Make installer for Linux - RPM
     container: fedora:latest
     runs-on: ubuntu-latest
+    needs: build
 
     steps:
     - name: Installing system libs
