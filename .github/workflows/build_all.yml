@@ -489,7 +489,7 @@ jobs:
         execute_process(COMMAND mv "lunremote ${{ env.APPLICATION_VERSION }}.dmg" lunremote-${{ env.APPLICATION_VERSION }}.dmg)
 
     - name: Build linux DEB package
-      if: matrix.config.os == 'ubuntu-latest'
+      if: matrix.config.os == 'ubuntu-latest1'
       run: |
         size=`du -k artifact | tail -n 1 | cut -f 1`
         mkdir -p installer/linux/deb/lunremote/opt/lunremote
@@ -526,8 +526,8 @@ jobs:
         mv ~/rpmbuild rpmbuild2
         pwd
         ls -l
-        ls -l rpmbuild
-        ls -l rpmbuild/SPECS
+        ls -l rpmbuild2
+        ls -l rpmbuild2/SPECS
 
     - name: Build Linux RPM package
       if: matrix.config.os == 'ubuntu-latest'
