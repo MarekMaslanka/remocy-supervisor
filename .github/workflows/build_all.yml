@@ -488,7 +488,7 @@ jobs:
         execute_process(COMMAND create-dmg lunremote.app)
         execute_process(COMMAND mv "lunremote ${{ env.APPLICATION_VERSION }}.dmg" lunremote-${{ env.APPLICATION_VERSION }}.dmg)
 
-    - name: Build linux DEB
+    - name: Build linux DEB package
       if: matrix.config.os == 'ubuntu-latest'
       run: |
         size=`du -k artifact | tail -n 1 | cut -f 1`
@@ -505,7 +505,7 @@ jobs:
         dpkg-deb --build installer/linux/deb/lunremote
         mv installer/linux/deb/lunremote.deb ./lunremote-${{ env.APPLICATION_VERSION }}.deb
     
-    - name: Build linux RPM
+    - name: Prepare linux RPM package
       if: matrix.config.os == 'ubuntu-latest'
       run: |
         wget https://download-ib01.fedoraproject.org/pub/fedora/linux/updates/32/Everything/x86_64/Packages/s/systemd-rpm-macros-245.8-2.fc32.noarch.rpm
@@ -523,9 +523,8 @@ jobs:
         cp artifact.tar ~/rpmbuild/SOURCES/
         cd ~/rpmbuild/SPECS/
         cd -
-        mv ~/rpmbuild/RPMS/x86_64/* ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
-    - name: build RPM package
+    - name: Build Linux RPM package
       if: matrix.config.os == 'ubuntu-latest'
       id: rpm
       uses: naveenrajm7/rpmbuild@master
