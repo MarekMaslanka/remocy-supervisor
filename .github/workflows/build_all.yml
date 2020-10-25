@@ -534,7 +534,7 @@ jobs:
       id: rpm
       uses: naveenrajm7/rpmbuild@master
       with:
-        spec_file: "./lunremote.spec"
+        spec_file: "./rpmbuild/SPECS/lunremote.spec"
 
     - uses: actions/upload-artifact@v1
       with:
