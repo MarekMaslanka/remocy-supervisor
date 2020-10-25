@@ -394,6 +394,64 @@ jobs:
         path: ./server/build/Release/lunremoted.dSYM
         name: lunremoted-${{ env.APPLICATION_VERSION }}.dSYM
 
+
+  build RPM:
+    name: Submit a build from Fedora container
+    # Run in Fedora container on Ubuntu VM (no direct Fedora support)
+    container: fedora:latest
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Prepare versions variable
+      shell: cmake -P {0}
+      run: |
+        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
+          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
+          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
+          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        else()
+          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        endif()
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: artifact-${{ matrix.config.os }}.tar
+
+    - name: UnTar files
+      run: tar -xf artifact.tar
+
+    - name: Checkout installer
+      uses: actions/checkout@v2
+      with:
+        path: installer
+        repository: MarekMaslanka/remocy-installer
+        token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Prepare linux RPM package
+      run: |
+        cd installer/linux/root
+        mkdir -p opt/lunremote
+        cp ../lunremoted.sh opt/lunremote
+        tar -cf data.tar .
+        cd -
+        mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+        cp -rf installer/linux/rpm/* ~/rpmbuild/
+        cp installer/linux/root/data.tar ~/rpmbuild/SOURCES/
+        cp artifact.tar ~/rpmbuild/SOURCES/
+        cd ~/rpmbuild/SPECS/
+        rpmbuild -bb lunremote.spec --target x86_64
+        cd -
+        mv ~/rpmbuild/RPMS/x86_64/* ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
+
+    - uses: actions/upload-artifact@v1
+      if: matrix.config.os == 'ubuntu-latest'
+      with:
+        path: ${{ steps.rpm.outputs.rpm_dir_path }}
+        name: lunremote-${{ env.APPLICATION_VERSION }}.rpm
+
   installer:
     name: Make installer for ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -504,44 +562,11 @@ jobs:
         sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/linux/deb/lunremote/DEBIAN/control
         dpkg-deb --build installer/linux/deb/lunremote
         mv installer/linux/deb/lunremote.deb ./lunremote-${{ env.APPLICATION_VERSION }}.deb
-    
-    - name: Prepare linux RPM package
-      if: matrix.config.os == 'ubuntu-latest'
-      run: |
-        wget https://download-ib01.fedoraproject.org/pub/fedora/linux/updates/32/Everything/x86_64/Packages/s/systemd-rpm-macros-245.8-2.fc32.noarch.rpm
-        sudo alien -i systemd-rpm-macros-245.8-2.fc32.noarch.rpm
-        sudo mkdir /usr/lib/rpm/debian/
-        sudo cp -rf /usr/lib/rpm/macros /usr/lib/rpm/debian/
-        cd installer/linux/root
-        mkdir -p opt/lunremote
-        cp ../lunremoted.sh opt/lunremote
-        tar -cf data.tar .
-        cd -
-        mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
-        cp -rf installer/linux/rpm/* ~/rpmbuild/
-        cp installer/linux/root/data.tar ~/rpmbuild/SOURCES/
-        cp artifact.tar ~/rpmbuild/SOURCES/
-        cd ~/rpmbuild/SPECS/
-        cd -
-        mv ~/rpmbuild/* .
-        pwd
-        ls -l *
-
-    - name: Build Linux RPM package
-      if: matrix.config.os == 'ubuntu-latest'
-      id: rpm
-      uses: robertdebock/rpmbuild-action@1.1.1
 
     - uses: actions/upload-artifact@v1
       with:
         path: ./lunremote-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
         name: lunremote-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
-
-    - uses: actions/upload-artifact@v1
-      if: matrix.config.os == 'ubuntu-latest'
-      with:
-        path: ${{ steps.rpm.outputs.rpm_dir_path }}
-        name: lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
   deploy:
     name: "Deploy application"
