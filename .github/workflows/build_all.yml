@@ -526,6 +526,7 @@ jobs:
         mv ~/rpmbuild/RPMS/x86_64/* ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
     - name: build RPM package
+      if: matrix.config.os == 'ubuntu-latest'
       id: rpm
       uses: naveenrajm7/rpmbuild@master
       with:
