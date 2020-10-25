@@ -522,7 +522,6 @@ jobs:
         cp installer/linux/root/data.tar ~/rpmbuild/SOURCES/
         cp artifact.tar ~/rpmbuild/SOURCES/
         cd ~/rpmbuild/SPECS/
-#        rpmbuild -bb lunremote.spec --target x86_64
         cd -
         mv ~/rpmbuild/RPMS/x86_64/* ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
@@ -541,7 +540,6 @@ jobs:
       if: matrix.config.os == 'ubuntu-latest'
       with:
         path: ${{ steps.rpm.outputs.rpm_dir_path }}
-#        path: ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
         name: lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
   deploy:
