@@ -510,6 +510,8 @@ jobs:
       run: |
         wget https://download-ib01.fedoraproject.org/pub/fedora/linux/updates/32/Everything/x86_64/Packages/s/systemd-rpm-macros-245.8-2.fc32.noarch.rpm
         sudo alien -i systemd-rpm-macros-245.8-2.fc32.noarch.rpm
+        sudo mkdir /usr/lib/rpm/debian/
+        sudo cp -rf /usr/lib/rpm/macros /usr/lib/rpm/debian/
         cd installer/linux/root
         mkdir -p opt/lunremote
         cp ../lunremoted.sh opt/lunremote
@@ -520,9 +522,15 @@ jobs:
         cp installer/linux/root/data.tar ~/rpmbuild/SOURCES/
         cp artifact.tar ~/rpmbuild/SOURCES/
         cd ~/rpmbuild/SPECS/
-        rpmbuild -bb lunremote.spec --target x86_64
+#        rpmbuild -bb lunremote.spec --target x86_64
         cd -
         mv ~/rpmbuild/RPMS/x86_64/* ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
+
+    - name: build RPM package
+      id: rpm
+      uses: naveenrajm7/rpmbuild@master
+      with:
+        spec_file: "~/rpmbuild/SPECS/lunremote.spec"
 
     - uses: actions/upload-artifact@v1
       with:
@@ -532,7 +540,8 @@ jobs:
     - uses: actions/upload-artifact@v1
       if: matrix.config.os == 'ubuntu-latest'
       with:
-        path: ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
+        path: ${{ steps.rpm.outputs.rpm_dir_path }}
+#        path: ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
         name: lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
   deploy:
