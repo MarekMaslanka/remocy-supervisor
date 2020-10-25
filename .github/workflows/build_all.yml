@@ -456,7 +456,7 @@ jobs:
           execute_process(COMMAND brew install graphicsmagick imagemagick)
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(COMMAND sudo apt update)
-          execute_process(COMMAND sudo apt install build-essential rpm)
+          execute_process(COMMAND sudo apt install build-essential rpm alien)
         endif()
 
     - name: Set UUID
@@ -508,6 +508,8 @@ jobs:
     - name: Build linux RPM
       if: matrix.config.os == 'ubuntu-latest'
       run: |
+        wget https://download-ib01.fedoraproject.org/pub/fedora/linux/updates/32/Everything/x86_64/Packages/s/systemd-rpm-macros-245.8-2.fc32.noarch.rpm
+        sudo alien -i systemd-rpm-macros-245.8-2.fc32.noarch.rpm
         cd installer/linux/root
         mkdir -p opt/lunremote
         cp ../lunremoted.sh opt/lunremote
