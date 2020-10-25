@@ -394,16 +394,15 @@ jobs:
         path: ./server/build/Release/lunremoted.dSYM
         name: lunremoted-${{ env.APPLICATION_VERSION }}.dSYM
 
-  build_RPM:
-    name: Submit a build from Fedora container
-    # Run in Fedora container on Ubuntu VM (no direct Fedora support)
+  installer_RPM:
+    name: Make installer for Linux - RPM
     container: fedora:latest
     runs-on: ubuntu-latest
 
     steps:
     - name: Installing system libs
       run: |
-        sudo yum -y install cmake rpm-install
+        sudo yum -y install cmake rpm-build
 
     - name: Prepare versions variable
       shell: cmake -P {0}
