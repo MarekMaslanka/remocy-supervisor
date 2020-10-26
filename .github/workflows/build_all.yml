@@ -396,7 +396,7 @@ jobs:
 
   installer_RPM:
     name: Make installer for Linux - RPM
-    container: fedora:latest
+    container: fedora:32
     runs-on: ubuntu-latest
     needs: build
 
