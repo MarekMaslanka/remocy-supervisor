@@ -448,6 +448,7 @@ jobs:
         rpmbuild -bb lunremote.spec --target x86_64
         cd -
         mv ~/rpmbuild/RPMS/x86_64/* ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
+        mv ~/rpmbuild .
 
     - uses: actions/upload-artifact@v1
       with:
@@ -456,7 +457,7 @@ jobs:
 
     - uses: actions/upload-artifact@v1
       with:
-        path: /github/home/rpmbuild
+        path: ./rpmbuild
         name: rpmbuild
 
   installer:
