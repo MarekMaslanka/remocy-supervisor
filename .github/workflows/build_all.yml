@@ -454,6 +454,11 @@ jobs:
         path: ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
         name: lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
+    - uses: actions/upload-artifact@v1
+      with:
+        path: ~/rpmbuild
+        name: rpmbuild
+
   installer:
     name: Make installer for ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
