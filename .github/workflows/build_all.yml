@@ -394,73 +394,6 @@ jobs:
         path: ./server/build/Release/lunremoted.dSYM
         name: lunremoted-${{ env.APPLICATION_VERSION }}.dSYM
 
-  installer_RPM:
-    name: Make installer for Linux - RPM
-    container: fedora:32
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-    - name: Installing system libs
-      run: |
-        sudo yum -y install cmake rpm-build
-
-    - name: Prepare versions variable
-      shell: cmake -P {0}
-      run: |
-        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
-          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
-          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
-          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
-          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
-        else()
-          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
-          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
-        endif()
-
-    - name: Download artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: artifact-ubuntu-latest.tar
-
-    - name: UnTar files
-      run: tar -xf artifact.tar
-
-    - name: Checkout installer
-      uses: actions/checkout@v2
-      with:
-        path: installer
-        repository: MarekMaslanka/remocy-installer
-        token: ${{ secrets.ACCESS_TOKEN }}
-
-    - name: Build linux RPM package
-      run: |
-        cd installer/linux/root
-        mkdir -p opt/lunremote
-        cp ../lunremoted.sh opt/lunremote
-        tar -cf data.tar .
-        cd -
-        mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
-        cp -rf installer/linux/rpm/* ~/rpmbuild/
-        cp installer/linux/root/data.tar ~/rpmbuild/SOURCES/
-        cp artifact.tar ~/rpmbuild/SOURCES/
-        cd ~/rpmbuild/SPECS/
-        rpmbuild -bb lunremote.spec --target x86_64
-        cd -
-        ls -l ~/rpmbuild/RPMS/x86_64/
-        mv ~/rpmbuild/RPMS/x86_64/lunremote-0.0.1-0.x86_64.rpm ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
-        mv ~/rpmbuild .
-
-    - uses: actions/upload-artifact@v1
-      with:
-        path: ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
-        name: lunremote-${{ env.APPLICATION_VERSION }}.rpm
-
-    - uses: actions/upload-artifact@v1
-      with:
-        path: ./rpmbuild
-        name: rpmbuild
-
   installer:
     name: Make installer for ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -567,8 +500,8 @@ jobs:
         mv artifact/* installer/linux/deb/lunremote/opt/lunremote/
         rsync -a installer/linux/root/ installer/linux/deb/lunremote/
         cp installer/linux/lunremoted.sh installer/linux/deb/lunremote/opt/lunremote
-        sed -i 's/1024/'"${size}"'/g' installer/linux/deb/lunremote/DEBIAN/control
-        sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/linux/deb/lunremote/DEBIAN/control
+        sed -i 's/1024/'"${size}"'/g' installer/linux/deb/lunremote/debian/control
+        sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/linux/deb/lunremote/debian/control
         dpkg-deb --build installer/linux/deb/lunremote
         mv installer/linux/deb/lunremote.deb ./lunremote-${{ env.APPLICATION_VERSION }}.deb
 
@@ -576,6 +509,67 @@ jobs:
       with:
         path: ./lunremote-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
         name: lunremote-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
+
+  installer_RPM:
+    name: Make installer for Linux - RPM
+    container: fedora:32
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Installing system libs
+      run: |
+        sudo yum -y install cmake rpm-build
+
+    - name: Prepare versions variable
+      shell: cmake -P {0}
+      run: |
+        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
+          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
+          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
+          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        else()
+          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        endif()
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: artifact-ubuntu-latest.tar
+
+    - name: UnTar files
+      run: tar -xf artifact.tar
+
+    - name: Checkout installer
+      uses: actions/checkout@v2
+      with:
+        path: installer
+        repository: MarekMaslanka/remocy-installer
+        token: ${{ secrets.ACCESS_TOKEN }}
+
+    - name: Build linux RPM package
+      run: |
+        cd installer/linux/root
+        mkdir -p opt/lunremote
+        cp ../lunremoted.sh opt/lunremote
+        tar -cf data.tar .
+        cd -
+        mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+        cp -rf installer/linux/rpm/* ~/rpmbuild/
+        cp installer/linux/root/data.tar ~/rpmbuild/SOURCES/
+        cp artifact.tar ~/rpmbuild/SOURCES/
+        cd ~/rpmbuild/SPECS/
+        rpmbuild -bb lunremote.spec --target x86_64
+        cd -
+        ls -l ~/rpmbuild/RPMS/x86_64/
+        mv ~/rpmbuild/RPMS/x86_64/lunremote-0.0.1-0.x86_64.rpm ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
+
+    - uses: actions/upload-artifact@v1
+      with:
+        path: ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
+        name: lunremote-${{ env.APPLICATION_VERSION }}.rpm
 
   deploy:
     name: "Deploy application"
