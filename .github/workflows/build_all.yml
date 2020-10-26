@@ -433,7 +433,7 @@ jobs:
         repository: MarekMaslanka/remocy-installer
         token: ${{ secrets.ACCESS_TOKEN }}
 
-    - name: Prepare linux RPM package
+    - name: Build linux RPM package
       run: |
         cd installer/linux/root
         mkdir -p opt/lunremote
@@ -456,7 +456,7 @@ jobs:
 
     - uses: actions/upload-artifact@v1
       with:
-        path: ~/rpmbuild
+        path: /github/home/rpmbuild
         name: rpmbuild
 
   installer:
