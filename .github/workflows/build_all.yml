@@ -447,7 +447,8 @@ jobs:
         cd ~/rpmbuild/SPECS/
         rpmbuild -bb lunremote.spec --target x86_64
         cd -
-        mv ~/rpmbuild/RPMS/x86_64/* ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
+        ls -l ~/rpmbuild/RPMS/x86_64/
+        mv ~/rpmbuild/RPMS/x86_64/lunremote-0.0.1-0.x86_64.rpm ./lunremote-${{ env.APPLICATION_VERSION }}.rpm
         mv ~/rpmbuild .
 
     - uses: actions/upload-artifact@v1
