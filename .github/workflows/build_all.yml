@@ -500,8 +500,8 @@ jobs:
         mv artifact/* installer/linux/deb/lunremote/opt/lunremote/
         rsync -a installer/linux/root/ installer/linux/deb/lunremote/
         cp installer/linux/lunremoted.sh installer/linux/deb/lunremote/opt/lunremote
-        sed -i 's/1024/'"${size}"'/g' installer/linux/deb/lunremote/debian/control
-        sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/linux/deb/lunremote/debian/control
+        sed -i 's/1024/'"${size}"'/g' installer/linux/deb/lunremote/DEBIAN/control
+        sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/linux/deb/lunremote/DEBIAN/control
         dpkg-deb --build installer/linux/deb/lunremote
         mv installer/linux/deb/lunremote.deb ./lunremote-${{ env.APPLICATION_VERSION }}.deb
 
