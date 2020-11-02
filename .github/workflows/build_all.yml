@@ -364,6 +364,7 @@ jobs:
           else()
             set(server_exec_name "lunremoted")
             file(COPY "server/${server_exec_name}" DESTINATION "artifact/")
+            file(COPY "server/users" DESTINATION "artifact/")
             file(COPY "server/lib/linux/libyuv2.so" DESTINATION "artifact/lib/")
             file(COPY "server/lib/linux/libavcodec.so" DESTINATION "artifact/lib/")
             file(COPY "server/lib/linux/libavcodec.so.58" DESTINATION "artifact/lib/")
@@ -456,7 +457,7 @@ jobs:
           execute_process(COMMAND brew install graphicsmagick imagemagick)
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           execute_process(COMMAND sudo apt update)
-          execute_process(COMMAND sudo apt install build-essential rpm alien)
+          execute_process(COMMAND sudo apt install build-essential)
         endif()
 
     - name: Set UUID
