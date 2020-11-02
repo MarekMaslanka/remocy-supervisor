@@ -28,10 +28,10 @@ jobs:
               name: "Linux",
               os: ubuntu-latest
             }
-#           - {
-#               name: "macOS",
-#               os: macos-latest
-#             }
+          - {
+              name: "macOS",
+              os: macos-latest
+            }
 
     steps:
     - name: Checkout client
@@ -412,11 +412,11 @@ jobs:
                ext: ".deb",
                os: ubuntu-latest
             }
-#           - {
-#                name: "macOS",
-#                ext: ".dmg",
-#                os: macos-latest
-#             }
+          - {
+               name: "macOS",
+               ext: ".dmg",
+               os: macos-latest
+            }
     steps:
     - name: Prepare versions variable
       shell: cmake -P {0}
@@ -501,6 +501,9 @@ jobs:
         mv artifact/* installer/linux/deb/lunremote/opt/lunremote/
         rsync -a installer/linux/root/ installer/linux/deb/lunremote/
         cp installer/linux/lunremoted.sh installer/linux/deb/lunremote/opt/lunremote
+        chmod 755 installer/linux/deb/lunremote/DEBIAN/postinst
+        chmod 755 installer/linux/deb/lunremote/DEBIAN/postrm
+        chmod 755 installer/linux/deb/lunremote/DEBIAN/prerm
         sed -i 's/1024/'"${size}"'/g' installer/linux/deb/lunremote/DEBIAN/control
         sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/linux/deb/lunremote/DEBIAN/control
         dpkg-deb --build installer/linux/deb/lunremote
