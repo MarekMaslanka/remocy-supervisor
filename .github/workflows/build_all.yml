@@ -351,17 +351,18 @@ jobs:
           if ("${{ runner.os }}" STREQUAL "Windows")
             set(make_program "cmake --build . --config Release")
           endif()
-
+          message(STATUS "Build 1")
           execute_process(
-            COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal  -DVERSION="${{ env.APPLICATION_VERSION }}" -DBUILD_ID="${{ steps.current-time.outputs.time }}"
+            COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal CXXFLAGS="-DVERSION=${{ env.APPLICATION_VERSION }} -DBUILD_ID=${{ steps.current-time.outputs.time }}"
             WORKING_DIRECTORY server
           )
 
+          message(STATUS "Build 2")
           execute_process(
-            COMMAND ${make_program} -DVERSION="${{ env.APPLICATION_VERSION }}" -DBUILD_ID="${{ steps.current-time.outputs.time }}"
+            COMMAND ${make_program} CXXFLAGS="-DVERSION=${{ env.APPLICATION_VERSION }} -DBUILD_ID=${{ steps.current-time.outputs.time }}"
             WORKING_DIRECTORY server
           )
-
+          message(STATUS "Done")
           if ("${{ runner.os }}" STREQUAL "Windows")
             set(server_exec_name "lunremoted.exe")
             file(COPY "server/Release/${server_exec_name}" DESTINATION "artifact/")
