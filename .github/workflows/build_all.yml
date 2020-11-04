@@ -92,7 +92,7 @@ jobs:
       id: time
       uses: nanzm/get-time-action@v1.1
       with:
-        timeZone: 8
+        timeZone: 1
         format: 'YYYYMMDDHHmm'
 
     - name: Download Qt from cache
@@ -322,6 +322,7 @@ jobs:
         string(REPLACE "#define VERSION 0.0.1" "#define VERSION ${{ env.APPLICATION_VERSION }}" main "${main}")
         string(REPLACE "#define BUILD_ID 0" "#define BUILD_ID ${{ steps.time.outputs.time }}" main "${main}")
         file(WRITE "server/src/main.cpp" ${main})
+        message(STATUS "${main}")
 
         if ("${{ runner.os }}" STREQUAL "macOS")
         else()
