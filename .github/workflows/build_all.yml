@@ -88,12 +88,12 @@ jobs:
         echo "APPLICATION_SHORT_VERSION=${APPLICATION_SHORT_VERSION}"
         printenv
 
-    - name: Get current time
-      uses: 1466587594/get-current-time@v2
-      id: current-time
+    - name: Get Time
+      id: time
+      uses: nanzm/get-time-action@v1.1
       with:
-        format: YYYYMMDDHHMM
-        utcOffset: "+00:00"
+        timeZone: 8
+        format: 'YYYYMMDDHHmm'
 
     - name: Download Qt from cache
       uses: actions/cache@v2
@@ -318,6 +318,11 @@ jobs:
     - name: Configure server
       shell: cmake -P {0}
       run: |
+        file(READ "server/src/main.cpp" main)
+        string(REPLACE "#define VERSION 0.0.1" "#define VERSION ${{ env.APPLICATION_VERSION }}" main "${main}")
+        string(REPLACE "#define BUILD_ID 0" "#define BUILD_ID ${{ steps.time.outputs.time }}" main "${main}")
+        file(WRITE "server/src/main.cpp" ${main})
+
         if ("${{ runner.os }}" STREQUAL "macOS")
         else()
           set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -336,7 +341,7 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
-            COMMAND xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO GCC_PREPROCESSOR_DEFINITIONS="$GCC_PREPROCESSOR_DEFINITIONS VERSION=${{ env.APPLICATION_VERSION }} BUILD_ID=${{ steps.current-time.outputs.time }}"
+            COMMAND xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO
             WORKING_DIRECTORY server
           )
           file(COPY "server/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
@@ -359,7 +364,7 @@ jobs:
 
           message(STATUS "Build 2")
           execute_process(
-            COMMAND ${make_program} CXXFLAGS="-DVERSION=${{ env.APPLICATION_VERSION }} -DBUILD_ID=${{ steps.current-time.outputs.time }}"
+            COMMAND ${make_program}
             WORKING_DIRECTORY server
           )
           message(STATUS "Done")
