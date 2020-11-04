@@ -353,7 +353,7 @@ jobs:
           endif()
           message(STATUS "Build 1")
           execute_process(
-            COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal CXXFLAGS="-DVERSION=${{ env.APPLICATION_VERSION }} -DBUILD_ID=${{ steps.current-time.outputs.time }}"
+            COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
             WORKING_DIRECTORY server
           )
 
