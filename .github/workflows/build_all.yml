@@ -321,7 +321,7 @@ jobs:
         file(READ "server/src/main.cpp" main)
         string(REPLACE "#define VERSION 0.0.1" "#define VERSION ${{ env.APPLICATION_VERSION }}" main "${main}")
         string(REPLACE "#define BUILD_ID 0" "#define BUILD_ID ${{ steps.time.outputs.time }}" main "${main}")
-        #file(WRITE "server/src/main.cpp" "${main}")
+        file(WRITE "server/src/main.cpp" "${main}")
         message(STATUS "${main}")
 
         if ("${{ runner.os }}" STREQUAL "macOS")
