@@ -322,7 +322,7 @@ jobs:
         else()
           set(CMAKE_VERBOSE_MAKEFILE ON)
           execute_process(
-            COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release -DVERSION="${{ env.APPLICATION_VERSION }}" -DBUILD_ID="${{ steps.current-time.outputs.time }}"
+            COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
             WORKING_DIRECTORY server
             RESULT_VARIABLE result
           )
@@ -336,7 +336,7 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
-            COMMAND xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO GCC_PREPROCESSOR_DEFINITIONS='$GCC_PREPROCESSOR_DEFINITIONS VERSION="${{ env.APPLICATION_VERSION }}" BUILD_ID="${{ steps.current-time.outputs.time }}"'
+            COMMAND xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO GCC_PREPROCESSOR_DEFINITIONS="$GCC_PREPROCESSOR_DEFINITIONS VERSION=${{ env.APPLICATION_VERSION }} BUILD_ID=${{ steps.current-time.outputs.time }}"
             WORKING_DIRECTORY server
           )
           file(COPY "server/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
@@ -353,12 +353,12 @@ jobs:
           endif()
 
           execute_process(
-            COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
+            COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal  -DVERSION="${{ env.APPLICATION_VERSION }}" -DBUILD_ID="${{ steps.current-time.outputs.time }}"
             WORKING_DIRECTORY server
           )
 
           execute_process(
-            COMMAND ${make_program}
+            COMMAND ${make_program} -DVERSION="${{ env.APPLICATION_VERSION }}" -DBUILD_ID="${{ steps.current-time.outputs.time }}"
             WORKING_DIRECTORY server
           )
 
