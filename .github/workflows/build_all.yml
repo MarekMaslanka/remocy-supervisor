@@ -88,6 +88,13 @@ jobs:
         echo "APPLICATION_SHORT_VERSION=${APPLICATION_SHORT_VERSION}"
         printenv
 
+    - name: Get current time
+      uses: 1466587594/get-current-time@v2
+      id: current-time
+      with:
+        format: YYYYMMDDHHMM
+        utcOffset: "+00:00"
+
     - name: Download Qt from cache
       uses: actions/cache@v2
       id: cache-qt5
@@ -236,6 +243,7 @@ jobs:
             $ENV{APPLICATION_PRO}
             CONFIG+=release
             DEFINES+=VERSION="$ENV{APPLICATION_VERSION}"
+            DEFINES+=BUILD_ID="${{ steps.current-time.outputs.time }}"
             QTC_SOURCE="${qtcreator_dir}"
             QTC_BUILD="${qtcreator_dir}"
           WORKING_DIRECTORY "client"
@@ -314,7 +322,7 @@ jobs:
         else()
           set(CMAKE_VERBOSE_MAKEFILE ON)
           execute_process(
-            COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
+            COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release -DVERSION="${{ env.APPLICATION_VERSION }}" -DBUILD_ID="${{ steps.current-time.outputs.time }}"
             WORKING_DIRECTORY server
             RESULT_VARIABLE result
           )
@@ -328,7 +336,7 @@ jobs:
       run: |
         if ("${{ runner.os }}" STREQUAL "macOS")
           execute_process(
-            COMMAND xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO
+            COMMAND xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO GCC_PREPROCESSOR_DEFINITIONS='$GCC_PREPROCESSOR_DEFINITIONS VERSION="${{ env.APPLICATION_VERSION }}" BUILD_ID="${{ steps.current-time.outputs.time }}"'
             WORKING_DIRECTORY server
           )
           file(COPY "server/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
