@@ -40,7 +40,7 @@ jobs:
       with:
         path: client
         repository: MarekMaslanka/remocy-client
-#         ref: build
+#         ref: build 
         token: ${{ secrets.ACCESS_TOKEN }}
 
     - name: Checkout server
