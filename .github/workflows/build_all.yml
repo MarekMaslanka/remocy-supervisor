@@ -21,19 +21,19 @@ jobs:
     strategy:
       matrix:
         config:
-          - {
-              name: "Windows",
-              os: windows-latest,
-              environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-            }
+#           - {
+#               name: "Windows",
+#               os: windows-latest,
+#               environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+#             }
           - {
               name: "Linux",
               os: ubuntu-latest
             }
-          - {
-              name: "macOS",
-              os: macos-latest
-            }
+#           - {
+#               name: "macOS",
+#               os: macos-latest
+#             }
 
     steps:
     - name: Checkout client
@@ -315,83 +315,6 @@ jobs:
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
           )
 
-        endif()
-
-    - name: Configure server
-      shell: cmake -P {0}
-      run: |
-        file(READ "server/src/main.cpp" main)
-        string(REPLACE "#define VERSION 0.0.1" "#define VERSION ${{ env.APPLICATION_VERSION }}" main "${main}")
-        string(REPLACE "#define BUILD_ID 0" "#define BUILD_ID ${{ steps.time.outputs.time }}" main "${main}")
-        file(WRITE "server/src/main.cpp" "${main}")
-        message(STATUS "${main}")
-
-        if ("${{ runner.os }}" STREQUAL "macOS")
-        else()
-          set(CMAKE_VERBOSE_MAKEFILE ON)
-          execute_process(
-            COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
-            WORKING_DIRECTORY server
-            RESULT_VARIABLE result
-          )
-          if (NOT result EQUAL 0)
-            message(FATAL_ERROR "Bad exit status for cmake")
-          endif()
-        endif()
-
-    - name: Build server
-      shell: cmake -P {0}
-      run: |
-        if ("${{ runner.os }}" STREQUAL "macOS")
-          execute_process(
-            COMMAND xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO
-            WORKING_DIRECTORY server
-          )
-          file(COPY "server/build/Release/lunremoted" DESTINATION "client/lunremote.app/Contents/MacOS/")
-          file(COPY "server/build/Release/crashpad_handler" DESTINATION "client/lunremote.app/Contents/MacOS/")
-          file(COPY "client/lunremote.app/" DESTINATION "artifact/")
-        else()
-          include(ProcessorCount)
-          ProcessorCount(N)
-          set(make_program make -j ${N})
-          if ("${{ runner.os }}" STREQUAL "Windows")
-            set(make_program "cmake --build . --config Release")
-          endif()
-          message(STATUS "Build 1")
-          execute_process(
-            COMMAND cmake --build . -- -property:Configuration=Release -verbosity:minimal
-            WORKING_DIRECTORY server
-          )
-
-          message(STATUS "Build 2")
-          execute_process(
-            COMMAND ${make_program}
-            WORKING_DIRECTORY server
-          )
-          message(STATUS "Done")
-          if ("${{ runner.os }}" STREQUAL "Windows")
-            set(server_exec_name "lunremoted.exe")
-            file(COPY "server/Release/${server_exec_name}" DESTINATION "artifact/")
-            file(COPY "server/Release/lunremotesvc.exe" DESTINATION "artifact/")
-            file(COPY "server/tools/win/crashpad_handler.exe" DESTINATION "artifact/")
-
-          elseif ("${{ runner.os }}" STREQUAL "macOS")
-          else()
-            set(server_exec_name "lunremoted")
-            file(COPY "server/${server_exec_name}" DESTINATION "artifact/")
-            file(COPY "server/users" DESTINATION "artifact/")
-            file(COPY "server/lib/linux/libyuv2.so" DESTINATION "artifact/lib/")
-            file(COPY "server/lib/linux/libavcodec.so" DESTINATION "artifact/lib/")
-            file(COPY "server/lib/linux/libavcodec.so.58" DESTINATION "artifact/lib/")
-            file(COPY "server/lib/linux/libavcodec.so.58.111.101" DESTINATION "artifact/lib/")
-            file(COPY "server/lib/linux/libavutil.so" DESTINATION "artifact/lib/")
-            file(COPY "server/lib/linux/libavutil.so.56" DESTINATION "artifact/lib/")
-            file(COPY "server/lib/linux/libavutil.so.56.60.100" DESTINATION "artifact/lib/")
-            file(COPY "server/tools/linux/crashpad_handler" DESTINATION "artifact/")
-
-            execute_process(COMMAND patchelf --debug --set-rpath "$ORIGIN/lib" ${server_exec_name} WORKING_DIRECTORY "artifact")
-            execute_process(COMMAND patchelf --debug --remove-rpath lib/libopenh264.so.5 WORKING_DIRECTORY "artifact")
-          endif()
         endif()
 
     - name: 'Tar files'
