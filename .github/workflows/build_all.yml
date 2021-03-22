@@ -263,6 +263,8 @@ jobs:
 
     - name: Build client
       shell: cmake -P {0}
+      env:
+        QT_QPA_PLATFORM: wayland
       run: |
         set(CMAKE_VERBOSE_MAKEFILE ON)
         if ("${{ runner.os }}" STREQUAL "Windows")
@@ -271,7 +273,6 @@ jobs:
           set(ENV{PATH} "${{ steps.qt.outputs.qt_dir }}/bin/:$ENV{PATH}")
           set(ENV{LD_LIBRARY_PATH} "qtcreator/lib/Qt/lib:$ENV{LD_LIBRARY_PATH}")
         endif()
-        message("::set-env name=QT_QPA_PLATFORM::wayland")
         include(ProcessorCount)
         ProcessorCount(N)
         set(make_program make -j ${N})
@@ -320,9 +321,6 @@ jobs:
           execute_process(
             COMMAND ../../../../linuxdeployqt ../../../../artifact/${{ steps.qt_creator.outputs.qtc_binary_client_name }} -verbose=2
             WORKING_DIRECTORY "qt5/$ENV{QT_VERSION}/gcc_64/lib/"
-          )
-          execute_process(
-            COMMAND printenv
           )
 
         endif()
