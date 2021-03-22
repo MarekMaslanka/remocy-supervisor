@@ -69,6 +69,9 @@ jobs:
           execute_process(
             COMMAND wget https://github.com/MarekMaslanka/x264/releases/download/refs%2Fheads%2Fmaster/libx264.a -O server/lib/linux/libx264.a
           )
+          execute_process(
+            COMMAND wget https://raw.githubusercontent.com/MarekMaslanka/x264/master/x264.h -O server/include/x264.h
+          )
         elseif ("${{ runner.os }}" STREQUAL "Windows")
           file(DOWNLOAD "https://aka.ms/vs/16/release/vc_redist.x64.exe" vc_redist.x64.exe)
           execute_process(COMMAND vc_redist.x64.exe /install /quiet /norestart)
