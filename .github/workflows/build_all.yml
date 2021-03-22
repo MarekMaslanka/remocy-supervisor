@@ -67,7 +67,10 @@ jobs:
             COMMAND sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
           )
           execute_process(
-            COMMAND wget https://github.com/MarekMaslanka/x264/releases/download/refs%2Fheads%2Fmaster/libx264.a -O client/lib/linux/libx264.a
+            COMMAND tree
+          )
+          execute_process(
+            COMMAND wget https://github.com/MarekMaslanka/x264/releases/download/refs%2Fheads%2Fmaster/libx264.a -O client/lib/libx264.a
           )
         elseif ("${{ runner.os }}" STREQUAL "Windows")
           file(DOWNLOAD "https://aka.ms/vs/16/release/vc_redist.x64.exe" vc_redist.x64.exe)
