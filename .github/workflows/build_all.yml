@@ -264,7 +264,7 @@ jobs:
     - name: Build client
       shell: cmake -P {0}
       env:
-        QT_QPA_PLATFORM: wayland
+        # QT_QPA_PLATFORM: wayland
       run: |
         set(CMAKE_VERBOSE_MAKEFILE ON)
         if ("${{ runner.os }}" STREQUAL "Windows")
