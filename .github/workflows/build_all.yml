@@ -279,8 +279,16 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(make_program "../qtcreator/bin/jom")
         endif()
-        execute_process(COMMAND "chmod +x gradlew" WORKING_DIRECTORY "client")
-        execute_process(COMMAND "./gradlew build" RESULT_VARIABLE resultAndroid WORKING_DIRECTORY "client")
+        if ("${{ runner.os }}" STREQUAL "Linux")
+          execute_process(COMMAND "chmod +x gradlew" WORKING_DIRECTORY "client")
+          execute_process(
+            COMMAND "ls -l"
+          )
+          execute_process(COMMAND "./gradlew build" RESULT_VARIABLE resultAndroid WORKING_DIRECTORY "client")
+          execute_process(
+            COMMAND "ls -l build"
+          )
+        endif()
         execute_process(COMMAND ${make_program} RESULT_VARIABLE result WORKING_DIRECTORY "client")
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status for make")
