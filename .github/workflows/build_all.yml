@@ -280,7 +280,7 @@ jobs:
           set(make_program "../qtcreator/bin/jom")
         endif()
         if ("${{ runner.os }}" STREQUAL "Linux")
-          message(FATAL_ERROR "aaaaaaaaaaaaaaaaaaaaaaaa")
+          message(STATUS "aaaaaaaaaaaaaaaaaaaaaaaa")
           execute_process(COMMAND "chmod +x gradlew" WORKING_DIRECTORY "client")
           execute_process(COMMAND "ls -l" WORKING_DIRECTORY "client")
           execute_process(COMMAND "./gradlew build" RESULT_VARIABLE resultAndroid WORKING_DIRECTORY "client")
