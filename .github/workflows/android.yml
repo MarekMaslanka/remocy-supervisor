@@ -1,0 +1,43 @@
+name: Test and deploy Android
+
+on:
+  push:
+
+jobs:
+  unit_tests:
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: client
+          repository: MarekMaslanka/remocy-client
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Unit tests
+        run: ./gradlew test
+  build:
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: client
+          repository: MarekMaslanka/remocy-client
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Build
+        run: ./gradlew build
+  ## 4
+  android_tests:
+    runs-on: [ macos-latest ]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: client
+          repository: MarekMaslanka/remocy-client
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Instrumentation Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./gradlew connectedAndroidTest
