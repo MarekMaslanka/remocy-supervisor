@@ -9,7 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          path: client
           repository: MarekMaslanka/remocy-client
           token: ${{ secrets.ACCESS_TOKEN }}
 
@@ -20,7 +19,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          path: client
           repository: MarekMaslanka/remocy-client
           token: ${{ secrets.ACCESS_TOKEN }}
 
@@ -32,7 +30,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          path: client
           repository: MarekMaslanka/remocy-client
           token: ${{ secrets.ACCESS_TOKEN }}
 
