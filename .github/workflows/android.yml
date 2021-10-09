@@ -13,7 +13,9 @@ jobs:
           token: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Unit tests
+        run: chmod +x gradlew
         run: ./gradlew test
+
   build:
     runs-on: [ubuntu-latest]
     steps:
@@ -23,8 +25,9 @@ jobs:
           token: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Build
+        run: chmod +x gradlew
         run: ./gradlew build
-  ## 4
+
   android_tests:
     runs-on: [ macos-latest ]
     steps:
