@@ -280,15 +280,16 @@ jobs:
           set(make_program "../qtcreator/bin/jom")
         endif()
         if ("${{ runner.os }}" STREQUAL "Linux")
-          echo "::group::My title"
-          echo "Inside group"
-          echo "::endgroup::"
-          echo "Inside group aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          echo("aaaaaaaaaaaaaaaaaaaaaaa1")
+          echo(STATUS "aaaaaaaaaaaaaaaaaaaaaaa2")
+          echo(WARNING "aaaaaaaaaaaaaaaaaaaaaaa3")
           execute_process(COMMAND "chmod +x gradlew" WORKING_DIRECTORY "client")
           execute_process(COMMAND "ls -l" WORKING_DIRECTORY "client")
           execute_process(COMMAND "./gradlew build" RESULT_VARIABLE resultAndroid WORKING_DIRECTORY "client")
           execute_process(COMMAND "ls -l build" WORKING_DIRECTORY "client")
-          echo '::warning:: this is a warning'
+          echo("aaaaaaaaaaaaaaaaaaaaaaa1z")
+          echo(STATUS "aaaaaaaaaaaaaaaaaaaaaaa2z")
+          echo(WARNING "aaaaaaaaaaaaaaaaaaaaaaa3z")
         endif()
         execute_process(COMMAND ${make_program} RESULT_VARIABLE result WORKING_DIRECTORY "client")
         if (NOT result EQUAL 0)
