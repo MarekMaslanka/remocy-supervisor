@@ -279,13 +279,6 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(make_program "../qtcreator/bin/jom")
         endif()
-        if ("${{ runner.os }}" STREQUAL "Linux")
-          message("Android build")
-          execute_process(COMMAND "chmod +x gradlew" WORKING_DIRECTORY "client")
-          execute_process(COMMAND "ls -l" WORKING_DIRECTORY "client")
-          execute_process(COMMAND "./gradlew build" RESULT_VARIABLE resultAndroid WORKING_DIRECTORY "client")
-          execute_process(COMMAND "ls -l build" WORKING_DIRECTORY "client")
-        endif()
         execute_process(COMMAND ${make_program} RESULT_VARIABLE result WORKING_DIRECTORY "client")
         if (NOT result EQUAL 0)
           message(FATAL_ERROR "Bad exit status for make")
@@ -320,6 +313,7 @@ jobs:
           file(COPY "client/lib/libopenh264.so" DESTINATION "qt5/$ENV{QT_VERSION}/gcc_64/lib/")
           file(COPY "client/lib/libopenh264.so.5" DESTINATION "qt5/$ENV{QT_VERSION}/gcc_64/lib/")
           
+          message("Linux Deploy QT")
           file(DOWNLOAD "https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt" "linuxdeployqt")
           
           execute_process(
