@@ -1,0 +1,211 @@
+name: Windows
+on:
+  push:
+  schedule:
+    - cron: "0 0 1 * *"
+
+env:
+  QT_VERSION: 5.15.2
+  APPLICATION_NAME: lunremote
+  CLIENT_APPLICATION_NAME: lunremote
+  SERVER_APPLICATION_NAME: lunremoted
+  APPLICATION_VERSION: v0.0.1-dev
+  APPLICATION_SHORT_VERSION: 0.0.0
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    steps:
+
+      - name: Test env
+        run: |
+          Import-Module BitsTransfer
+          Start-BitsTransfer -source "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip"
+          Expand-Archive wix311-binaries.zip -DestinationPath wix
+          dir wix
+          $vcvars = '"C:\Program Files (x86)\Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"'
+          iex ("& {0}" -f $vcvars)
+          dir env:
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ env.QT_VERSION }}
+
+      - name: Checkout client
+        uses: actions/checkout@v2
+        with:
+          path: client
+          repository: MarekMaslanka/remocy-client
+          ref: fix_display_non-windows 
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Checkout server
+        uses: actions/checkout@v2
+        with:
+          path: server
+          repository: MarekMaslanka/remocy-server
+  #        ref: build
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Install dependencies
+        run: |
+          Import-Module BitsTransfer
+          Start-BitsTransfer -source "https://aka.ms/vs/16/release/vc_redist.x64.exe"
+          .\vc_redist.x64.exe /install /quiet /norestart
+
+      - name: Get Time
+        id: time
+        uses: nanzm/get-time-action@v1.1
+        with:
+          timeZone: 1
+          format: 'YYYYMMDDHHmm'
+
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Build client
+        run: |
+          cd client
+          qmake CONFIG+=release DEFINES+=VERSION="${{ env.APPLICATION_VERSION }}" DEFINES+=BUILD_ID="${{ steps.time.outputs.time }}" || exit /b !errorlevel!
+          nmake release || exit /b !errorlevel!
+
+      - name: Deploy client
+        run: |
+          mkdir -p artifact/lib
+          copy client/release/${{ env.CLIENT_APPLICATION_NAME }}.exe artifact/
+          copy client/lib/openh264.dll artifact/
+          copy c:/Windows/System32/msvcp140.dll artifact/
+          copy c:/Windows/System32/vcruntime140.dll artifact/
+          copy c:/Windows/System32/vcruntime140_1.dll artifact/
+
+          windeployqt artifact/lunremote.exe
+
+      - name: Build server
+        run: |
+          cd server
+          sed -i 's/#define VERSION 0.0.1/#define VERSION ${{ env.APPLICATION_VERSION }}/' src/main.cpp
+          sed -i 's/#define BUILD_ID 0/#define BUILD_ID ${{ steps.time.outputs.time }}/' src/main.cpp
+          cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
+
+      - name: Deploy server
+        run: |
+            copy server/Release/${{ env.SERVER_APPLICATION_NAME }}.exe artifact/
+            copy server/Release/lunremotesvc.exe artifact/
+            copy server/tools/win/crashpad_handler.exe artifact/
+
+      - name: 'Compress artifact'
+        run: tar -cf artifact.tar artifact
+    
+      - uses: actions/upload-artifact@v2
+        id: upload_product_artifact
+        with:
+          path: ./artifact.tar
+          name: artifact-windows.tar
+
+  installer:
+    name: Make installer
+    runs-on: windows-latest
+    needs: build
+    steps:
+    - name: Prepare versions variable
+      shell: cmake -P {0}
+      run: |
+        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
+          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
+          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
+          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        else()
+          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        endif()
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: artifact-windows.tar
+
+    - name: Extract artifact
+      run: tar -xf artifact.tar
+
+    - name: Checkout installer
+      uses: actions/checkout@v2
+      with:
+        path: installer
+        repository: MarekMaslanka/remocy-installer
+        token: ${{ secrets.ACCESS_TOKEN }}
+
+    - name: Install dependencies
+      run: |
+        Import-Module BitsTransfer
+        Start-BitsTransfer -source "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip"
+        Expand-Archive wix311-binaries.zip -DestinationPath wix
+
+    - name: Set UUID
+      id: generate-uuid
+      uses: filipstefansson/uuid-action@v1
+
+    - name: Build MSI installer
+      run: |
+        cd installer/win
+        move ../../artifact/lunremote.exe .
+        move ../../artifact/lunremoted.exe .
+        move ../../artifact/lunremotesvc.exe .
+        ../../wix/heat.exe dir "../../artifact" -cg RestProductComponentsGroup -dr INSTALLDIR -gg -sfrag -srd -var var.SourceFilesDir -out "Components.wxs"
+        move lunremote.exe ../../artifact/
+        move lunremoted.exe ../../artifact/
+        move lunremotesvc.exe ../../artifact/
+        ../../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../../artifact/" -dProductVersion="${{ env.APPLICATION_SHORT_VERSION }}" -dProductId=${{ steps.generate-uuid.outputs.uuid }} lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
+        ../../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension Components.wixobj lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out ../../lunremote-${{ env.APPLICATION_VERSION }}.msi
+
+    - uses: actions/upload-artifact@v1
+      with:
+        path: ./lunremote-${{ env.APPLICATION_VERSION }}.msi
+        name: lunremote-${{ env.APPLICATION_VERSION }}.msi
+
+  deploy:
+    name: "Deploy application"
+    if: contains(github.ref, 'tags/')
+    runs-on: ubuntu-latest
+    needs: installer
+    steps:
+    - name: Prepare versions variable
+      shell: cmake -P {0}
+      run: |
+        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
+          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
+          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
+          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        else()
+          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        endif()
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        path: artifacts
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Deploy MSI application
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifacts/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.msi/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.msi
+        asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.msi
+        asset_content_type: application/octet-stream
