@@ -5,8 +5,7 @@ on:
     - cron: "0 0 1 * *"
 
 env:
-  QT_VERSION: 5.15.1
-  QT_CREATOR_VERSION: 4.12.3
+  QT_VERSION: 5.15.2
   APPLICATION_NAME: lunremote
   CLIENT_APPLICATION_NAME: lunremote
   SERVER_APPLICATION_NAME: lunremoted
@@ -65,15 +64,19 @@ jobs:
 
       - name: Deploy client
         run: |
-          mkdir artifact
+          mkdir -p artifact/lib
           cp client/${{ env.CLIENT_APPLICATION_NAME }} artifact/
           sudo cp client/lib/libopenh264.so /usr/lib/x86_64-linux-gnu/
           sudo cp client/lib/libopenh264.so.5 /usr/lib/x86_64-linux-gnu/
+          sudo cp client/lib/libopenh264.so artifact/lib/
+          sudo cp client/lib/libopenh264.so.5 artifact/lib/
 
           echo "Linux Deploy QT"
           wget https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt -q -O linuxdeployqt
           chmod a+x linuxdeployqt
           ./linuxdeployqt artifact/${{ env.CLIENT_APPLICATION_NAME }} -verbose=2
+          ls -l artifact
+          ls -l artifact/lib
           patchelf --debug --remove-rpath artifact/lib/libopenh264.so.5
 
       - name: Build server
@@ -109,3 +112,110 @@ jobs:
         with:
           path: ./artifact.tar
           name: artifact-linux.tar
+
+  installer:
+    name: Make installer
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Prepare versions variable
+      shell: cmake -P {0}
+      run: |
+        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
+          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
+          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
+          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        else()
+          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        endif()
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: artifact-linux.tar
+
+    - name: Extract artifact
+      run: tar -xf artifact.tar
+
+    - name: Checkout installer
+      uses: actions/checkout@v2
+      with:
+        path: installer
+        repository: MarekMaslanka/remocy-installer
+        token: ${{ secrets.ACCESS_TOKEN }}
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install build-essential
+
+    - name: Build DEB package
+      run: |
+        size=`du -k artifact | tail -n 1 | cut -f 1`
+        mkdir -p installer/linux/deb/lunremote/opt/lunremote
+        mkdir -p installer/linux/deb/lunremote/usr/bin
+        cd installer/linux/deb/lunremote/usr/bin
+        ln -s /opt/lunremote/lunremote lunremote
+        cd -
+        mv artifact/* installer/linux/deb/lunremote/opt/lunremote/
+        rsync -a installer/linux/root/ installer/linux/deb/lunremote/
+        cp installer/linux/lunremoted.sh installer/linux/deb/lunremote/opt/lunremote
+        chmod 755 installer/linux/deb/lunremote/DEBIAN/postinst
+        chmod 755 installer/linux/deb/lunremote/DEBIAN/postrm
+        chmod 755 installer/linux/deb/lunremote/DEBIAN/prerm
+        sed -i 's/1024/'"${size}"'/g' installer/linux/deb/lunremote/DEBIAN/control
+        sed -i 's/0.0.0/${{ env.APPLICATION_SHORT_VERSION }}/g' installer/linux/deb/lunremote/DEBIAN/control
+        dpkg-deb --build installer/linux/deb/lunremote
+        mv installer/linux/deb/lunremote.deb ./lunremote-${{ env.APPLICATION_VERSION }}.deb
+
+    - uses: actions/upload-artifact@v1
+      with:
+        path: ./lunremote-${{ env.APPLICATION_VERSION }}.deb
+        name: lunremote-${{ env.APPLICATION_VERSION }}.deb
+
+  deploy:
+    name: "Deploy application"
+    if: contains(github.ref, 'tags/')
+    runs-on: ubuntu-latest
+    needs: installer
+    steps:
+    - name: Prepare versions variable
+      shell: cmake -P {0}
+      run: |
+        if($ENV{GITHUB_REF} MATCHES "refs/tags/.*")
+          STRING(REPLACE "refs/tags/" "" APP_VER $ENV{GITHUB_REF})
+          STRING(REGEX REPLACE "^.*v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{GITHUB_REF})
+          message("::set-env name=APPLICATION_VERSION::${APP_VER}")
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        else()
+          STRING(REGEX REPLACE "^v?([0-9]+).([0-9]+).([0-9]+)(-([A-Za-z0-9_]+))?$" "\\1.\\2.\\3" SHORT_VER $ENV{APPLICATION_VERSION})
+          message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
+        endif()
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        path: artifacts
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Deploy Linux DEB application
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: artifacts/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.deb/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.deb
+        asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.deb
+        asset_content_type: application/octet-stream
