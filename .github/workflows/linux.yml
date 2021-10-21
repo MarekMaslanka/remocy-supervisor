@@ -1,0 +1,111 @@
+name: Linux
+on:
+  push:
+  schedule:
+    - cron: "0 0 1 * *"
+
+env:
+  QT_VERSION: 5.15.1
+  QT_CREATOR_VERSION: 4.12.3
+  APPLICATION_NAME: lunremote
+  CLIENT_APPLICATION_NAME: lunremote
+  SERVER_APPLICATION_NAME: lunremoted
+  APPLICATION_VERSION: v0.0.1-dev
+  APPLICATION_SHORT_VERSION: 0.0.0
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ env.QT_VERSION }}
+
+      - name: Checkout client
+        uses: actions/checkout@v2
+        with:
+          path: client
+          repository: MarekMaslanka/remocy-client
+          ref: fix_display_non-windows 
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Checkout server
+        uses: actions/checkout@v2
+        with:
+          path: server
+          repository: MarekMaslanka/remocy-server
+  #        ref: build
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxfixes-dev libxtst-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev libxcb-randr0
+          wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
+          sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
+          wget https://github.com/MarekMaslanka/x264/releases/download/refs%2Fheads%2Fmaster/libx264.a -O server/lib/linux/libx264.a
+          wget https://raw.githubusercontent.com/MarekMaslanka/x264/master/x264.h -O server/include/x264.h
+
+      - name: Get Time
+        id: time
+        uses: nanzm/get-time-action@v1.1
+        with:
+          timeZone: 1
+          format: 'YYYYMMDDHHmm'
+
+      - name: Build client
+        run: |
+          cd client
+          qmake CONFIG+=release DEFINES+=VERSION="${{ env.APPLICATION_VERSION }}" DEFINES+=BUILD_ID="${{ steps.time.outputs.time }}"
+          make -j$(nproc)
+
+      - name: Deploy client
+        run: |
+          mkdir artifact
+          cp client/${{ env.CLIENT_APPLICATION_NAME }} artifact/
+          sudo cp client/lib/libopenh264.so /usr/lib/x86_64-linux-gnu/
+          sudo cp client/lib/libopenh264.so.5 /usr/lib/x86_64-linux-gnu/
+
+          echo "Linux Deploy QT"
+          wget https://github.com/MarekMaslanka/linuxdeployqt/releases/download/1.0/linuxdeployqt -q -O linuxdeployqt
+          chmod a+x linuxdeployqt
+          ./linuxdeployqt artifact/${{ env.CLIENT_APPLICATION_NAME }} -verbose=2
+          patchelf --debug --remove-rpath artifact/lib/libopenh264.so.5
+
+      - name: Build server
+        run: |
+          cd server
+          sed -i 's/#define VERSION 0.0.1/#define VERSION ${{ env.APPLICATION_VERSION }}/' src/main.cpp
+          sed -i 's/#define BUILD_ID 0/#define BUILD_ID ${{ steps.time.outputs.time }}/' src/main.cpp
+          cmake . -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
+          make
+
+      - name: Deploy server
+        run: |
+            mkdir -p artifact/lib
+            cp server/${{ env.SERVER_APPLICATION_NAME }} artifact/
+            cp server/users artifact/
+            cp server/lib/linux/libyuv2.so artifact/lib/
+            cp server/lib/linux/libavcodec.so artifact/lib/
+            cp server/lib/linux/libavcodec.so.58 artifact/lib/
+            cp server/lib/linux/libavcodec.so.58.111.101 artifact/lib/
+            cp server/lib/linux/libavutil.so artifact/lib/
+            cp server/lib/linux/libavutil.so.56 artifact/lib/
+            cp server/lib/linux/libavutil.so.56.60.100 artifact/lib/
+            cp server/tools/linux/crashpad_handler artifact/
+
+            patchelf --debug --set-rpath "$ORIGIN/lib" artifact/${{ env.SERVER_APPLICATION_NAME }}
+
+      - name: 'Compress artifact'
+        run: tar -cf artifact.tar artifact
+    
+      - uses: actions/upload-artifact@v2
+        id: upload_product_artifact
+        with:
+          path: ./artifact.tar
+          name: artifact-linux.tar
