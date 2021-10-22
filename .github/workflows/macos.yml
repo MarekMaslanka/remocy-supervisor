@@ -1,4 +1,4 @@
-name: Windows
+name: macOS
 on:
   push:
   schedule:
@@ -16,7 +16,7 @@ env:
 jobs:
   build:
     name: Build
-    runs-on: windows-latest
+    runs-on: macos-latest
     steps:
 
       - name: Install Qt
@@ -40,12 +40,6 @@ jobs:
   #        ref: build
           token: ${{ secrets.ACCESS_TOKEN }}
 
-      - name: Install dependencies
-        run: |
-          Import-Module BitsTransfer
-          Start-BitsTransfer -source "https://aka.ms/vs/16/release/vc_redist.x64.exe"
-          .\vc_redist.x64.exe /install /quiet /norestart
-
       - name: Get Time
         id: time
         uses: nanzm/get-time-action@v1.1
@@ -66,48 +60,50 @@ jobs:
             message("::set-env name=APPLICATION_SHORT_VERSION::${SHORT_VER}")
           endif()
 
-      - uses: ilammy/msvc-dev-cmd@v1
       - name: Build client
         run: |
           cd client
-          qmake CONFIG+=release DEFINES+=VERSION="${{ env.APPLICATION_VERSION }}" DEFINES+=BUILD_ID="${{ steps.time.outputs.time }}" || exit /b !errorlevel!
-          nmake release || exit /b !errorlevel!
+          qmake CONFIG+=release DEFINES+=VERSION="${{ env.APPLICATION_VERSION }}" DEFINES+=BUILD_ID="${{ steps.time.outputs.time }}"
+          make -j$(nproc)
 
       - name: Deploy client
         run: |
-          mkdir -p artifact/lib
-          copy client/release/${{ env.CLIENT_APPLICATION_NAME }}.exe artifact/
-          copy client/lib/openh264.dll artifact/
-          copy c:/Windows/System32/msvcp140.dll artifact/
-          copy c:/Windows/System32/vcruntime140.dll artifact/
-          copy c:/Windows/System32/vcruntime140_1.dll artifact/
+          mkdir artifact/
+          ls -l client
+          sudo cp client/lib/libopenh264.5.dylib /usr/local/lib/
+          macdeployqt client/${{ env.CLIENT_APPLICATION_NAME }}.app -verbose=2
+          sed -i'' -e 's/v0.0.0/${{ env.APPLICATION_VERSION }}/' client/resources/Info.plist
+          mv client/resources/Info.plist client/${{ env.CLIENT_APPLICATION_NAME }}.app/Contents/
 
       - name: Build server
         run: |
           cd server
-          sed -i 's/#define VERSION 0.0.1/#define VERSION ${{ env.APPLICATION_VERSION }}/' src/main.cpp
-          sed -i 's/#define BUILD_ID 0/#define BUILD_ID ${{ steps.time.outputs.time }}/' src/main.cpp
-          cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --config Release
+          sed -i'' -e 's/#define VERSION 0.0.1/#define VERSION ${{ env.APPLICATION_VERSION }}/' src/main.cpp
+          sed -i'' -e 's/#define BUILD_ID 0/#define BUILD_ID ${{ steps.time.outputs.time }}/' src/main.cpp
+          xcodebuild -project "lunremoted.xcodeproj" -configuration Release build CODE_SIGNING_ALLOWED=NO
 
       - name: Deploy server
         run: |
-            copy server/Release/${{ env.SERVER_APPLICATION_NAME }}.exe artifact/
-            copy server/Release/lunremotesvc.exe artifact/
-            copy server/tools/win/crashpad_handler.exe artifact/
+          mv server/build/Release/${{ env.SERVER_APPLICATION_NAME }} client/${{ env.CLIENT_APPLICATION_NAME }}.app/Contents/MacOS/
+          mv server/build/Release/crashpad_handler client/${{ env.CLIENT_APPLICATION_NAME }}.app/Contents/MacOS/
 
       - name: 'Compress artifact'
-        run: tar -cf artifact.tar artifact
+        run: tar -C client/ -cf artifact.tar ${{ env.CLIENT_APPLICATION_NAME }}.app
+
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./server/build/Release/lunremoted.dSYM
+          name: lunremoted-${{ env.APPLICATION_VERSION }}.dSYM
     
       - uses: actions/upload-artifact@v2
         id: upload_product_artifact
         with:
           path: ./artifact.tar
-          name: artifact-windows.tar
+          name: artifact-macos.tar
 
   installer:
     name: Make installer
-    runs-on: windows-latest
+    runs-on: macos-latest
     needs: build
     steps:
 
@@ -127,7 +123,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
-        name: artifact-windows.tar
+        name: artifact-macos.tar
 
     - name: Extract artifact
       run: tar -xvf artifact.tar
@@ -141,39 +137,20 @@ jobs:
 
     - name: Install dependencies
       run: |
-        Import-Module BitsTransfer
-        Start-BitsTransfer -source "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip"
-        Expand-Archive wix311-binaries.zip -DestinationPath wix
+        npm install --global create-dmg
+        brew install graphicsmagick imagemagick
 
-    - name: Set UUID
-      id: generate-uuid
-      uses: filipstefansson/uuid-action@v1
-
-    - name: Build MSI installer
+    - name: Build DMG package
       run: |
-        cd installer/win
-        move ../../artifact/lunremote.exe .
-        move ../../artifact/lunremoted.exe .
-        move ../../artifact/lunremotesvc.exe .
-        ../../wix/heat.exe dir "../../artifact" -cg RestProductComponentsGroup -dr INSTALLDIR -gg -sfrag -srd -var var.SourceFilesDir -out "Components.wxs"
-        move lunremote.exe ../../artifact/
-        move lunremoted.exe ../../artifact/
-        move lunremotesvc.exe ../../artifact/
-        ../../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../../artifact/" -dProductVersion="${{ env.APPLICATION_SHORT_VERSION }}" -dProductId=${{ steps.generate-uuid.outputs.uuid }} lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
-        ../../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension Components.wixobj lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out ../../lunremote-${{ env.APPLICATION_VERSION }}.msi
-
-    - name: Fire test
-      run: |
-        msiexec.exe /I .\lunremote-${{ env.APPLICATION_VERSION }}.msi
-
-    - name: Fire test
-      run: |
-        msiexec.exe /I .\lunremote-${{ env.APPLICATION_VERSION }}.msi
+        sudo cp -f installer/macos/dmg-background.png /usr/local/lib/node_modules/create-dmg/assets/
+        sudo cp -f installer/macos/dmg-background@2x.png /usr/local/lib/node_modules/create-dmg/assets/
+        create-dmg lunremote.app || true
+        mv "lunremote ${{ env.APPLICATION_VERSION }}.dmg" lunremote-${{ env.APPLICATION_VERSION }}.dmg
 
     - uses: actions/upload-artifact@v1
       with:
-        path: ./lunremote-${{ env.APPLICATION_VERSION }}.msi
-        name: lunremote-${{ env.APPLICATION_VERSION }}.msi
+        path: ./lunremote-${{ env.APPLICATION_VERSION }}.dmg
+        name: lunremote-${{ env.APPLICATION_VERSION }}.dmg
 
   deploy:
     name: "Deploy application"
@@ -211,12 +188,12 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Deploy MSI application
+    - name: Deploy macOS application
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: artifacts/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.msi/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.msi
-        asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.msi
+        asset_path: artifacts/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.dmg/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.dmg
+        asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.dmg
         asset_content_type: application/octet-stream

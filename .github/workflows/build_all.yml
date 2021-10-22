@@ -429,21 +429,21 @@ jobs:
     strategy:
       matrix:
         config:
-#           - {
-#                name: "Windows",
-#                ext: ".msi",
-#                os: windows-latest,
-#             }
+          - {
+               name: "Windows",
+               ext: ".msi",
+               os: windows-latest,
+            }
           - {
                name: "Linux",
                ext: ".deb",
                os: ubuntu-latest
             }
-#           - {
-#                name: "macOS",
-#                ext: ".dmg",
-#                os: macos-latest
-#             }
+          - {
+               name: "macOS",
+               ext: ".dmg",
+               os: macos-latest
+            }
     steps:
     - name: Prepare versions variable
       shell: cmake -P {0}
@@ -464,7 +464,7 @@ jobs:
         name: artifact-${{ matrix.config.os }}.tar
 
     - name: UnTar files
-      run: tar -xf artifact.tar
+      run: tar -xvf artifact.tar
 
     - name: Checkout installer
       uses: actions/checkout@v2
