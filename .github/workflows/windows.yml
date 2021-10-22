@@ -82,6 +82,8 @@ jobs:
           copy c:/Windows/System32/vcruntime140.dll artifact/
           copy c:/Windows/System32/vcruntime140_1.dll artifact/
 
+          # windeployqt artifact/${{ env.CLIENT_APPLICATION_NAME }}.exe
+
       - name: Build server
         run: |
           cd server
@@ -162,18 +164,68 @@ jobs:
         ../../wix/candle.exe -arch x64 -ext WixUtilExtension -ext WixFirewallExtension -dSourceFilesDir="../../artifact/" -dProductVersion="${{ env.APPLICATION_SHORT_VERSION }}" -dProductId=${{ steps.generate-uuid.outputs.uuid }} lunremote.wxs Components.wxs Custom_InstallDir.wxs Custom_InstallDirDlg.wxs
         ../../wix/light.exe -ext WixUIExtension -ext WixUtilExtension -ext WixFirewallExtension Components.wixobj lunremote.wixobj Custom_InstallDir.wixobj Custom_InstallDirDlg.wixobj -out ../../lunremote-${{ env.APPLICATION_VERSION }}.msi
 
-    - name: Fire test
+    - name: Smoke test
       run: |
-        msiexec.exe /I .\lunremote-${{ env.APPLICATION_VERSION }}.msi
+        function screenshot($File) {
+          Add-Type -AssemblyName System.Windows.Forms
+          Add-type -AssemblyName System.Drawing
+          # Gather Screen resolution information
+          $Screen = [System.Windows.Forms.SystemInformation]::VirtualScreen
+          $Width = $Screen.Width
+          $Height = $Screen.Height
+          $Left = $Screen.Left
+          $Top = $Screen.Top
+          # Create bitmap using the top-left and bottom-right bounds
+          $bitmap = New-Object System.Drawing.Bitmap $Width, $Height
+          # Create Graphics object
+          $graphic = [System.Drawing.Graphics]::FromImage($bitmap)
+          # Capture screen
+          $graphic.CopyFromScreen($Left, $Top, 0, 0, $bitmap.Size)
+          # Save to file
+          $bitmap.Save($File, [System.Drawing.Imaging.ImageFormat]::Png) 
+          Write-Output "Screenshot saved to:"
+          Write-Output $File
+        }
 
-    - name: Fire test
+        dir
+        cd artifact
+        & "D:\a\remocy-supervisor\remocy-supervisor\artifact\lunremote.exe"
+
+        # Start-Process -filePath .\lunremote.exe -ArgumentList "--debug" -workingdirectory . -RedirectStandardError 'err.txt' -RedirectStandardOutput out.txt
+        screenshot 'D:\a\remocy-supervisor\remocy-supervisor\artifact\client1.png'
+        Start-Sleep -s 1
+        screenshot 'D:\a\remocy-supervisor\remocy-supervisor\artifact\client2.png'
+        Start-Sleep -s 1
+        screenshot 'D:\a\remocy-supervisor\remocy-supervisor\artifact\client3.png'
+        Start-Sleep -s 5
+        screenshot 'D:\a\remocy-supervisor\remocy-supervisor\artifact\client4.png'
+
+        $proc2 = Start-Process -filePath .\lunremoted.exe -ArgumentList "--debug" -workingdirectory . -RedirectStandardError 'err.txt' -RedirectStandardOutput out.txt
+        Start-Sleep -s 100
+        screenshot 'D:\a\remocy-supervisor\remocy-supervisor\artifact\server.png'
+        Start-Sleep -s 5
+        $proc2 | kill
+        gc out.txt
+        gc err.txt
+
+    - name: Smoke test MSI
+      # shell: cmd
       run: |
-        msiexec.exe /I .\lunremote-${{ env.APPLICATION_VERSION }}.msi
+        dir
+        msiexec /i .\lunremote-v0.0.1-dev.msi /qr
 
-    - uses: actions/upload-artifact@v1
+    - name: Upload
+      uses: actions/upload-artifact@v1
       with:
         path: ./lunremote-${{ env.APPLICATION_VERSION }}.msi
         name: lunremote-${{ env.APPLICATION_VERSION }}.msi
+
+    - name: Upload screenshots
+      uses: actions/upload-artifact@v2
+      with:
+        name: screenshots
+        path: |
+          D:\a\remocy-supervisor\remocy-supervisor\artifact\*.png
 
   deploy:
     name: "Deploy application"

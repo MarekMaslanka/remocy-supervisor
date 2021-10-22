@@ -536,6 +536,21 @@ jobs:
         dpkg-deb --build installer/linux/deb/lunremote
         mv installer/linux/deb/lunremote.deb ./lunremote-${{ env.APPLICATION_VERSION }}.deb
 
+    - name: Smoke test
+      if: matrix.config.os == 'ubuntu-latest'
+      run: |
+        sudo apt install -y ./lunremote-${{ env.APPLICATION_VERSION }}.deb
+        sudo apt-get install -y xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0
+        echo Xvfb
+        sudo /usr/bin/Xvfb $DISPLAY -screen 0 1920x1080x24 &
+
+        cd /opt/lunremote/
+        export QT_DEBUG_PLUGINS=1
+        echo Client
+        timeout 5 ./lunremote || true
+        echo Server
+        timeout 5 ./lunremoted || true
+
     - uses: actions/upload-artifact@v1
       with:
         path: ./lunremote-${{ env.APPLICATION_VERSION }}${{ matrix.config.ext }}
