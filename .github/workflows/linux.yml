@@ -2,7 +2,7 @@ name: Linux
 on:
   push:
   schedule:
-    - cron: "0 0 1 * *"
+    - cron: "0 1 * * *"
 
 env:
   QT_VERSION: 5.15.2
@@ -71,8 +71,9 @@ jobs:
         with:
           path: client
           repository: MarekMaslanka/remocy-client
-          ref: fix_display_non-windows 
+          # ref: build
           token: ${{ secrets.ACCESS_TOKEN }}
+          submodules: 'true'
 
       - name: Checkout server
         uses: actions/checkout@v2
@@ -81,6 +82,7 @@ jobs:
           repository: MarekMaslanka/remocy-server
   #        ref: build
           token: ${{ secrets.ACCESS_TOKEN }}
+          submodules: 'true'
 
       - name: Install dependencies
         run: |
