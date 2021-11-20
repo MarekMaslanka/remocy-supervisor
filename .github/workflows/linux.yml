@@ -73,7 +73,7 @@ jobs:
           repository: MarekMaslanka/remocy-client
           # ref: build
           token: ${{ secrets.ACCESS_TOKEN }}
-          submodules: 'true'
+          submodules: true
 
       - name: Checkout server
         uses: actions/checkout@v2
@@ -82,7 +82,7 @@ jobs:
           repository: MarekMaslanka/remocy-server
   #        ref: build
           token: ${{ secrets.ACCESS_TOKEN }}
-          submodules: 'true'
+          submodules: true
 
       - name: Install dependencies
         run: |

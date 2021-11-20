@@ -31,7 +31,7 @@ jobs:
           repository: MarekMaslanka/remocy-client
           # ref: build
           token: ${{ secrets.ACCESS_TOKEN }}
-          submodules: 'true'
+          submodules: true
 
       - name: Checkout server
         uses: actions/checkout@v2
@@ -40,7 +40,7 @@ jobs:
           repository: MarekMaslanka/remocy-server
   #        ref: build
           token: ${{ secrets.ACCESS_TOKEN }}
-          submodules: 'true'
+          submodules: true
 
       - name: Install dependencies
         run: |
@@ -190,6 +190,7 @@ jobs:
         }
 
         dir
+        dir artifact
         cd artifact
         & "D:\a\remocy-supervisor\remocy-supervisor\artifact\lunremote.exe"
 
@@ -206,9 +207,12 @@ jobs:
         Start-Sleep -s 100
         screenshot 'D:\a\remocy-supervisor\remocy-supervisor\artifact\server.png'
         Start-Sleep -s 5
-        $proc2 | kill
+        Write-Output "Terminating..."
+        $proc2 | kill || true
+        Write-Output "Terminated"
         gc out.txt
         gc err.txt
+      continue-on-error: true
 
     - name: Smoke test MSI
       # shell: cmd
