@@ -330,22 +330,21 @@ jobs:
 
         endif()
 
-    - name: Build server1
+    - name: Configure server
+      if: matrix.config.os != 'macos-latest'
       run: |
         cd server
         sed -i 's/#define VERSION 0.0.1/#define VERSION ${{ env.APPLICATION_VERSION }}/' src/main.cpp
         sed -i 's/#define BUILD_ID 0/#define BUILD_ID ${{ steps.time.outputs.time }}/' src/main.cpp
-        cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
-        cmake --build . --config Release
+        cmake . -DCMAKE_BUILD_TYPE=Release
 
-    - name: Configure server
+    - name: Configure server - old
       shell: cmake -P {0}
       run: |
         file(READ "server/src/main.cpp" main)
         string(REPLACE "#define VERSION 0.0.1" "#define VERSION ${{ env.APPLICATION_VERSION }}" main "${main}")
         string(REPLACE "#define BUILD_ID 0" "#define BUILD_ID ${{ steps.time.outputs.time }}" main "${main}")
         file(WRITE "server/src/main.cpp" "${main}")
-        message(STATUS "${main}")
 
         if ("${{ runner.os }}" STREQUAL "macOS")
         else()
