@@ -330,6 +330,14 @@ jobs:
 
         endif()
 
+    - name: Build server1
+      run: |
+        cd server
+        sed -i 's/#define VERSION 0.0.1/#define VERSION ${{ env.APPLICATION_VERSION }}/' src/main.cpp
+        sed -i 's/#define BUILD_ID 0/#define BUILD_ID ${{ steps.time.outputs.time }}/' src/main.cpp
+        cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
+        cmake --build . --config Release
+
     - name: Configure server
       shell: cmake -P {0}
       run: |
@@ -343,7 +351,7 @@ jobs:
         else()
           set(CMAKE_VERBOSE_MAKEFILE ON)
           execute_process(
-            COMMAND cmake . -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" -DCMAKE_BUILD_TYPE=Release
+            COMMAND cmake . -DCMAKE_BUILD_TYPE=Release
             WORKING_DIRECTORY server
             RESULT_VARIABLE result
           )
