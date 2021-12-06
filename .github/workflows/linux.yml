@@ -89,7 +89,9 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libxfixes-dev libxtst-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev libxcb-randr0
+          sudo apt install -y libgl1-mesa-dev tree libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 \
+                              libxcb-xinerama0 libxfixes-dev libxtst-dev libxcb-image0-dev libxrandr-dev libxcb-xtest0 libxcb-xtest0-dev \
+                              libxcb-randr0 libasound2-dev
           wget https://github.com/MarekMaslanka/icu/releases/download/56/libicu.tar
           sudo tar -xf libicu.tar -C /usr/lib/x86_64-linux-gnu/
           wget https://github.com/MarekMaslanka/x264/releases/download/refs%2Fheads%2Fmaster/libx264.a -O server/lib/linux/libx264.a
