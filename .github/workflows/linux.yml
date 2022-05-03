@@ -311,3 +311,4 @@ jobs:
         asset_path: artifacts/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.deb/${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.deb
         asset_name: ${{ env.APPLICATION_NAME }}-${{ env.APPLICATION_VERSION }}.deb
         asset_content_type: application/octet-stream
+  
