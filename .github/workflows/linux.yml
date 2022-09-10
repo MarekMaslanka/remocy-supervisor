@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "0 1 * * *"
 
-env: 
+env:
   QT_VERSION: 5.15.2
   APPLICATION_NAME: lunremote
   CLIENT_APPLICATION_NAME: lunremote
@@ -237,7 +237,8 @@ jobs:
         sudo apt install -y ./lunremote-${{ env.APPLICATION_VERSION }}.deb
 
         sudo apt-get install -y imagemagick psmisc xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
-                                libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 libpulse0
+                                libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0 \
+                                libpulse0 qt5-default
         echo "Start Xvfb"
         sudo /usr/bin/Xvfb $DISPLAY -screen 0 1920x1080x24 &
         sleep 2
