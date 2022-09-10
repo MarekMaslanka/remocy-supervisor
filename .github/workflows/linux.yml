@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "0 1 * * *"
 
-env:
+env: 
   QT_VERSION: 5.15.2
   APPLICATION_NAME: lunremote
   CLIENT_APPLICATION_NAME: lunremote
