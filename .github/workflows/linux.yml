@@ -37,7 +37,7 @@ jobs:
           sudo apt update
           sudo apt-get install -y build-essential libgl1-mesa-dev libxkbcommon-x11-0 libpulse-dev libxcb-util1 libxcb-glx0 libxcb-icccm4 \
                                   libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-render0 libxcb-shape0 libxcb-shm0 \
-                                  libxcb-sync1 libxcb-xfixes0 libxcb-xinerama0 libxcb1 libasound2-dev
+                                  libxcb-sync1 libxcb-xfixes0 libxtst-dev libxcb-xinerama0 libxcb1 libasound2-dev
           
           sudo apt-get install -y imagemagick psmisc xvfb libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xinput0 libxcb-xfixes0
           echo "Start Xvfb"
