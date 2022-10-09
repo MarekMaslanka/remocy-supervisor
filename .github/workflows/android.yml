@@ -48,7 +48,7 @@ jobs:
           repository: MarekMaslanka/remocy-client
           token: ${{ secrets.ACCESS_TOKEN }}
           submodules: true
-          ref: fix-display-on-android
+          ref: base-android-implementation
 
       - name: Fix permissions
         run: chmod +x gradlew
